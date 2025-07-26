@@ -43,6 +43,8 @@
         .photo-error { color: #dc3545; font-size: 0.8rem; }
         .photo-link { color: #28a745 !important; text-decoration: underline; }
         .photo-link:hover { color: #1e7e34 !important; text-decoration: underline; }
+        .street-view-link { color: #007bff !important; text-decoration: underline; }
+        .street-view-link:hover { color: #0056b3 !important; text-decoration: underline; }
         
         /* Map Styles */
         .map-container { margin: 2rem 0; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
@@ -188,6 +190,15 @@
                             statsHTML += `<small style="color: #666;">💡 Click "Photo Available" links to view the official photo list PDF</small><br>`;
                         }
                     }
+                    
+                    // Add Street View info
+                    const propertiesWithAddresses = data.parsedListings.filter(listing => 
+                        listing.address && listing.address.trim() !== '' && listing.zipCode
+                    ).length;
+                    if (propertiesWithAddresses > 0) {
+                        statsHTML += `🌍 ${propertiesWithAddresses} properties have Street View available<br>`;
+                        statsHTML += `<small style="color: #666;">💡 Click "Street View" links to virtually visit properties</small><br>`;
+                    }
                     if (data.metadata.lastUpdated) {
                         statsHTML += `<small>Last updated: ${data.metadata.lastUpdated}</small>`;
                     }
@@ -232,6 +243,7 @@
                             <th>Zip Code</th>
                             <th>Amount</th>
                             <th>Photos</th>
+                            <th>Street View</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -249,6 +261,18 @@
                     photoHTML = '<span style="color: #6c757d;">No photo</span>';
                 }
                 
+                // Generate Street View link
+                let streetViewHTML = '';
+                if (listing.address && listing.address.trim() !== '' && listing.zipCode) {
+                    const fullAddress = `${listing.address}, ${listing.zipCode}, GA, USA`;
+                    const encodedAddress = encodeURIComponent(fullAddress);
+                    // Using Google Street View direct link format
+                    const streetViewUrl = `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=&address=${encodedAddress}`;
+                    streetViewHTML = `<a href="${streetViewUrl}" target="_blank" class="street-view-link" title="View ${listing.address} in Google Street View">🌍 Street View</a>`;
+                } else {
+                    streetViewHTML = '<span style="color: #6c757d;">No address</span>';
+                }
+                
                 tableHTML += `
                     <tr>
                         <td><strong>${listing.parcelId}</strong></td>
@@ -257,6 +281,7 @@
                         <td>${listing.zipCode}</td>
                         <td><strong>${listing.amount}</strong></td>
                         <td>${photoHTML}</td>
+                        <td>${streetViewHTML}</td>
                     </tr>
                 `;
             });
