@@ -385,40 +385,57 @@
             btn.disabled = true;
             
             try {
+                // Extract addresses for geocoding
+                const addresses = currentData.parsedListings
+                    .map(listing => `${listing.address}, ${listing.zipCode}`)
+                    .filter(addr => addr.trim() !== ', '); // Filter out empty addresses
+                
+                console.log('Sending addresses for geocoding:', addresses.length);
+                
                 const response = await fetch(`${API_BASE}/api/geocode-batch`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        properties: currentData.parsedListings.map(listing => ({
-                            id: listing.parcelId,
-                            address: `${listing.address}, ${listing.zipCode}, GA`
-                        }))
+                        addresses: addresses,
+                        county: 'Chatham County',
+                        state: 'GA'
                     })
                 });
                 
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
                 const geocodeData = await response.json();
+                console.log('Geocoding response:', geocodeData);
                 
                 // Update currentData with coordinates
-                currentData.parsedListings.forEach(listing => {
-                    const geocodeResult = geocodeData.results.find(r => r.id === listing.parcelId);
-                    if (geocodeResult && geocodeResult.coordinates) {
+                currentData.parsedListings.forEach((listing, index) => {
+                    const addressToMatch = `${listing.address}, ${listing.zipCode}`;
+                    const geocodeResult = geocodeData.results.find(r => r.address === addressToMatch);
+                    if (geocodeResult && geocodeResult.success && geocodeResult.coordinates) {
                         listing.coordinates = geocodeResult.coordinates;
+                        console.log(`Added coordinates for ${listing.parcelId}:`, geocodeResult.coordinates);
                     }
                 });
                 
                 // Re-plot the map
                 plotProperties();
                 
-                btn.textContent = '✅ Geocoded';
+                const processedCount = geocodeData.processed || 0;
+                const totalCount = geocodeData.total || addresses.length;
+                
+                btn.textContent = `✅ Geocoded ${processedCount}/${totalCount}`;
                 setTimeout(() => {
                     btn.textContent = '🔍 Find Property Locations';
                     btn.disabled = false;
-                }, 2000);
+                }, 3000);
                 
             } catch (error) {
                 console.error('Geocoding error:', error);
+                alert('Geocoding failed: ' + error.message);
                 btn.textContent = '❌ Geocoding failed';
                 setTimeout(() => {
                     btn.textContent = '🔍 Find Property Locations';
