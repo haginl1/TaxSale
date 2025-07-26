@@ -385,12 +385,25 @@
             btn.disabled = true;
             
             try {
-                // Extract addresses for geocoding
+                // Extract addresses for geocoding - better filtering and cleaning
                 const addresses = currentData.parsedListings
-                    .map(listing => `${listing.address}, ${listing.zipCode}`)
-                    .filter(addr => addr.trim() !== ', '); // Filter out empty addresses
+                    .map(listing => {
+                        // Combine address and zip, clean it up
+                        let fullAddress = `${listing.address} ${listing.zipCode}`.trim();
+                        // Remove extra spaces and normalize
+                        fullAddress = fullAddress.replace(/\s+/g, ' ');
+                        return fullAddress;
+                    })
+                    .filter(addr => {
+                        // Filter out addresses that are too short or just zip codes
+                        return addr.length > 5 && !/^\d{5}$/.test(addr.trim());
+                    });
                 
-                console.log('Sending addresses for geocoding:', addresses.length);
+                console.log('Sending addresses for geocoding:', addresses.length, 'out of', currentData.parsedListings.length, 'total properties');
+                console.log('Sample addresses:', addresses.slice(0, 5));
+                
+                // Show progress
+                btn.textContent = `🔄 Geocoding ${addresses.length} addresses...`;
                 
                 const response = await fetch(`${API_BASE}/api/geocode-batch`, {
                     method: 'POST',
@@ -412,26 +425,31 @@
                 console.log('Geocoding response:', geocodeData);
                 
                 // Update currentData with coordinates
+                let coordsAdded = 0;
                 currentData.parsedListings.forEach((listing, index) => {
-                    const addressToMatch = `${listing.address}, ${listing.zipCode}`;
-                    const geocodeResult = geocodeData.results.find(r => r.address === addressToMatch);
+                    const fullAddress = `${listing.address} ${listing.zipCode}`.trim().replace(/\s+/g, ' ');
+                    const geocodeResult = geocodeData.results.find(r => r.address === fullAddress);
                     if (geocodeResult && geocodeResult.success && geocodeResult.coordinates) {
                         listing.coordinates = geocodeResult.coordinates;
-                        console.log(`Added coordinates for ${listing.parcelId}:`, geocodeResult.coordinates);
+                        coordsAdded++;
+                        console.log(`Added coordinates for ${listing.parcelId} (${fullAddress}):`, geocodeResult.coordinates);
                     }
                 });
+                
+                console.log(`Successfully added coordinates to ${coordsAdded} properties`);
                 
                 // Re-plot the map
                 plotProperties();
                 
                 const processedCount = geocodeData.processed || 0;
+                const successfulCount = geocodeData.successful || coordsAdded;
                 const totalCount = geocodeData.total || addresses.length;
                 
-                btn.textContent = `✅ Geocoded ${processedCount}/${totalCount}`;
+                btn.textContent = `✅ Geocoded ${successfulCount}/${processedCount} (${coordsAdded} mapped)`;
                 setTimeout(() => {
                     btn.textContent = '🔍 Find Property Locations';
                     btn.disabled = false;
-                }, 3000);
+                }, 5000);
                 
             } catch (error) {
                 console.error('Geocoding error:', error);

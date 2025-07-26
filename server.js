@@ -173,12 +173,24 @@ app.post('/api/geocode-batch', async (req, res) => {
         const results = [];
         
         // Process addresses in batches to avoid overwhelming the service
-        for (const address of addresses.slice(0, 20)) { // Limit to 20 addresses
+        // Increased limit and added better address processing
+        const addressesToProcess = addresses.slice(0, 50).map(addr => {
+            // Clean and format addresses better
+            return addr.replace(/\s+/g, ' ').trim();
+        }).filter(addr => addr.length > 5); // Filter out very short addresses
+        
+        console.log(`Processing ${addressesToProcess.length} cleaned addresses for geocoding`);
+        
+        for (let i = 0; i < addressesToProcess.length; i++) {
+            const address = addressesToProcess[i];
+            
             try {
                 const searchQuery = `${address}, ${county}, ${state}, USA`;
                 const encodedQuery = encodeURIComponent(searchQuery);
                 
                 const nominatimUrl = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodedQuery}`;
+                
+                console.log(`Geocoding ${i + 1}/${addressesToProcess.length}: ${address}`);
                 
                 const response = await fetch(nominatimUrl, {
                     headers: {
@@ -203,12 +215,14 @@ app.post('/api/geocode-batch', async (req, res) => {
                                 },
                                 display_name: result.display_name
                             });
+                            console.log(`✅ Successfully geocoded: ${address}`);
                         } else {
                             results.push({
                                 address: address,
                                 success: false,
                                 message: 'No coordinates found'
                             });
+                            console.log(`❌ No results for: ${address}`);
                         }
                     } catch (parseError) {
                         console.error('JSON parse error for address:', address, 'Response:', responseText);
@@ -219,6 +233,7 @@ app.post('/api/geocode-batch', async (req, res) => {
                         });
                     }
                 } else {
+                    console.log(`❌ HTTP error ${response.status} for: ${address}`);
                     results.push({
                         address: address,
                         success: false,
@@ -226,10 +241,12 @@ app.post('/api/geocode-batch', async (req, res) => {
                     });
                 }
                 
-                // Small delay to be respectful to the free service
-                await new Promise(resolve => setTimeout(resolve, 100));
+                // Increased delay to be more respectful to the free service
+                // and reduce chance of rate limiting
+                await new Promise(resolve => setTimeout(resolve, 500));
                 
             } catch (error) {
+                console.error(`❌ Error geocoding ${address}:`, error.message);
                 results.push({
                     address: address,
                     success: false,
@@ -238,10 +255,13 @@ app.post('/api/geocode-batch', async (req, res) => {
             }
         }
         
+        console.log(`Geocoding completed: ${results.filter(r => r.success).length}/${results.length} successful`);
+        
         res.json({
             results: results,
             processed: results.length,
-            total: addresses.length
+            total: addresses.length,
+            successful: results.filter(r => r.success).length
         });
         
     } catch (error) {
