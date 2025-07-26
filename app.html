@@ -218,6 +218,24 @@
                 // Render listings table
                 if (data.parsedListings && data.parsedListings.length > 0) {
                     renderListingsTable(data.parsedListings);
+                    
+                    // Automatically show map and start geocoding
+                    setTimeout(() => {
+                        // Automatically show the map
+                        const mapContainer = document.getElementById('mapContainer');
+                        const showMapBtn = document.getElementById('showMapBtn');
+                        
+                        if (mapContainer && mapContainer.classList.contains('hidden')) {
+                            // Show the map automatically
+                            toggleMap();
+                            
+                            // After map is shown, automatically start geocoding
+                            setTimeout(() => {
+                                console.log('Auto-starting property location finding...');
+                                geocodeProperties();
+                            }, 1000); // Give map time to initialize
+                        }
+                    }, 500); // Give table time to render
                 } else {
                     listingContainer.innerHTML = '<div class="no-data">No listings found for this county.</div>';
                 }
