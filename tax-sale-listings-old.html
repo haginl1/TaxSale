@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Georgia Tax Sale Listings</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body { font-family: Arial, sans-serif; background: #f8f8f8; }
+        .container { max-width: 1200px; margin: 2rem auto; background: #fff; border-radius: 10px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); padding: 2rem; }
+        h1 { color: #764ba2; margin-bottom: 1.5rem; }
+        .controls { margin-bottom: 2rem; }
+        .controls label { font-weight: bold; margin-right: 1rem; }
+        .controls select { font-size: 1.1rem; padding: 0.5rem; margin-right: 1rem; }
+        .controls button { padding: 0.5rem 1rem; background: #764ba2; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .controls button:hover { background: #5a2d91; }
+        .stats { background: #f0e6fa; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; }
+        .listing-table { width: 100%; border-collapse: collapse; margin-top: 1.5rem; }
+        .listing-table th, .listing-table td { border: 1px solid #e0e0e0; padding: 0.6rem; text-align: left; }
+        .listing-table th { background: #f0e6fa; color: #764ba2; font-weight: bold; }
+        .listing-table tr:nth-child(even) { background: #f8f8f8; }
+        .listing-table tr:hover { background: #e8f4fd; }
+        .no-data { color: #b47ddb; margin-top: 2rem; text-align: center; }
+        .pdf-link { margin-top: 1rem; display: inline-block; color: #667eea; text-decoration: underline; }
+        .error { background: #ffe6e6; color: #d63031; padding: 1rem; border-radius: 8px; margin: 1rem 0; }
+        .loading { color: #764ba2; text-align: center; margin: 2rem 0; }
+        .maintenance { background: #fff3cd; color: #856404; padding: 1rem; border-radius: 8px; margin: 1rem 0; }
+        .raw-button { background: #17a2b8; color: white; border: none; padding: 0.3rem 0.6rem; border-radius: 3px; cursor: pointer; font-size: 0.8rem; }
+        .raw-button:hover { background: #138496; }
+        .raw-data { background: #f8f9fa; padding: 0.5rem; margin-top: 0.5rem; border-radius: 4px; font-family: monospace; font-size: 0.8rem; max-height: 100px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Georgia Tax Sale Listings</h1>
+        
+        <div class="controls">
+            <label for="countySelect">Select County:</label>
+            <select id="countySelect">
+                <option value="chatham">Chatham County</option>
+                <option value="dekalb">DeKalb County</option>
+            </select>
+            <button onclick="loadListings()">Load Listings</button>
+        </div>
+        
+        <div id="statusContainer"></div>
+        <div id="statsContainer"></div>
+        <div id="listingContainer"></div>
+    </div>
+
+    <script>
+        let currentData = null;
+
+        // Load available counties on page load
+        async function loadCounties() {
+            try {
+                const response = await fetch('http://localhost:3001/api/counties');
+                const counties = await response.json();
+                
+                const select = document.getElementById('countySelect');
+                select.innerHTML = '';
+                
+                counties.forEach(county => {
+                    const option = document.createElement('option');
+                    option.value = county.id;
+                    option.textContent = `${county.name}, ${county.state}`;
+                    if (county.status === 'maintenance') {
+                        option.textContent += ' (Under Maintenance)';
+                    }
+                    select.appendChild(option);
+        // Load tax sale listings for selected county
+        async function loadListings() {
+            const county = document.getElementById('countySelect').value;
+            const statusContainer = document.getElementById('statusContainer');
+            const statsContainer = document.getElementById('statsContainer');
+            const listingContainer = document.getElementById('listingContainer');
+            
+            // Show loading state
+            statusContainer.innerHTML = '<div class="loading">Loading tax sale listings...</div>';
+            statsContainer.innerHTML = '';
+            listingContainer.innerHTML = '';
+            
+            try {
+                const response = await fetch(`http://localhost:3001/api/tax-sale-listings/${county}`);
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    if (response.status === 503) {
+                        // Service unavailable (maintenance)
+                        statusContainer.innerHTML = `
+                            <div class="maintenance">
+                                <strong>Service Temporarily Unavailable</strong><br>
+                                ${data.message}<br>
+                                <small>Available counties: ${data.availableCounties.join(', ')}</small>
+                            </div>
+                        `;
+                        return;
+                    } else {
+                        throw new Error(data.error || 'Failed to load listings');
+                    }
+                }
+                
+                currentData = data;
+                
+                // Clear loading state
+                statusContainer.innerHTML = '';
+                
+                // Show statistics
+                if (data.metadata) {
+                    statsContainer.innerHTML = `
+                        <div class="stats">
+                            <strong>${data.county || 'Tax Sale'} Statistics:</strong><br>
+                            📄 ${data.totalListings} properties found<br>
+                            📅 Tax Sale Date: ${data.metadata.taxSaleDate || 'TBD'}<br>
+                            🔗 <a href="${data.pdfUrl}" target="_blank">View Official PDF</a><br>
+                            <small>Last updated: ${data.metadata.lastUpdated || new Date().toLocaleDateString()}</small>
+                        </div>
+                    `;
+                }
+                
+                // Render listings table
+                if (data.parsedListings && data.parsedListings.length > 0) {
+                    let tableHTML = `
+                        <table class="listing-table">
+                            <thead>
+                                <tr>
+                                    <th>Parcel ID</th>
+                                    <th>Owner</th>
+                                    <th>Address</th>
+                                    <th>Zip Code</th>
+                                    <th>Amount</th>
+                                    <th>Details</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+                    
+                    data.parsedListings.forEach((listing, index) => {
+                        tableHTML += `
+                            <tr>
+                                <td><strong>${listing.parcelId}</strong></td>
+                                <td>${listing.owner || 'N/A'}</td>
+                                <td>${listing.address || 'N/A'}</td>
+                                <td>${listing.zipCode || 'N/A'}</td>
+                                <td><strong>${listing.amount || 'N/A'}</strong></td>
+                                <td>
+                                    <button class="raw-button" onclick="toggleRawData(${index})">Show Raw</button>
+                                    <div id="raw-${index}" class="raw-data" style="display:none;">
+                                        <strong>All Lines:</strong><br>
+                                        ${listing.allLines ? listing.allLines.join('<br>') : 'No raw data'}
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                    
+                    tableHTML += '</tbody></table>';
+                    listingContainer.innerHTML = tableHTML;
+                } else {
+                    listingContainer.innerHTML = '<div class="no-data">No tax sale listings found for this county.</div>';
+                }
+                
+            } catch (error) {
+                console.error('Error loading listings:', error);
+                statusContainer.innerHTML = `
+                    <div class="error">
+                        <strong>Error:</strong> ${error.message}
+                    </div>
+                `;
+            }
+        }
+        
+        // Toggle raw data display
+        function toggleRawData(index) {
+            const rawDiv = document.getElementById(`raw-${index}`);
+            const button = rawDiv.previousElementSibling;
+            
+            if (rawDiv.style.display === 'none') {
+                rawDiv.style.display = 'block';
+                button.textContent = 'Hide Raw';
+            } else {
+                rawDiv.style.display = 'none';
+                button.textContent = 'Show Raw';
+            }
+        }
+        
+        // Initialize page
+        window.addEventListener('load', () => {
+            loadCounties();
+            loadListings(); // Load default county listings
+        });
+    </script>
+</body>
+</html>
+            const pdfLinkContainer = document.getElementById('pdfLinkContainer');
+            if (data.pdfUrl) {
+                let linkHtml = `<a class="pdf-link" href="${data.pdfUrl}" target="_blank">📄 Download Official PDF (August 2025 Tax Sale List)</a>`;
+                if (data.metadata && data.metadata.note) {
+                    linkHtml += `<div style="margin-top: 10px; padding: 10px; background: #d4edda; border: 1px solid #c3e6cb; border-radius: 4px; color: #155724;">`;
+                    linkHtml += `${data.metadata.note}`;
+                    if (data.metadata.taxSaleDate) {
+                        linkHtml += `<br><strong>Tax Sale Date:</strong> ${data.metadata.taxSaleDate}`;
+                    }
+                    if (data.metadata.lastUpdated) {
+                        linkHtml += `<br><strong>Last Updated:</strong> ${data.metadata.lastUpdated}`;
+                    }
+                    linkHtml += `</div>`;
+                }
+                pdfLinkContainer.innerHTML = linkHtml;
+            } else {
+                pdfLinkContainer.innerHTML = `<span style="color: #666;">PDF link not available</span>`;
+            }
+            if (data.parsedListings && data.parsedListings.length > 0) {
+                let html = `<h3>Tax Sale Listings (${data.totalListings} properties found)</h3>`;
+                
+                // Create a table for better formatting
+                html += `<div style="overflow-x: auto;">`;
+                html += `<table class="listing-table" style="width: 100%; border-collapse: collapse; margin: 10px 0;">`;
+                html += `<thead>`;
+                html += `<tr style="background: #764ba2; color: white;">`;
+                html += `<th style="padding: 12px; border: 1px solid #ddd; text-align: left;">#</th>`;
+                html += `<th style="padding: 12px; border: 1px solid #ddd; text-align: left;">Parcel ID</th>`;
+                html += `<th style="padding: 12px; border: 1px solid #ddd; text-align: left;">Owner</th>`;
+                html += `<th style="padding: 12px; border: 1px solid #ddd; text-align: left;">Address</th>`;
+                html += `<th style="padding: 12px; border: 1px solid #ddd; text-align: left;">Zip Code</th>`;
+                html += `<th style="padding: 12px; border: 1px solid #ddd; text-align: left;">Starting Bid</th>`;
+                html += `<th style="padding: 12px; border: 1px solid #ddd; text-align: left;">Details</th>`;
+                html += `</tr>`;
+                html += `</thead>`;
+                html += `<tbody>`;
+                
+                data.parsedListings.forEach((listing, index) => {
+                    const rowStyle = index % 2 === 0 ? 'background: #f8f8f8;' : 'background: white;';
+                    html += `<tr style="${rowStyle}">`;
+                    html += `<td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">${index + 1}</td>`;
+                    html += `<td style="padding: 10px; border: 1px solid #ddd; font-family: monospace; color: #2c5aa0;">${listing.parcelId}</td>`;
+                    html += `<td style="padding: 10px; border: 1px solid #ddd;">${listing.owner || 'N/A'}</td>`;
+                    html += `<td style="padding: 10px; border: 1px solid #ddd;">${listing.address || 'N/A'}</td>`;
+                    html += `<td style="padding: 10px; border: 1px solid #ddd;">${listing.zipCode || 'N/A'}</td>`;
+                    html += `<td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; color: #d63384;">${listing.amount || 'N/A'}</td>`;
+                    html += `<td style="padding: 10px; border: 1px solid #ddd;">`;
+                    html += `<button onclick="toggleDetails(${index})" style="background: #667eea; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px;">Show Raw</button>`;
+                    html += `<div id="details-${index}" style="display: none; margin-top: 8px; padding: 8px; background: #f0f0f0; border-radius: 4px; font-size: 11px; font-family: monospace; max-height: 150px; overflow-y: auto;">`;
+                    html += `${listing.allLines.join('<br>')}`;
+                    html += `</div>`;
+                    html += `</td>`;
+                    html += `</tr>`;
+                });
+                
+                html += `</tbody>`;
+                html += `</table>`;
+                html += `</div>`;
+                
+                // Add summary stats
+                const withOwner = data.parsedListings.filter(l => l.owner).length;
+                const withAddress = data.parsedListings.filter(l => l.address).length;
+                const withAmount = data.parsedListings.filter(l => l.amount).length;
+                const withZip = data.parsedListings.filter(l => l.zipCode).length;
+                
+                html += `<div style="margin-top: 20px; padding: 15px; background: #e3f2fd; border-radius: 8px; border-left: 4px solid #2196f3;">`;
+                html += `<h4 style="margin: 0 0 10px 0; color: #1976d2;">Official Tax Sale Data Summary</h4>`;
+                if (data.metadata && data.metadata.source) {
+                    html += `<p style="margin: 5px 0; padding: 8px; background: #c8e6c9; border-radius: 4px; color: #2e7d32;"><strong>✅ Source:</strong> ${data.metadata.source}</p>`;
+                } else {
+                    html += `<p style="margin: 5px 0; padding: 8px; background: #c8e6c9; border-radius: 4px; color: #2e7d32;"><strong>✅ Data Source:</strong> The table below shows data parsed from the same PDF available via the "Download Official PDF" link above.</p>`;
+                }
+                html += `<p style="margin: 5px 0;">📊 <strong>Total Properties:</strong> ${data.totalListings}</p>`;
+                html += `<p style="margin: 5px 0;">👤 <strong>With Owner Info:</strong> ${withOwner} (${Math.round(withOwner/data.totalListings*100)}%)</p>`;
+                html += `<p style="margin: 5px 0;">🏠 <strong>With Address:</strong> ${withAddress} (${Math.round(withAddress/data.totalListings*100)}%)</p>`;
+                html += `<p style="margin: 5px 0;">💰 <strong>With Starting Bid:</strong> ${withAmount} (${Math.round(withAmount/data.totalListings*100)}%)</p>`;
+                html += `<p style="margin: 5px 0;">📮 <strong>With Zip Code:</strong> ${withZip} (${Math.round(withZip/data.totalListings*100)}%)</p>`;
+                html += `</div>`;
+                
+                html += `<details style="margin-top: 20px;"><summary style="cursor: pointer; padding: 10px; background: #f5f5f5; border-radius: 4px;">Debug Info & Metadata</summary>`;
+                html += `<div style="padding: 10px;">`;
+                html += `<p><strong>Total Raw Lines:</strong> ${data.rawLines ? data.rawLines.length : 0}</p>`;
+                if (data.metadata) {
+                    html += `<p><strong>Processed At:</strong> ${data.metadata.processedAt}</p>`;
+                    html += `<p><strong>PDF Size:</strong> ${(data.metadata.pdfSize / 1024).toFixed(1)} KB</p>`;
+                    html += `<p><strong>PDF Pages:</strong> ${data.metadata.pdfPages || 'Unknown'}</p>`;
+                    html += `<p><strong>Text Length:</strong> ${data.metadata.textLength} characters</p>`;
+                    if (data.metadata.pdfPages) {
+                        const avgCharsPerPage = Math.round(data.metadata.textLength / data.metadata.pdfPages);
+                        html += `<p><strong>Avg Characters per Page:</strong> ${avgCharsPerPage}</p>`;
+                        if (data.metadata.pdfPages > 1 && avgCharsPerPage < 1000) {
+                            html += `<p style="color: #d63384;"><strong>⚠️ Warning:</strong> Very few characters per page detected. Some pages may not be parsing correctly.</p>`;
+                        }
+                    }
+                }
+                html += `<p><strong>Original Text Preview:</strong></p>`;
+                html += `<pre style="font-size: 0.8em; color: #888; white-space: pre-wrap; background: #f8f8f8; padding: 10px; border-radius: 4px; max-height: 200px; overflow-y: auto;">${data.originalText}</pre>`;
+                html += `</div>`;
+                html += `</details>`;
+                
+                pdfTextContainer.innerHTML = html;
+            } else if (data.rawLines && data.rawLines.length) {
+                // Fallback to showing raw lines if parsing failed
+                pdfTextContainer.innerHTML = `<h3>Raw PDF Text (${data.rawLines.length} lines)</h3><pre style="white-space:pre-wrap; max-height: 400px; overflow-y: auto; font-size: 0.9em;">${data.rawLines.join('\n')}</pre>`;
+            } else {
+                pdfTextContainer.innerHTML = '<span style="color:red;">No listings found in PDF.</span>';
+            }
+        })
+        .catch(err => {
+            pdfTextContainer.innerHTML = `<span style="color:red;">Failed to load listings: ${err.message}</span>`;
+        });
+}
+
+function toggleDetails(index) {
+    const detailsDiv = document.getElementById(`details-${index}`);
+    const button = detailsDiv.previousElementSibling;
+    
+    if (detailsDiv.style.display === 'none') {
+        detailsDiv.style.display = 'block';
+        button.textContent = 'Hide Raw';
+        button.style.background = '#dc3545';
+    } else {
+        detailsDiv.style.display = 'none';
+        button.textContent = 'Show Raw';
+        button.style.background = '#667eea';
+    }
+}
+
+    document.getElementById('countySelect').addEventListener('change', function() {
+        renderListings(this.value);
+    });
+    // Initial render
+    renderListings(document.getElementById('countySelect').value);
+    </script>
+    
+</body>
+</html>

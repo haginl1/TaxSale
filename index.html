@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Georgia Tax Sale Listings - Demo</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        // Configure PDF.js worker immediately after loading
+        if (typeof pdfjsLib !== 'undefined') {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        }
+    </script>
+    <!-- Leaflet CSS and JS for mapping -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f8f8f8; }
+        .container { max-width: 1200px; margin: 2rem auto; background: #fff; border-radius: 10px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); padding: 2rem; }
+        h1 { color: #764ba2; margin-bottom: 1.5rem; }
+        .controls { margin-bottom: 2rem; }
+        .controls label { font-weight: bold; margin-right: 1rem; }
+        .controls select { font-size: 1.1rem; padding: 0.5rem; margin-right: 1rem; }
+        .controls button { padding: 0.5rem 1rem; background: #764ba2; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .controls button:hover { background: #5a2d91; }
+        .stats { background: #f0e6fa; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; }
+        .listing-table { width: 100%; border-collapse: collapse; margin-top: 1.5rem; }
+        .listing-table th, .listing-table td { border: 1px solid #e0e0e0; padding: 0.6rem; text-align: left; }
+        .listing-table th { background: #f0e6fa; color: #764ba2; font-weight: bold; }
+        .listing-table tr:nth-child(even) { background: #f8f8f8; }
+        .listing-table tr:hover { background: #e8f4fd; }
+        .no-data { color: #b47ddb; margin-top: 2rem; text-align: center; }
+        .pdf-link { margin-top: 1rem; display: inline-block; color: #667eea; text-decoration: underline; }
+        .error { background: #ffe6e6; color: #d63031; padding: 1rem; border-radius: 8px; margin: 1rem 0; }
+        .loading { color: #764ba2; text-align: center; margin: 2rem 0; }
+        .maintenance { background: #fff3cd; color: #856404; padding: 1rem; border-radius: 8px; margin: 1rem 0; }
+        .raw-button { background: #17a2b8; color: white; border: none; padding: 0.3rem 0.6rem; border-radius: 3px; cursor: pointer; font-size: 0.8rem; }
+        .raw-button:hover { background: #138496; }
+        .raw-data { background: #f8f9fa; padding: 0.5rem; margin-top: 0.5rem; border-radius: 4px; font-family: monospace; font-size: 0.8rem; max-height: 100px; overflow-y: auto; }
+        .photo-preview { max-width: 200px; max-height: 150px; border: 1px solid #ddd; border-radius: 4px; margin: 0.5rem 0; }
+        .photo-container { text-align: center; }
+        .photo-loading { color: #666; font-style: italic; }
+        .photo-error { color: #dc3545; font-size: 0.8rem; }
+        .demo-notice { background: #e3f2fd; color: #1976d2; padding: 1rem; border-radius: 8px; margin: 1rem 0; border-left: 4px solid #2196f3; }
+        
+        /* Map Styles */
+        .map-container { margin: 2rem 0; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .map-container.hidden { display: none; }
+        #map { height: 500px; width: 100%; }
+        .map-controls { margin: 1rem 0; text-align: center; }
+        .map-controls button { 
+            margin: 0 0.5rem; 
+            padding: 0.5rem 1rem; 
+            background: #764ba2; 
+            color: white; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-size: 0.9rem;
+        }
+        .map-controls button:hover { background: #5a3a7a; }
+        .map-controls button.active { background: #28a745; }
+        .map-controls button.hidden { display: none; }
+        .leaflet-popup-content { font-size: 0.9rem; }
+        .popup-content h4 { margin: 0 0 0.5rem 0; color: #764ba2; }
+        .popup-content p { margin: 0.2rem 0; }
+        .popup-content .amount { font-weight: bold; color: #dc3545; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Georgia Tax Sale Listings - Demo</h1>
+        
+        <div class="demo-notice">
+            <strong>📋 Portfolio Demo</strong><br>
+            This is a demonstration of a tax sale property listing application. Features include PDF parsing, property mapping with Street View integration, and photo previews. The full application includes a Node.js backend for live data processing.
+            <br><br>
+            <strong>🔗 GitHub Repository:</strong> <a href="https://github.com/haginl1/Portfolio" target="_blank" rel="noopener">View Source Code</a>
+        </div>
+        
+        <div class="controls">
+            <label for="countySelect">Select County:</label>
+            <select id="countySelect">
+                <option value="chatham">Chatham County, GA</option>
+                <option value="dekalb">DeKalb County, GA (Demo Data)</option>
+            </select>
+            <button onclick="loadDemoListings()">Load Demo Data</button>
+        </div>
+        
+        <div id="statusContainer"></div>
+        <div id="statsContainer"></div>
+        
+        <!-- Map Toggle Button (always visible) -->
+        <div class="map-controls">
+            <button id="showMapBtn" onclick="toggleMap()">📍 Show Properties on Map</button>
+        </div>
+        
+        <!-- Map Section (initially hidden) -->
+        <div class="map-container hidden" id="mapContainer">
+            <div class="map-controls">
+                <button id="geocodeBtn" onclick="simulateGeocoding()" class="hidden">🔍 Find Property Locations (Demo)</button>
+                <button id="togglePhotosMapBtn" onclick="togglePhotoFilter()" class="hidden">📷 Show Only Properties with Photos</button>
+            </div>
+            <div id="map"></div>
+        </div>
+        
+        <div id="listingContainer"></div>
+    </div>
+
+    <script>
+        let currentData = null;
+
+        // Demo data for Chatham County
+        const demoData = {
+            county: "Chatham County",
+            totalListings: 5,
+            pdfUrl: "https://cms.chathamcountyga.gov/api/assets/taxcommissioner/55d1026b-bc1f-4f42-be4d-12893bff13d9?download=0",
+            photoListUrl: "https://cms.chathamcountyga.gov/api/assets/taxcommissioner/678679b0-4664-4f96-8a68-a28ae08a63d8?download=0",
+            metadata: {
+                taxSaleDate: "August 5, 2025",
+                photoListAvailable: true,
+                propertiesWithPhotos: 3,
+                lastUpdated: "July 25, 2025"
+            },
+            parsedListings: [
+                {
+                    parcelId: "10045-12032",
+                    owner: "TURZILLO FAITH C",
+                    address: "7205 W SUGAR TREE CT",
+                    zipCode: "31410",
+                    amount: "$4,672.58",
+                    hasPhotos: true,
+                    photoData: {
+                        ownerAddress: "TURZILLO FAITH C / 7205 W SUGAR TREE CT 31410",
+                        bidAmount: "$4,672.58",
+                        estimatedPage: 1
+                    },
+                    coordinates: { lat: 32.1851, lng: -81.2559 }
+                },
+                {
+                    parcelId: "20014-10005",
+                    owner: "NORTH BEECH PROPERTIES, LLC",
+                    address: "240 PRICE ST",
+                    zipCode: "31401",
+                    amount: "$6,488.40",
+                    hasPhotos: true,
+                    photoData: {
+                        ownerAddress: "NORTH BEECH PROPERTIES, LLC / 240 PRICE ST 31401",
+                        bidAmount: "$6,488.40",
+                        estimatedPage: 2
+                    },
+                    coordinates: { lat: 32.0808, lng: -81.0912 }
+                },
+                {
+                    parcelId: "20099-18001",
+                    owner: "MACK JULIUS D",
+                    address: "3702 EASTGATE DR",
+                    zipCode: "31404",
+                    amount: "$5,500.74",
+                    hasPhotos: true,
+                    photoData: {
+                        ownerAddress: "MACK JULIUS D / 3702 EASTGATE DR 31404",
+                        bidAmount: "$5,500.74",
+                        estimatedPage: 3
+                    },
+                    coordinates: { lat: 32.0698, lng: -81.1262 }
+                },
+                {
+                    parcelId: "30006-04010",
+                    owner: "BLOUNT SHALONDA",
+                    address: "3213 COLLEGE ST",
+                    zipCode: "31404",
+                    amount: "$5,061.85",
+                    hasPhotos: false,
+                    coordinates: { lat: 32.0698, lng: -81.1262 }
+                },
+                {
+                    parcelId: "70978B16007",
+                    owner: "CGN PROPERTY MANAGEMENT, LLC",
+                    address: "130 ROSEBERRY CIR",
+                    zipCode: "31407",
+                    amount: "$6,820.35",
+                    hasPhotos: false,
+                    coordinates: { lat: 32.0089, lng: -81.1464 }
+                }
+            ]
+        };
+
+        // Load demo listings
+        function loadDemoListings() {
+            const statusContainer = document.getElementById('statusContainer');
+            const statsContainer = document.getElementById('statsContainer');
+            const listingContainer = document.getElementById('listingContainer');
+            
+            // Show loading state
+            statusContainer.innerHTML = '<div class="loading">Loading demo tax sale listings...</div>';
+            statsContainer.innerHTML = '';
+            listingContainer.innerHTML = '';
+            
+            setTimeout(() => {
+                currentData = demoData;
+                
+                // Clear loading state
+                statusContainer.innerHTML = '';
+                
+                // Show statistics
+                let statsHTML = `
+                    <div class="stats">
+                        <strong>${demoData.county} Demo Statistics:</strong><br>
+                        📄 ${demoData.totalListings} properties found<br>
+                        📅 Tax Sale Date: ${demoData.metadata.taxSaleDate}<br>
+                        🔗 <a href="${demoData.pdfUrl}" target="_blank">View Official PDF</a><br>
+                        📸 <a href="${demoData.photoListUrl}" target="_blank">View Photo List PDF</a><br>
+                        🖼️ ${demoData.metadata.propertiesWithPhotos} properties have photos<br>
+                        <small>Demo data - Last updated: ${demoData.metadata.lastUpdated}</small>
+                    </div>
+                `;
+                
+                statsContainer.innerHTML = statsHTML;
+                
+                // Render listings table
+                let tableHTML = `
+                    <table class="listing-table">
+                        <thead>
+                            <tr>
+                                <th>Parcel ID</th>
+                                <th>Owner</th>
+                                <th>Address</th>
+                                <th>Zip Code</th>
+                                <th>Amount</th>
+                                <th>Photos</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                demoData.parsedListings.forEach((listing, index) => {
+                    let photoHTML = '';
+                    if (listing.hasPhotos) {
+                        photoHTML = '<span style="color: #28a745;">📸 Photo Available</span>';
+                    } else {
+                        photoHTML = '<span style="color: #6c757d;">No photo</span>';
+                    }
+                    
+                    tableHTML += `
+                        <tr>
+                            <td><strong>${listing.parcelId}</strong></td>
+                            <td>${listing.owner}</td>
+                            <td>${listing.address}</td>
+                            <td>${listing.zipCode}</td>
+                            <td><strong>${listing.amount}</strong></td>
+                            <td>${photoHTML}</td>
+                        </tr>
+                    `;
+                });
+                
+                tableHTML += '</tbody></table>';
+                listingContainer.innerHTML = tableHTML;
+                
+                // Update map if it's visible
+                if (map && !document.getElementById('mapContainer').classList.contains('hidden')) {
+                    plotPropertiesWithRealCoordinates();
+                }
+            }, 1000);
+        }
+        
+        // Map functionality
+        let map = null;
+        let markersLayer = null;
+        let photoFilterActive = false;
+        
+        // Initialize map
+        function initializeMap() {
+            if (map) {
+                map.remove();
+            }
+            
+            // Center on Chatham County, GA (Savannah area)
+            map = L.map('map').setView([32.0835, -81.0998], 11);
+            
+            // Add OpenStreetMap tiles
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+            
+            // Create markers layer
+            markersLayer = L.layerGroup().addTo(map);
+        }
+        
+        // Toggle map visibility
+        function toggleMap() {
+            const mapContainer = document.getElementById('mapContainer');
+            const showMapBtn = document.getElementById('showMapBtn');
+            const geocodeBtn = document.getElementById('geocodeBtn');
+            const togglePhotosBtn = document.getElementById('togglePhotosMapBtn');
+            
+            if (mapContainer.classList.contains('hidden')) {
+                // Show the map
+                mapContainer.classList.remove('hidden');
+                showMapBtn.textContent = '🗺️ Hide Map';
+                showMapBtn.classList.add('active');
+                geocodeBtn.classList.remove('hidden');
+                togglePhotosBtn.classList.remove('hidden');
+                
+                if (!map) {
+                    initializeMap();
+                }
+                
+                // Refresh map size and plot properties
+                setTimeout(() => {
+                    if (map) {
+                        map.invalidateSize();
+                        plotPropertiesWithRealCoordinates();
+                    }
+                }, 100);
+            } else {
+                // Hide the map
+                mapContainer.classList.add('hidden');
+                showMapBtn.textContent = '📍 Show Properties on Map';
+                showMapBtn.classList.remove('active');
+                geocodeBtn.classList.add('hidden');
+                togglePhotosBtn.classList.add('hidden');
+            }
+        }
+        
+        // Toggle photo filter on map
+        function togglePhotoFilter() {
+            const btn = document.getElementById('togglePhotosMapBtn');
+            photoFilterActive = !photoFilterActive;
+            
+            if (photoFilterActive) {
+                btn.textContent = '📷 Show All Properties';
+                btn.classList.add('active');
+            } else {
+                btn.textContent = '📷 Show Only Properties with Photos';
+                btn.classList.remove('active');
+            }
+            
+            plotPropertiesWithRealCoordinates();
+        }
+        
+        // Simulate geocoding (for demo purposes)
+        function simulateGeocoding() {
+            alert('Demo: In the full application, this would fetch exact coordinates for all properties using OpenStreetMap\'s geocoding service.');
+        }
+        
+        // Plot properties with real coordinates
+        function plotPropertiesWithRealCoordinates() {
+            if (!map || !currentData || !currentData.parsedListings) {
+                return;
+            }
+            
+            markersLayer.clearLayers();
+            
+            const listings = photoFilterActive 
+                ? currentData.parsedListings.filter(listing => listing.hasPhotos)
+                : currentData.parsedListings;
+            
+            let mappedCount = 0;
+            let bounds = [];
+            
+            listings.forEach((listing, index) => {
+                if (listing.coordinates) {
+                    const coords = [listing.coordinates.lat, listing.coordinates.lng];
+                    const marker = L.marker(coords).addTo(markersLayer);
+                    bounds.push(coords);
+                    mappedCount++;
+                    
+                    // Create Google Street View URL
+                    const streetViewUrl = `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${coords[0]},${coords[1]}`;
+                    
+                    const popupContent = `
+                        <div class="popup-content">
+                            <h4>Parcel: ${listing.parcelId}</h4>
+                            <p><strong>Owner:</strong> ${listing.owner}</p>
+                            <p><strong>Address:</strong> ${listing.address}</p>
+                            <p><strong>Zip:</strong> ${listing.zipCode}</p>
+                            <p class="amount"><strong>Starting Bid:</strong> ${listing.amount}</p>
+                            ${listing.hasPhotos ? '<p>📷 <em>Property photo available</em></p>' : ''}
+                            <p>🎯 <em>Exact location</em></p>
+                            <p><a href="${streetViewUrl}" target="_blank" style="color: #007bff; text-decoration: underline;">🏠 View in Google Street View</a></p>
+                        </div>
+                    `;
+                    
+                    marker.bindPopup(popupContent);
+                    
+                    // Different marker colors for properties with photos
+                    let iconColor = '#764ba2'; // Default purple
+                    
+                    if (listing.hasPhotos) {
+                        iconColor = '#28a745'; // Green for photos + exact location
+                    } else {
+                        iconColor = '#17a2b8'; // Blue for exact location only
+                    }
+                    
+                    marker.setIcon(L.icon({
+                        iconUrl: 'data:image/svg+xml;base64,' + btoa(`
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 25 25" fill="${iconColor}">
+                                <path d="M12.5 2.5c-5.5 0-10 4.5-10 10 0 7.5 10 15 10 15s10-7.5 10-15c0-5.5-4.5-10-10-10zm0 13.5c-1.9 0-3.5-1.6-3.5-3.5s1.6-3.5 3.5-3.5 3.5 1.6 3.5 3.5-1.6 3.5-3.5 3.5z"/>
+                            </svg>
+                        `),
+                        iconSize: [25, 25],
+                        iconAnchor: [12, 25],
+                        popupAnchor: [0, -25]
+                    }));
+                }
+            });
+            
+            // Fit map to show all markers
+            if (bounds.length > 0) {
+                const group = new L.featureGroup(markersLayer.getLayers());
+                map.fitBounds(group.getBounds().pad(0.1));
+            }
+            
+            console.log(`Plotted ${mappedCount} properties on map`);
+        }
+        
+        // Initialize page with demo data
+        window.addEventListener('load', () => {
+            loadDemoListings();
+        });
+    </script>
+</body>
+</html>

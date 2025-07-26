@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Georgia Tax Sale Listings</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body { font-family: Arial, sans-serif; background: #f8f8f8; }
+        .container { max-width: 1200px; margin: 2rem auto; background: #fff; border-radius: 10px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); padding: 2rem; }
+        h1 { color: #764ba2; margin-bottom: 1.5rem; }
+        .controls { margin-bottom: 2rem; }
+        .controls label { font-weight: bold; margin-right: 1rem; }
+        .controls select { font-size: 1.1rem; padding: 0.5rem; margin-right: 1rem; }
+        .controls button { padding: 0.5rem 1rem; background: #764ba2; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .controls button:hover { background: #5a2d91; }
+        .stats { background: #f0e6fa; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; }
+        .listing-table { width: 100%; border-collapse: collapse; margin-top: 1.5rem; }
+        .listing-table th, .listing-table td { border: 1px solid #e0e0e0; padding: 0.6rem; text-align: left; }
+        .listing-table th { background: #f0e6fa; color: #764ba2; font-weight: bold; }
+        .listing-table tr:nth-child(even) { background: #f8f8f8; }
+        .listing-table tr:hover { background: #e8f4fd; }
+        .no-data { color: #b47ddb; margin-top: 2rem; text-align: center; }
+        .pdf-link { margin-top: 1rem; display: inline-block; color: #667eea; text-decoration: underline; }
+        .error { background: #ffe6e6; color: #d63031; padding: 1rem; border-radius: 8px; margin: 1rem 0; }
+        .loading { color: #764ba2; text-align: center; margin: 2rem 0; }
+        .maintenance { background: #fff3cd; color: #856404; padding: 1rem; border-radius: 8px; margin: 1rem 0; }
+        .raw-button { background: #17a2b8; color: white; border: none; padding: 0.3rem 0.6rem; border-radius: 3px; cursor: pointer; font-size: 0.8rem; }
+        .raw-button:hover { background: #138496; }
+        .raw-data { background: #f8f9fa; padding: 0.5rem; margin-top: 0.5rem; border-radius: 4px; font-family: monospace; font-size: 0.8rem; max-height: 100px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Georgia Tax Sale Listings</h1>
+        
+        <div class="controls">
+            <label for="countySelect">Select County:</label>
+            <select id="countySelect">
+                <option value="chatham">Chatham County</option>
+                <option value="dekalb">DeKalb County</option>
+            </select>
+            <button onclick="loadListings()">Load Listings</button>
+        </div>
+        
+        <div id="statusContainer"></div>
+        <div id="statsContainer"></div>
+        <div id="listingContainer"></div>
+    </div>
+
+    <script>
+        let currentData = null;
+
+        // Load available counties on page load
+        async function loadCounties() {
+            try {
+                const response = await fetch('http://localhost:3001/api/counties');
+                const counties = await response.json();
+                
+                const select = document.getElementById('countySelect');
+                select.innerHTML = '';
+                
+                counties.forEach(county => {
+                    const option = document.createElement('option');
+                    option.value = county.id;
+                    option.textContent = `${county.name}, ${county.state}`;
+                    if (county.status === 'maintenance') {
+                        option.textContent += ' (Under Maintenance)';
+                    }
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading counties:', error);
+            }
+        }
+
+        // Load tax sale listings for selected county
+        async function loadListings() {
+            const county = document.getElementById('countySelect').value;
+            const statusContainer = document.getElementById('statusContainer');
+            const statsContainer = document.getElementById('statsContainer');
+            const listingContainer = document.getElementById('listingContainer');
+            
+            // Show loading state
+            statusContainer.innerHTML = '<div class="loading">Loading tax sale listings...</div>';
+            statsContainer.innerHTML = '';
+            listingContainer.innerHTML = '';
+            
+            try {
+                const response = await fetch(`http://localhost:3001/api/tax-sale-listings/${county}`);
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    if (response.status === 503) {
+                        // Service unavailable (maintenance)
+                        statusContainer.innerHTML = `
+                            <div class="maintenance">
+                                <strong>Service Temporarily Unavailable</strong><br>
+                                ${data.message}<br>
+                                <small>Available counties: ${data.availableCounties.join(', ')}</small>
+                            </div>
+                        `;
+                        return;
+                    } else {
+                        throw new Error(data.error || 'Failed to load listings');
+                    }
+                }
+                
+                currentData = data;
+                
+                // Clear loading state
+                statusContainer.innerHTML = '';
+                
+                // Show statistics
+                if (data.metadata) {
+                    statsContainer.innerHTML = `
+                        <div class="stats">
+                            <strong>${data.county || 'Tax Sale'} Statistics:</strong><br>
+                            📄 ${data.totalListings} properties found<br>
+                            📅 Tax Sale Date: ${data.metadata.taxSaleDate || 'TBD'}<br>
+                            🔗 <a href="${data.pdfUrl}" target="_blank">View Official PDF</a><br>
+                            <small>Last updated: ${data.metadata.lastUpdated || new Date().toLocaleDateString()}</small>
+                        </div>
+                    `;
+                }
+                
+                // Render listings table
+                if (data.parsedListings && data.parsedListings.length > 0) {
+                    let tableHTML = `
+                        <table class="listing-table">
+                            <thead>
+                                <tr>
+                                    <th>Parcel ID</th>
+                                    <th>Owner</th>
+                                    <th>Address</th>
+                                    <th>Zip Code</th>
+                                    <th>Amount</th>
+                                    <th>Details</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+                    
+                    data.parsedListings.forEach((listing, index) => {
+                        tableHTML += `
+                            <tr>
+                                <td><strong>${listing.parcelId}</strong></td>
+                                <td>${listing.owner || 'N/A'}</td>
+                                <td>${listing.address || 'N/A'}</td>
+                                <td>${listing.zipCode || 'N/A'}</td>
+                                <td><strong>${listing.amount || 'N/A'}</strong></td>
+                                <td>
+                                    <button class="raw-button" onclick="toggleRawData(${index})">Show Raw</button>
+                                    <div id="raw-${index}" class="raw-data" style="display:none;">
+                                        <strong>All Lines:</strong><br>
+                                        ${listing.allLines ? listing.allLines.join('<br>') : 'No raw data'}
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                    
+                    tableHTML += '</tbody></table>';
+                    listingContainer.innerHTML = tableHTML;
+                } else {
+                    listingContainer.innerHTML = '<div class="no-data">No tax sale listings found for this county.</div>';
+                }
+                
+            } catch (error) {
+                console.error('Error loading listings:', error);
+                statusContainer.innerHTML = `
+                    <div class="error">
+                        <strong>Error:</strong> ${error.message}
+                    </div>
+                `;
+            }
+        }
+        
+        // Toggle raw data display
+        function toggleRawData(index) {
+            const rawDiv = document.getElementById(`raw-${index}`);
+            const button = rawDiv.previousElementSibling;
+            
+            if (rawDiv.style.display === 'none') {
+                rawDiv.style.display = 'block';
+                button.textContent = 'Hide Raw';
+            } else {
+                rawDiv.style.display = 'none';
+                button.textContent = 'Show Raw';
+            }
+        }
+        
+        // Initialize page
+        window.addEventListener('load', () => {
+            loadCounties();
+            loadListings(); // Load default county listings
+        });
+    </script>
+</body>
+</html>
