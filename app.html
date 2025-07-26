@@ -123,6 +123,11 @@
                     }
                     select.appendChild(option);
                 });
+                
+                // Automatically load Chatham County listings (default)
+                setTimeout(() => {
+                    loadListings();
+                }, 500);
             } catch (error) {
                 console.error('Error loading counties:', error);
             }
