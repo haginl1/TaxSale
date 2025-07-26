@@ -41,6 +41,8 @@
         .photo-container { text-align: center; }
         .photo-loading { color: #666; font-style: italic; }
         .photo-error { color: #dc3545; font-size: 0.8rem; }
+        .photo-link { color: #28a745 !important; text-decoration: underline; }
+        .photo-link:hover { color: #1e7e34 !important; text-decoration: underline; }
         
         /* Map Styles */
         .map-container { margin: 2rem 0; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
@@ -182,6 +184,9 @@
                     }
                     if (data.metadata.propertiesWithPhotos !== undefined) {
                         statsHTML += `🖼️ ${data.metadata.propertiesWithPhotos} properties have photos<br>`;
+                        if (data.metadata.propertiesWithPhotos > 0 && data.photoListUrl) {
+                            statsHTML += `<small style="color: #666;">💡 Click "Photo Available" links to view the official photo list PDF</small><br>`;
+                        }
                     }
                     if (data.metadata.lastUpdated) {
                         statsHTML += `<small>Last updated: ${data.metadata.lastUpdated}</small>`;
@@ -234,7 +239,11 @@
             
             listings.forEach((listing, index) => {
                 let photoHTML = '';
-                if (listing.hasPhotos) {
+                if (listing.hasPhotos && currentData.photoListUrl) {
+                    // Create a clickable link to the photo list PDF
+                    photoHTML = `<a href="${currentData.photoListUrl}" target="_blank" class="photo-link" title="Click to view photo list PDF">📸 Photo Available</a>`;
+                } else if (listing.hasPhotos) {
+                    // Fallback if no photo list URL is available
                     photoHTML = '<span style="color: #28a745;">📸 Photo Available</span>';
                 } else {
                     photoHTML = '<span style="color: #6c757d;">No photo</span>';
