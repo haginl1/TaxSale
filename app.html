@@ -76,6 +76,70 @@
         .popup-content .street-view-link:hover { 
             color: #0056b3 !important; 
         }
+        
+        /* Street View Modal Styles */
+        .street-view-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 10000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .street-view-modal.hidden {
+            display: none;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            max-width: 90vw;
+            max-height: 90vh;
+            width: 800px;
+            overflow: hidden;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            background: #764ba2;
+            color: white;
+        }
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.2rem;
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background-color 0.2s;
+        }
+        .modal-close:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        .modal-body {
+            padding: 0;
+        }
+        .street-view-frame {
+            width: 100%;
+            height: 500px;
+            border: none;
+        }
     </style>
 </head>
 <body>
@@ -109,6 +173,24 @@
         </div>
         
         <div id="listingContainer"></div>
+        
+        <!-- Street View Modal -->
+        <div id="streetViewModal" class="street-view-modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modalTitle">Street View</h3>
+                    <button class="modal-close" onclick="closeStreetViewModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <iframe id="streetViewFrame" 
+                            class="street-view-frame"
+                            title="Google Maps Street View"
+                            frameborder="0" 
+                            allowfullscreen>
+                    </iframe>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -571,10 +653,7 @@
                     // Generate Street View link for popup
                     let streetViewLink = '';
                     if (listing.address && listing.address.trim() !== '' && listing.zipCode) {
-                        const fullAddress = `${listing.address}, ${listing.zipCode}, GA, USA`;
-                        const encodedAddress = encodeURIComponent(fullAddress);
-                        const streetViewUrl = `https://www.google.com/maps/search/${encodedAddress}`;
-                        streetViewLink = `<p><a href="${streetViewUrl}" target="_blank" class="street-view-link" title="View ${listing.address} on Google Maps / Street View">🌍 View on Google Maps / Street View</a></p>`;
+                        streetViewLink = `<p><a href="#" onclick="openStreetViewModal('${listing.address.replace(/'/g, "\\'")}', '${listing.zipCode}', '${listing.parcelId}'); return false;" class="street-view-link" title="View ${listing.address} on Google Maps / Street View">🌍 View on Google Maps / Street View</a></p>`;
                     }
                     
                     const popupContent = `
@@ -600,6 +679,59 @@
             
             console.log(`Plotted ${mappedCount} properties on map`);
         }
+        
+        // Street View Modal Functions
+        function openStreetViewModal(address, zipCode, propertyInfo) {
+            const modal = document.getElementById('streetViewModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const streetViewFrame = document.getElementById('streetViewFrame');
+            
+            // Update modal title
+            modalTitle.textContent = `Street View - ${address}`;
+            
+            // Create Google Maps URL that will open in the iframe
+            const fullAddress = `${address}, ${zipCode}, GA, USA`;
+            const encodedAddress = encodeURIComponent(fullAddress);
+            
+            // Use a Google Maps URL that works in iframe (this will show the location)
+            const mapUrl = `https://maps.google.com/maps?q=${encodedAddress}&output=embed&z=18`;
+            
+            streetViewFrame.src = mapUrl;
+            
+            // Show modal
+            modal.classList.remove('hidden');
+            
+            // Add escape key listener
+            document.addEventListener('keydown', handleModalEscape);
+        }
+        
+        function closeStreetViewModal() {
+            const modal = document.getElementById('streetViewModal');
+            const streetViewFrame = document.getElementById('streetViewFrame');
+            
+            // Hide modal
+            modal.classList.add('hidden');
+            
+            // Clear iframe to stop loading
+            streetViewFrame.src = '';
+            
+            // Remove escape key listener
+            document.removeEventListener('keydown', handleModalEscape);
+        }
+        
+        function handleModalEscape(event) {
+            if (event.key === 'Escape') {
+                closeStreetViewModal();
+            }
+        }
+        
+        // Close modal when clicking outside
+        document.addEventListener('click', function(event) {
+            const modal = document.getElementById('streetViewModal');
+            if (event.target === modal) {
+                closeStreetViewModal();
+            }
+        });
         
         // Initialize page
         window.addEventListener('load', () => {
