@@ -187,7 +187,7 @@
                     if (data.metadata.propertiesWithPhotos !== undefined) {
                         statsHTML += `🖼️ ${data.metadata.propertiesWithPhotos} properties have photos<br>`;
                         if (data.metadata.propertiesWithPhotos > 0 && data.photoListUrl) {
-                            statsHTML += `<small style="color: #666;">💡 Click "Photo Available" links to view the official photo list PDF</small><br>`;
+                            statsHTML += `📋 <a href="${data.photoListUrl}" target="_blank" class="photo-link" title="Click to view the official photo list PDF">View Official Property Photos PDF</a><br>`;
                         }
                     }
                     
@@ -242,7 +242,6 @@
                             <th>Address</th>
                             <th>Zip Code</th>
                             <th>Amount</th>
-                            <th>Photos</th>
                             <th>Street View</th>
                         </tr>
                     </thead>
@@ -250,17 +249,6 @@
             `;
             
             listings.forEach((listing, index) => {
-                let photoHTML = '';
-                if (listing.hasPhotos && currentData.photoListUrl) {
-                    // Create a clickable link to the photo list PDF
-                    photoHTML = `<a href="${currentData.photoListUrl}" target="_blank" class="photo-link" title="Click to view photo list PDF">📸 Photo Available</a>`;
-                } else if (listing.hasPhotos) {
-                    // Fallback if no photo list URL is available
-                    photoHTML = '<span style="color: #28a745;">📸 Photo Available</span>';
-                } else {
-                    photoHTML = '<span style="color: #6c757d;">No photo</span>';
-                }
-                
                 // Generate Street View link
                 let streetViewHTML = '';
                 if (listing.address && listing.address.trim() !== '' && listing.zipCode) {
@@ -280,7 +268,6 @@
                         <td>${listing.address}</td>
                         <td>${listing.zipCode}</td>
                         <td><strong>${listing.amount}</strong></td>
-                        <td>${photoHTML}</td>
                         <td>${streetViewHTML}</td>
                     </tr>
                 `;
@@ -562,7 +549,6 @@
                             <p><strong>Address:</strong> ${listing.address}</p>
                             <p><strong>Zip:</strong> ${listing.zipCode}</p>
                             <p class="amount"><strong>Starting Bid:</strong> ${listing.amount}</p>
-                            ${listing.hasPhotos ? '<p>📷 <em>Property photo available</em></p>' : ''}
                         </div>
                     `;
                     
