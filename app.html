@@ -196,8 +196,8 @@
                         listing.address && listing.address.trim() !== '' && listing.zipCode
                     ).length;
                     if (propertiesWithAddresses > 0) {
-                        statsHTML += `🌍 ${propertiesWithAddresses} properties have Street View available<br>`;
-                        statsHTML += `<small style="color: #666;">💡 Click "Street View" links to virtually visit properties</small><br>`;
+                        statsHTML += `🌍 ${propertiesWithAddresses} properties have maps & street view available<br>`;
+                        statsHTML += `<small style="color: #666;">💡 Click "Maps & Street View" links to view properties on Google Maps</small><br>`;
                     }
                     if (data.metadata.lastUpdated) {
                         statsHTML += `<small>Last updated: ${data.metadata.lastUpdated}</small>`;
@@ -266,9 +266,9 @@
                 if (listing.address && listing.address.trim() !== '' && listing.zipCode) {
                     const fullAddress = `${listing.address}, ${listing.zipCode}, GA, USA`;
                     const encodedAddress = encodeURIComponent(fullAddress);
-                    // Using Google Street View direct link format
-                    const streetViewUrl = `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=&address=${encodedAddress}`;
-                    streetViewHTML = `<a href="${streetViewUrl}" target="_blank" class="street-view-link" title="View ${listing.address} in Google Street View">🌍 Street View</a>`;
+                    // Using Google Maps URL that opens to Street View when available
+                    const streetViewUrl = `https://www.google.com/maps/search/${encodedAddress}`;
+                    streetViewHTML = `<a href="${streetViewUrl}" target="_blank" class="street-view-link" title="View ${listing.address} on Google Maps / Street View">🌍 Maps & Street View</a>`;
                 } else {
                     streetViewHTML = '<span style="color: #6c757d;">No address</span>';
                 }
