@@ -26,7 +26,27 @@ app.use(express.json());
 
 // Root route - serve the main application (must come before static middleware)
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'app.html'));
+    console.log('Root route accessed');
+    const filePath = path.join(__dirname, 'app.html');
+    console.log('Sending file:', filePath);
+    res.sendFile(filePath, (err) => {
+        if (err) {
+            console.error('Error sending file:', err);
+            res.status(500).send('Error loading application');
+        }
+    });
+});
+
+// Explicit route for app.html
+app.get('/app.html', (req, res) => {
+    console.log('App.html route accessed');
+    const filePath = path.join(__dirname, 'app.html');
+    res.sendFile(filePath, (err) => {
+        if (err) {
+            console.error('Error sending app.html:', err);
+            res.status(500).send('Error loading application');
+        }
+    });
 });
 
 // Serve static files (but not index.html at root)
@@ -556,7 +576,20 @@ async function parseDekalbCsv(csvUrl, res, config) {
     });
 }
 
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error('Server error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+});
+
+// 404 handler
+app.use((req, res) => {
+    console.log('404 - Route not found:', req.url);
+    res.status(404).json({ error: 'Route not found' });
+});
+
 app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);
     console.log('Available counties:', Object.keys(COUNTY_CONFIGS));
+    console.log('Serving files from:', __dirname);
 });
