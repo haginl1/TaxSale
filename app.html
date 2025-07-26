@@ -263,55 +263,97 @@
         
         // Initialize map
         function initializeMap() {
-            if (map) {
-                map.remove();
+            console.log('Attempting to initialize map...');
+            
+            try {
+                if (map) {
+                    console.log('Removing existing map...');
+                    map.remove();
+                }
+                
+                console.log('Creating new map...');
+                // Center on Georgia
+                map = L.map('map').setView([32.1656, -82.9001], 7);
+                
+                console.log('Adding tile layer...');
+                // Add OpenStreetMap tiles
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(map);
+                
+                console.log('Creating markers layer...');
+                // Create markers layer
+                markersLayer = L.layerGroup().addTo(map);
+                
+                console.log('Map initialized successfully');
+            } catch (error) {
+                console.error('Error initializing map:', error);
+                alert('Error initializing map: ' + error.message);
             }
-            
-            // Center on Georgia
-            map = L.map('map').setView([32.1656, -82.9001], 7);
-            
-            // Add OpenStreetMap tiles
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap contributors'
-            }).addTo(map);
-            
-            // Create markers layer
-            markersLayer = L.layerGroup().addTo(map);
         }
         
         // Toggle map visibility
         function toggleMap() {
-            const mapContainer = document.getElementById('mapContainer');
-            const showMapBtn = document.getElementById('showMapBtn');
-            const geocodeBtn = document.getElementById('geocodeBtn');
-            const togglePhotosBtn = document.getElementById('togglePhotosMapBtn');
+            console.log('toggleMap function called');
             
-            if (mapContainer.classList.contains('hidden')) {
-                // Show the map
-                mapContainer.classList.remove('hidden');
-                showMapBtn.textContent = '🗺️ Hide Map';
-                showMapBtn.classList.add('active');
-                geocodeBtn.classList.remove('hidden');
-                togglePhotosBtn.classList.remove('hidden');
+            try {
+                const mapContainer = document.getElementById('mapContainer');
+                const showMapBtn = document.getElementById('showMapBtn');
+                const geocodeBtn = document.getElementById('geocodeBtn');
+                const togglePhotosBtn = document.getElementById('togglePhotosMapBtn');
                 
-                if (!map) {
-                    initializeMap();
+                console.log('Elements found:', {
+                    mapContainer: !!mapContainer,
+                    showMapBtn: !!showMapBtn,
+                    geocodeBtn: !!geocodeBtn,
+                    togglePhotosBtn: !!togglePhotosBtn
+                });
+                
+                if (!mapContainer) {
+                    console.error('Map container not found!');
+                    alert('Error: Map container not found');
+                    return;
                 }
                 
-                // Refresh map size and plot properties
-                setTimeout(() => {
-                    if (map) {
-                        map.invalidateSize();
-                        plotProperties();
+                if (mapContainer.classList.contains('hidden')) {
+                    console.log('Showing map...');
+                    // Show the map
+                    mapContainer.classList.remove('hidden');
+                    showMapBtn.textContent = '🗺️ Hide Map';
+                    showMapBtn.classList.add('active');
+                    geocodeBtn.classList.remove('hidden');
+                    togglePhotosBtn.classList.remove('hidden');
+                    
+                    if (!map) {
+                        console.log('Map not initialized, initializing now...');
+                        if (typeof L === 'undefined') {
+                            console.error('Leaflet library not loaded!');
+                            alert('Error: Map library not loaded. Please refresh the page.');
+                            return;
+                        }
+                        initializeMap();
                     }
-                }, 100);
-            } else {
-                // Hide the map
-                mapContainer.classList.add('hidden');
-                showMapBtn.textContent = '📍 Show Properties on Map';
-                showMapBtn.classList.remove('active');
-                geocodeBtn.classList.add('hidden');
-                togglePhotosBtn.classList.add('hidden');
+                    
+                    // Refresh map size and plot properties
+                    setTimeout(() => {
+                        if (map) {
+                            console.log('Refreshing map size and plotting properties...');
+                            map.invalidateSize();
+                            plotProperties();
+                        }
+                    }, 100);
+                } else {
+                    console.log('Hiding map...');
+                    // Hide the map
+                    mapContainer.classList.add('hidden');
+                    showMapBtn.textContent = '📍 Show Properties on Map';
+                    showMapBtn.classList.remove('active');
+                    geocodeBtn.classList.add('hidden');
+                    togglePhotosBtn.classList.add('hidden');
+                }
+            } catch (error) {
+                console.error('Error in toggleMap:', error);
+                alert('Error toggling map: ' + error.message);
             }
         }
         
@@ -433,6 +475,21 @@
         
         // Initialize page
         window.addEventListener('load', () => {
+            console.log('Page loaded, checking dependencies...');
+            
+            // Check if Leaflet is available
+            if (typeof L === 'undefined') {
+                console.error('Leaflet library not loaded!');
+                const mapBtn = document.getElementById('showMapBtn');
+                if (mapBtn) {
+                    mapBtn.textContent = '❌ Map Not Available';
+                    mapBtn.disabled = true;
+                    mapBtn.style.opacity = '0.5';
+                }
+            } else {
+                console.log('Leaflet library loaded successfully');
+            }
+            
             loadCounties();
         });
     </script>
