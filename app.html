@@ -140,6 +140,329 @@
             height: 500px;
             border: none;
         }
+        
+        /* Default: Show table, hide mobile cards */
+        .mobile-cards {
+            display: none;
+        }
+        
+        .listing-table {
+            display: table;
+        }
+        
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+            body {
+                padding: 0.5rem;
+                margin: 0;
+            }
+            
+            .container {
+                margin: 0.5rem auto;
+                padding: 1rem;
+                border-radius: 5px;
+                max-width: 100%;
+                box-sizing: border-box;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+                text-align: center;
+                margin-bottom: 1rem;
+            }
+            
+            .controls {
+                margin-bottom: 1rem;
+                text-align: center;
+            }
+            
+            .controls label {
+                display: block;
+                margin-bottom: 0.5rem;
+                margin-right: 0;
+            }
+            
+            .controls select {
+                width: 100%;
+                max-width: 300px;
+                margin-bottom: 0.5rem;
+                margin-right: 0;
+                font-size: 1rem;
+                padding: 0.75rem;
+                box-sizing: border-box;
+            }
+            
+            .controls button {
+                width: 100%;
+                max-width: 300px;
+                padding: 0.75rem;
+                font-size: 1rem;
+                margin: 0.25rem 0;
+            }
+            
+            .stats {
+                padding: 0.75rem;
+                font-size: 0.9rem;
+                text-align: center;
+            }
+            
+            /* Mobile Table Styles */
+            .listing-table {
+                font-size: 0.8rem;
+                margin-top: 1rem;
+            }
+            
+            .listing-table th,
+            .listing-table td {
+                padding: 0.4rem 0.2rem;
+                word-wrap: break-word;
+                max-width: 120px;
+            }
+            
+            .listing-table th {
+                font-size: 0.75rem;
+            }
+            
+            /* Hide less important columns on very small screens */
+            @media (max-width: 480px) {
+                .listing-table th:nth-child(1),
+                .listing-table td:nth-child(1) {
+                    display: none; /* Hide Parcel ID on very small screens */
+                }
+            }
+            
+            /* Mobile Map Styles */
+            .map-container {
+                margin: 1rem 0;
+                border-radius: 5px;
+            }
+            
+            #map {
+                height: 350px;
+            }
+            
+            .map-controls {
+                margin: 0.5rem 0;
+                text-align: center;
+            }
+            
+            .map-controls button {
+                margin: 0.25rem;
+                padding: 0.5rem 0.75rem;
+                font-size: 0.8rem;
+                display: inline-block;
+                width: auto;
+                min-width: 120px;
+            }
+            
+            /* Mobile Modal Styles */
+            .modal-content {
+                width: 95vw;
+                max-width: 95vw;
+                max-height: 85vh;
+                margin: 0 auto;
+            }
+            
+            .modal-header {
+                padding: 0.75rem 1rem;
+            }
+            
+            .modal-header h3 {
+                font-size: 1rem;
+                word-wrap: break-word;
+                max-width: calc(100% - 40px);
+            }
+            
+            .street-view-frame {
+                height: 300px;
+            }
+            
+            /* Mobile Popup Styles */
+            .leaflet-popup-content {
+                font-size: 0.8rem;
+                margin: 0.5rem;
+                width: auto !important;
+                max-width: 250px;
+            }
+            
+            .popup-content h4 {
+                font-size: 0.9rem;
+                margin-bottom: 0.3rem;
+            }
+            
+            .popup-content p {
+                margin: 0.1rem 0;
+                word-wrap: break-word;
+            }
+            
+            .popup-content .street-view-link {
+                font-size: 0.75rem;
+                display: inline-block;
+                margin-top: 0.3rem;
+            }
+            
+            /* Touch-friendly button sizes */
+            .raw-button {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.75rem;
+                min-height: 44px;
+                min-width: 44px;
+            }
+            
+            .street-view-link,
+            .photo-link {
+                min-height: 44px;
+                display: inline-block;
+                line-height: 44px;
+                padding: 0 0.5rem;
+            }
+        }
+        
+        /* Extra small screens */
+        @media (max-width: 320px) {
+            .container {
+                padding: 0.5rem;
+            }
+            
+            h1 {
+                font-size: 1.25rem;
+            }
+            
+            .listing-table {
+                font-size: 0.7rem;
+            }
+            
+            .listing-table th,
+            .listing-table td {
+                padding: 0.3rem 0.1rem;
+                max-width: 80px;
+            }
+            
+            #map {
+                height: 250px;
+            }
+            
+            .map-controls button {
+                font-size: 0.7rem;
+                padding: 0.4rem 0.6rem;
+                min-width: 100px;
+            }
+        }
+        
+        /* Mobile Card Layout for small screens */
+        @media (max-width: 600px) {
+            /* Hide table on mobile */
+            .listing-table {
+                display: none !important;
+            }
+            
+            /* Show mobile cards */
+            .mobile-cards {
+                display: block !important;
+            }
+            
+            .property-card {
+                background: white;
+                border: 1px solid #e0e0e0;
+                border-radius: 8px;
+                margin-bottom: 1rem;
+                padding: 1rem;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            
+            .property-card:hover {
+                box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+                background: #f8f9fa;
+            }
+            
+            .card-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 0.75rem;
+                padding-bottom: 0.5rem;
+                border-bottom: 1px solid #e9ecef;
+            }
+            
+            .card-parcel {
+                font-weight: bold;
+                color: #764ba2;
+                font-size: 0.9rem;
+            }
+            
+            .card-amount {
+                font-weight: bold;
+                color: #dc3545;
+                font-size: 1rem;
+            }
+            
+            .card-info {
+                margin-bottom: 0.75rem;
+            }
+            
+            .card-info-row {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 0.25rem;
+                font-size: 0.85rem;
+            }
+            
+            .card-info-label {
+                font-weight: bold;
+                color: #495057;
+                min-width: 60px;
+            }
+            
+            .card-info-value {
+                text-align: right;
+                flex: 1;
+                margin-left: 1rem;
+                word-break: break-word;
+            }
+            
+            .card-actions {
+                display: flex;
+                gap: 0.5rem;
+                flex-wrap: wrap;
+            }
+            
+            .card-actions a {
+                flex: 1;
+                min-width: 120px;
+                text-align: center;
+                padding: 0.5rem;
+                border-radius: 4px;
+                text-decoration: none;
+                font-size: 0.8rem;
+                display: inline-block;
+            }
+        }
+        
+        /* Show table on larger screens, hide cards */
+        @media (min-width: 601px) {
+            .mobile-cards {
+                display: none !important;
+            }
+            
+            .listing-table {
+                display: table !important;
+            }
+        }
+        
+        /* Landscape mobile optimization */
+        @media (max-width: 768px) and (orientation: landscape) {
+            #map {
+                height: 250px;
+            }
+            
+            .street-view-frame {
+                height: 250px;
+            }
+            
+            .modal-content {
+                max-height: 90vh;
+            }
+        }
     </style>
 </head>
 <body>
@@ -341,6 +664,7 @@
         function renderListingsTable(listings) {
             const listingContainer = document.getElementById('listingContainer');
             
+            // Generate table HTML for desktop/tablet
             let tableHTML = `
                 <table class="listing-table">
                     <thead>
@@ -356,19 +680,22 @@
                     <tbody>
             `;
             
+            // Generate mobile cards HTML
+            let cardsHTML = '<div class="mobile-cards">';
+            
             listings.forEach((listing, index) => {
-                // Generate Street View link
+                // Generate Street View link for table
                 let streetViewHTML = '';
                 if (listing.address && listing.address.trim() !== '' && listing.zipCode) {
                     const fullAddress = `${listing.address}, ${listing.zipCode}, GA, USA`;
                     const encodedAddress = encodeURIComponent(fullAddress);
-                    // Using Google Maps URL that opens to Street View when available
                     const streetViewUrl = `https://www.google.com/maps/search/${encodedAddress}`;
                     streetViewHTML = `<a href="${streetViewUrl}" target="_blank" class="street-view-link" title="View ${listing.address} on Google Maps / Street View">🌍 Maps & Street View</a>`;
                 } else {
                     streetViewHTML = '<span style="color: #6c757d;">No address</span>';
                 }
                 
+                // Add row to table
                 tableHTML += `
                     <tr>
                         <td><strong>${listing.parcelId}</strong></td>
@@ -379,10 +706,47 @@
                         <td>${streetViewHTML}</td>
                     </tr>
                 `;
+                
+                // Add card for mobile
+                let mobileStreetViewHTML = '';
+                if (listing.address && listing.address.trim() !== '' && listing.zipCode) {
+                    mobileStreetViewHTML = `<a href="#" onclick="openStreetViewModal('${listing.address.replace(/'/g, "\\'")}', '${listing.zipCode}', '${listing.parcelId}'); return false;" class="street-view-link">🌍 Street View</a>`;
+                } else {
+                    mobileStreetViewHTML = '<span style="color: #6c757d;">No address</span>';
+                }
+                
+                cardsHTML += `
+                    <div class="property-card">
+                        <div class="card-header">
+                            <div class="card-parcel">${listing.parcelId}</div>
+                            <div class="card-amount">${listing.amount}</div>
+                        </div>
+                        <div class="card-info">
+                            <div class="card-info-row">
+                                <span class="card-info-label">Owner:</span>
+                                <span class="card-info-value">${listing.owner}</span>
+                            </div>
+                            <div class="card-info-row">
+                                <span class="card-info-label">Address:</span>
+                                <span class="card-info-value">${listing.address}</span>
+                            </div>
+                            <div class="card-info-row">
+                                <span class="card-info-label">Zip:</span>
+                                <span class="card-info-value">${listing.zipCode}</span>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            ${mobileStreetViewHTML}
+                        </div>
+                    </div>
+                `;
             });
             
             tableHTML += '</tbody></table>';
-            listingContainer.innerHTML = tableHTML;
+            cardsHTML += '</div>';
+            
+            // Combine table and cards - CSS will control which is displayed
+            listingContainer.innerHTML = tableHTML + cardsHTML;
         }
         
         // Map functionality
