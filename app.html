@@ -436,33 +436,68 @@
                 console.log('Sending addresses for geocoding:', addresses.length, 'out of', currentData.parsedListings.length, 'total properties');
                 console.log('Sample addresses:', addresses.slice(0, 5));
                 
-                // Show progress
-                btn.textContent = `🔄 Geocoding ${addresses.length} addresses...`;
+                // Process in chunks if we have many addresses
+                const CHUNK_SIZE = 20; // Match server limit
+                let allResults = [];
+                let totalProcessed = 0;
+                let totalSuccessful = 0;
+                let wasLimited = false;
                 
-                const response = await fetch(`${API_BASE}/api/geocode-batch`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        addresses: addresses,
-                        county: 'Chatham County',
-                        state: 'GA'
-                    })
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                for (let i = 0; i < addresses.length; i += CHUNK_SIZE) {
+                    const chunk = addresses.slice(i, i + CHUNK_SIZE);
+                    const chunkNum = Math.floor(i / CHUNK_SIZE) + 1;
+                    const totalChunks = Math.ceil(addresses.length / CHUNK_SIZE);
+                    
+                    btn.textContent = `🔄 Geocoding chunk ${chunkNum}/${totalChunks} (${chunk.length} addresses)...`;
+                    
+                    console.log(`Processing chunk ${chunkNum}/${totalChunks}: ${chunk.length} addresses`);
+                    
+                    try {
+                        const response = await fetch(`${API_BASE}/api/geocode-batch`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                addresses: chunk,
+                                county: 'Chatham County',
+                                state: 'GA'
+                            })
+                        });
+                        
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                        }
+                        
+                        const geocodeData = await response.json();
+                        console.log(`Chunk ${chunkNum} response:`, geocodeData);
+                        
+                        // Accumulate results
+                        allResults = allResults.concat(geocodeData.results || []);
+                        totalProcessed += geocodeData.processed || 0;
+                        totalSuccessful += geocodeData.successful || 0;
+                        wasLimited = wasLimited || geocodeData.limited || false;
+                        
+                        // Small delay between chunks to be respectful
+                        if (i + CHUNK_SIZE < addresses.length) {
+                            await new Promise(resolve => setTimeout(resolve, 1000));
+                        }
+                        
+                    } catch (chunkError) {
+                        console.error(`Error processing chunk ${chunkNum}:`, chunkError);
+                        // Continue with next chunk rather than failing completely
+                        btn.textContent = `⚠️ Chunk ${chunkNum} failed, continuing...`;
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                    }
                 }
                 
-                const geocodeData = await response.json();
-                console.log('Geocoding response:', geocodeData);
+                console.log('All chunks processed. Total results:', allResults.length);
                 
                 // Update currentData with coordinates
                 let coordsAdded = 0;
                 currentData.parsedListings.forEach((listing, index) => {
                     const fullAddress = `${listing.address} ${listing.zipCode}`.trim().replace(/\s+/g, ' ');
-                    const geocodeResult = geocodeData.results.find(r => r.address === fullAddress);
+                    const geocodeResult = allResults.find(r => r.address === fullAddress);
                     if (geocodeResult && geocodeResult.success && geocodeResult.coordinates) {
                         listing.coordinates = geocodeResult.coordinates;
                         coordsAdded++;
@@ -475,11 +510,13 @@
                 // Re-plot the map
                 plotProperties();
                 
-                const processedCount = geocodeData.processed || 0;
-                const successfulCount = geocodeData.successful || coordsAdded;
-                const totalCount = geocodeData.total || addresses.length;
+                // Show comprehensive results
+                let resultText = `✅ Geocoded ${totalSuccessful}/${totalProcessed} (${coordsAdded} mapped)`;
+                if (wasLimited) {
+                    resultText += ' - Some addresses skipped due to server limits';
+                }
                 
-                btn.textContent = `✅ Geocoded ${successfulCount}/${processedCount} (${coordsAdded} mapped)`;
+                btn.textContent = resultText;
                 setTimeout(() => {
                     btn.textContent = '🔍 Find Property Locations';
                     btn.disabled = false;

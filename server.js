@@ -169,19 +169,30 @@ app.post('/api/geocode-batch', async (req, res) => {
     
     console.log(`Processing ${addresses.length} addresses for geocoding`);
     
+    // Set a timeout for the entire operation (20 seconds)
+    const timeoutMs = 20000;
+    const startTime = Date.now();
+    
     try {
         const results = [];
         
-        // Process addresses in batches to avoid overwhelming the service
-        // Increased limit and added better address processing
-        const addressesToProcess = addresses.slice(0, 50).map(addr => {
+        // Reduced batch size for better performance and to avoid timeouts
+        // Process max 20 addresses to stay under server timeout limits
+        const maxAddresses = Math.min(addresses.length, 20);
+        const addressesToProcess = addresses.slice(0, maxAddresses).map(addr => {
             // Clean and format addresses better
             return addr.replace(/\s+/g, ' ').trim();
         }).filter(addr => addr.length > 5); // Filter out very short addresses
         
-        console.log(`Processing ${addressesToProcess.length} cleaned addresses for geocoding`);
+        console.log(`Processing ${addressesToProcess.length} cleaned addresses (limited to ${maxAddresses})`);
         
         for (let i = 0; i < addressesToProcess.length; i++) {
+            // Check if we're approaching timeout
+            if (Date.now() - startTime > timeoutMs - 2000) { // Leave 2 seconds buffer
+                console.log(`Stopping geocoding due to timeout approaching. Processed ${i}/${addressesToProcess.length}`);
+                break;
+            }
+            
             const address = addressesToProcess[i];
             
             try {
@@ -192,11 +203,18 @@ app.post('/api/geocode-batch', async (req, res) => {
                 
                 console.log(`Geocoding ${i + 1}/${addressesToProcess.length}: ${address}`);
                 
+                // Add timeout to individual requests
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout per request
+                
                 const response = await fetch(nominatimUrl, {
                     headers: {
                         'User-Agent': 'TaxSaleListings/1.0'
-                    }
+                    },
+                    signal: controller.signal
                 });
+                
+                clearTimeout(timeoutId);
                 
                 if (response.ok) {
                     const responseText = await response.text();
@@ -241,33 +259,45 @@ app.post('/api/geocode-batch', async (req, res) => {
                     });
                 }
                 
-                // Increased delay to be more respectful to the free service
-                // and reduce chance of rate limiting
-                await new Promise(resolve => setTimeout(resolve, 500));
+                // Reduced delay to avoid timeouts while still being respectful
+                await new Promise(resolve => setTimeout(resolve, 300));
                 
             } catch (error) {
-                console.error(`❌ Error geocoding ${address}:`, error.message);
-                results.push({
-                    address: address,
-                    success: false,
-                    message: error.message
-                });
+                if (error.name === 'AbortError') {
+                    console.error(`❌ Timeout geocoding ${address}`);
+                    results.push({
+                        address: address,
+                        success: false,
+                        message: 'Request timeout'
+                    });
+                } else {
+                    console.error(`❌ Error geocoding ${address}:`, error.message);
+                    results.push({
+                        address: address,
+                        success: false,
+                        message: error.message
+                    });
+                }
             }
         }
         
-        console.log(`Geocoding completed: ${results.filter(r => r.success).length}/${results.length} successful`);
+        const processingTime = Date.now() - startTime;
+        console.log(`Geocoding completed in ${processingTime}ms: ${results.filter(r => r.success).length}/${results.length} successful`);
         
         res.json({
             results: results,
             processed: results.length,
             total: addresses.length,
-            successful: results.filter(r => r.success).length
+            successful: results.filter(r => r.success).length,
+            limited: addresses.length > maxAddresses,
+            processingTimeMs: processingTime
         });
         
     } catch (error) {
         console.error('Batch geocoding error:', error);
         res.status(500).json({
-            error: error.message
+            error: error.message,
+            processingTimeMs: Date.now() - startTime
         });
     }
 });
