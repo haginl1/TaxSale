@@ -502,6 +502,8 @@ async function parseChathamPdf(pdfUrl, res, config) {
             
             // Parse owner and address from the collected lines
             if (allDataLines.length > 0) {
+                console.log(`DEBUG: Processing parcel ${fullParcelId} with data:`, allDataLines);
+                
                 // Find the house number (first number that's not 5 digits)
                 let houseNumberIndex = -1;
                 let zipIndex = -1;
@@ -523,7 +525,7 @@ async function parseChathamPdf(pdfUrl, res, config) {
                     const ownerParts = rawOwnerParts.filter(part => 
                         part.length > 0 && 
                         !part.includes('$') && 
-                        !/^[\d,]+\.?\d*$/.test(part)
+                        !/^[\d,]+\.[\d,]+$/.test(part) // Only filter decimal amounts like "4,672.58"
                     );
                     currentListing.owner = ownerParts.slice(0, 4).join(' ');
                     
@@ -533,18 +535,18 @@ async function parseChathamPdf(pdfUrl, res, config) {
                     const addressParts = rawAddressParts.filter(part => 
                         part.length > 0 && 
                         !part.includes('$') && 
-                        !/^[\d,]+\.?\d*$/.test(part) &&
-                        !/^\d{5}$/.test(part)
+                        !/^[\d,]+\.[\d,]+$/.test(part) && // Only filter decimal amounts like "4,672.58", not house numbers
+                        !/^\d{5}$/.test(part) // Not zip code
                     );
                     currentListing.address = addressParts.join(' ');
                 } else {
                     // Fallback: if no house number found, split roughly in half
                     const splitPoint = Math.floor(allDataLines.length / 2);
                     const ownerParts = allDataLines.slice(0, splitPoint).filter(part => 
-                        part.length > 0 && !part.includes('$') && !/^[\d,]+\.?\d*$/.test(part)
+                        part.length > 0 && !part.includes('$') && !/^[\d,]+\.[\d,]+$/.test(part)
                     );
                     const addressParts = allDataLines.slice(splitPoint).filter(part => 
-                        part.length > 0 && !part.includes('$') && !/^[\d,]+\.?\d*$/.test(part) && !/^\d{5}$/.test(part)
+                        part.length > 0 && !part.includes('$') && !/^[\d,]+\.[\d,]+$/.test(part) && !/^\d{5}$/.test(part)
                     );
                     
                     currentListing.owner = ownerParts.slice(0, 4).join(' ');
