@@ -6,6 +6,9 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Disable ETag caching for development
+app.set('etag', false);
+
 // Deployment timestamp: 2025-07-26 - Enhanced logging deployment
 console.log('Starting server...');
 console.log('Environment:', process.env.NODE_ENV || 'development');
@@ -325,6 +328,13 @@ app.get('/api/tax-sale-listings/:county', async (req, res) => {
     const county = req.params.county || 'chatham'; // Default to Chatham County
     console.log(`Tax sale listings requested for county: ${county}`);
     
+    // Disable caching
+    res.set({
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+    });
+    
     const config = COUNTY_CONFIGS[county];
     
     if (!config) {
@@ -483,13 +493,18 @@ async function parseChathamPdf(pdfUrl, res, config) {
                 currentListing.allLines.push(nextLine);
                 allDataLines.push(nextLine);
                 
-                // Identify amount (contains $ and numbers)
+                // Identify amount - handle both combined ($1234.56) and separate lines
                 if (nextLine.includes('$') && /[\d,]+\.?\d*/.test(nextLine)) {
+                    // Case 1: Dollar sign and amount on same line
                     const amountMatch = nextLine.match(/[\d,]+\.?\d*/);
                     if (amountMatch) {
                         currentListing.amount = '$' + amountMatch[0];
                         foundAmount = true;
                     }
+                } else if (/^[\d,]+\.\d+$/.test(nextLine) && !foundAmount) {
+                    // Case 2: Amount line without $ - typical pattern like "4,672.58"
+                    currentListing.amount = '$' + nextLine;
+                    foundAmount = true;
                 }
                 
                 // Identify zip code (5 digits)
@@ -631,11 +646,15 @@ async function parseChathamPdf(pdfUrl, res, config) {
         }
     }
 
-    // Add photo references to listings
+    // Add photo references to listings and copy amounts
     parsedListings.forEach(listing => {
         if (photoMap[listing.parcelId]) {
             listing.photoData = photoMap[listing.parcelId];
             listing.hasPhotos = true;
+            // Copy amount from photoData if main parsing didn't capture it
+            if ((!listing.amount || listing.amount === '') && listing.photoData.bidAmount) {
+                listing.amount = listing.photoData.bidAmount;
+            }
         } else {
             listing.photoData = null;
             listing.hasPhotos = false;
