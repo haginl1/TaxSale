@@ -6,6 +6,7 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Deployment timestamp: 2025-07-26 - Enhanced logging deployment
 console.log('Starting server...');
 console.log('Environment:', process.env.NODE_ENV || 'development');
 console.log('Port:', PORT);
