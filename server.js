@@ -21,16 +21,18 @@ app.use((req, res, next) => {
     next();
 });
 
-// Serve static files
-app.use(express.static(path.join(__dirname, '.')));
-
 // Add body parser for JSON requests
 app.use(express.json());
 
-// Root route - serve the main application
+// Root route - serve the main application (must come before static middleware)
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'app.html'));
 });
+
+// Serve static files (but not index.html at root)
+app.use(express.static(path.join(__dirname, '.'), {
+    index: false  // Prevent serving index.html automatically
+}));
 
 // County configurations
 const COUNTY_CONFIGS = {
