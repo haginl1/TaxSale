@@ -1,4 +1,15 @@
 {
+  "name": "tax-sale-listings",
+  "version": "1.0.0",
+  "description": "Georgia Tax Sale Property Listings Application",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
   "dependencies": {
     "express": "^5.1.0",
     "fs-extra": "^11.3.0",

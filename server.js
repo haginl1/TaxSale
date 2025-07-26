@@ -1,9 +1,10 @@
 const express = require('express');
 const fetch = require('node-fetch');
 const pdfParse = require('pdf-parse');
+const path = require('path');
 
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
 // Add CORS middleware
 app.use((req, res, next) => {
@@ -20,8 +21,16 @@ app.use((req, res, next) => {
     next();
 });
 
+// Serve static files
+app.use(express.static(path.join(__dirname, '.')));
+
 // Add body parser for JSON requests
 app.use(express.json());
+
+// Root route - serve the main application
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'app.html'));
+});
 
 // County configurations
 const COUNTY_CONFIGS = {
@@ -544,8 +553,6 @@ async function parseDekalbCsv(csvUrl, res, config) {
         }
     });
 }
-
-app.use(express.static('.')); // Serve files from current directory
 
 app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);

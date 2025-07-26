@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Georgia Tax Sale Listings</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        // Configure PDF.js worker immediately after loading
+        if (typeof pdfjsLib !== 'undefined') {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        }
+    </script>
+    <!-- Leaflet CSS and JS for mapping -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f8f8f8; }
+        .container { max-width: 1200px; margin: 2rem auto; background: #fff; border-radius: 10px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); padding: 2rem; }
+        h1 { color: #764ba2; margin-bottom: 1.5rem; }
+        .controls { margin-bottom: 2rem; }
+        .controls label { font-weight: bold; margin-right: 1rem; }
+        .controls select { font-size: 1.1rem; padding: 0.5rem; margin-right: 1rem; }
+        .controls button { padding: 0.5rem 1rem; background: #764ba2; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .controls button:hover { background: #5a2d91; }
+        .stats { background: #f0e6fa; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; }
+        .listing-table { width: 100%; border-collapse: collapse; margin-top: 1.5rem; }
+        .listing-table th, .listing-table td { border: 1px solid #e0e0e0; padding: 0.6rem; text-align: left; }
+        .listing-table th { background: #f0e6fa; color: #764ba2; font-weight: bold; }
+        .listing-table tr:nth-child(even) { background: #f8f8f8; }
+        .listing-table tr:hover { background: #e8f4fd; }
+        .no-data { color: #b47ddb; margin-top: 2rem; text-align: center; }
+        .pdf-link { margin-top: 1rem; display: inline-block; color: #667eea; text-decoration: underline; }
+        .error { background: #ffe6e6; color: #d63031; padding: 1rem; border-radius: 8px; margin: 1rem 0; }
+        .loading { color: #764ba2; text-align: center; margin: 2rem 0; }
+        .maintenance { background: #fff3cd; color: #856404; padding: 1rem; border-radius: 8px; margin: 1rem 0; }
+        .raw-button { background: #17a2b8; color: white; border: none; padding: 0.3rem 0.6rem; border-radius: 3px; cursor: pointer; font-size: 0.8rem; }
+        .raw-button:hover { background: #138496; }
+        .raw-data { background: #f8f9fa; padding: 0.5rem; margin-top: 0.5rem; border-radius: 4px; font-family: monospace; font-size: 0.8rem; max-height: 100px; overflow-y: auto; }
+        .photo-preview { max-width: 200px; max-height: 150px; border: 1px solid #ddd; border-radius: 4px; margin: 0.5rem 0; }
+        .photo-container { text-align: center; }
+        .photo-loading { color: #666; font-style: italic; }
+        .photo-error { color: #dc3545; font-size: 0.8rem; }
+        
+        /* Map Styles */
+        .map-container { margin: 2rem 0; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .map-container.hidden { display: none; }
+        #map { height: 500px; width: 100%; }
+        .map-controls { margin: 1rem 0; text-align: center; }
+        .map-controls button { 
+            margin: 0 0.5rem; 
+            padding: 0.5rem 1rem; 
+            background: #764ba2; 
+            color: white; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-size: 0.9rem;
+        }
+        .map-controls button:hover { background: #5a3a7a; }
+        .map-controls button.active { background: #28a745; }
+        .map-controls button.hidden { display: none; }
+        .leaflet-popup-content { font-size: 0.9rem; }
+        .popup-content h4 { margin: 0 0 0.5rem 0; color: #764ba2; }
+        .popup-content p { margin: 0.2rem 0; }
+        .popup-content .amount { font-weight: bold; color: #dc3545; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Georgia Tax Sale Listings</h1>
+        
+        <div class="controls">
+            <label for="countySelect">Select County:</label>
+            <select id="countySelect">
+                <option value="chatham">Chatham County</option>
+                <option value="dekalb">DeKalb County</option>
+            </select>
+            <button onclick="loadListings()">Load Listings</button>
+        </div>
+        
+        <div id="statusContainer"></div>
+        <div id="statsContainer"></div>
+        
+        <!-- Map Toggle Button (always visible) -->
+        <div class="map-controls">
+            <button id="showMapBtn" onclick="toggleMap()">📍 Show Properties on Map</button>
+        </div>
+        
+        <!-- Map Section (initially hidden) -->
+        <div class="map-container hidden" id="mapContainer">
+            <div class="map-controls">
+                <button id="geocodeBtn" onclick="geocodeProperties()" class="hidden">🔍 Find Property Locations</button>
+                <button id="togglePhotosMapBtn" onclick="togglePhotoFilter()" class="hidden">📷 Show Only Properties with Photos</button>
+            </div>
+            <div id="map"></div>
+        </div>
+        
+        <div id="listingContainer"></div>
+    </div>
+
+    <script>
+        let currentData = null;
+        
+        // Get the base URL for API calls (works both locally and when deployed)
+        const API_BASE = window.location.origin;
+
+        // Load available counties on page load
+        async function loadCounties() {
+            try {
+                const response = await fetch(`${API_BASE}/api/counties`);
+                const counties = await response.json();
+                
+                const select = document.getElementById('countySelect');
+                select.innerHTML = '';
+                
+                counties.forEach(county => {
+                    const option = document.createElement('option');
+                    option.value = county.id;
+                    option.textContent = `${county.name}, ${county.state}`;
+                    if (county.status === 'maintenance') {
+                        option.textContent += ' (Under Maintenance)';
+                    }
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading counties:', error);
+            }
+        }
+
+        // Load tax sale listings for selected county
+        async function loadListings() {
+            const county = document.getElementById('countySelect').value;
+            const statusContainer = document.getElementById('statusContainer');
+            const statsContainer = document.getElementById('statsContainer');
+            const listingContainer = document.getElementById('listingContainer');
+            
+            // Show loading state
+            statusContainer.innerHTML = '<div class="loading">Loading tax sale listings...</div>';
+            statsContainer.innerHTML = '';
+            listingContainer.innerHTML = '';
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/tax-sale-listings/${county}`);
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    if (response.status === 503) {
+                        // Service unavailable (maintenance)
+                        statusContainer.innerHTML = `
+                            <div class="maintenance">
+                                <strong>Service Temporarily Unavailable</strong><br>
+                                ${data.message || 'This county\'s tax sale system is currently under maintenance.'}
+                            </div>
+                        `;
+                        return;
+                    } else {
+                        throw new Error(data.error || 'Failed to load listings');
+                    }
+                }
+                
+                currentData = data;
+                
+                // Clear loading state
+                statusContainer.innerHTML = '';
+                
+                // Show statistics
+                let statsHTML = `
+                    <div class="stats">
+                        <strong>${data.county} Statistics:</strong><br>
+                        📄 ${data.totalListings} properties found<br>
+                `;
+                
+                if (data.metadata) {
+                    if (data.metadata.taxSaleDate) {
+                        statsHTML += `📅 Tax Sale Date: ${data.metadata.taxSaleDate}<br>`;
+                    }
+                    if (data.metadata.propertiesWithPhotos !== undefined) {
+                        statsHTML += `🖼️ ${data.metadata.propertiesWithPhotos} properties have photos<br>`;
+                    }
+                    if (data.metadata.lastUpdated) {
+                        statsHTML += `<small>Last updated: ${data.metadata.lastUpdated}</small>`;
+                    }
+                }
+                
+                statsHTML += `</div>`;
+                statsContainer.innerHTML = statsHTML;
+                
+                // Render listings table
+                if (data.parsedListings && data.parsedListings.length > 0) {
+                    renderListingsTable(data.parsedListings);
+                } else {
+                    listingContainer.innerHTML = '<div class="no-data">No listings found for this county.</div>';
+                }
+                
+                // Update map if it's visible
+                if (map && !document.getElementById('mapContainer').classList.contains('hidden')) {
+                    plotProperties();
+                }
+                
+            } catch (error) {
+                console.error('Error loading listings:', error);
+                statusContainer.innerHTML = `
+                    <div class="error">
+                        <strong>Error:</strong> ${error.message}
+                    </div>
+                `;
+            }
+        }
+        
+        // Render listings table
+        function renderListingsTable(listings) {
+            const listingContainer = document.getElementById('listingContainer');
+            
+            let tableHTML = `
+                <table class="listing-table">
+                    <thead>
+                        <tr>
+                            <th>Parcel ID</th>
+                            <th>Owner</th>
+                            <th>Address</th>
+                            <th>Zip Code</th>
+                            <th>Amount</th>
+                            <th>Photos</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            listings.forEach((listing, index) => {
+                let photoHTML = '';
+                if (listing.hasPhotos) {
+                    photoHTML = '<span style="color: #28a745;">📸 Photo Available</span>';
+                } else {
+                    photoHTML = '<span style="color: #6c757d;">No photo</span>';
+                }
+                
+                tableHTML += `
+                    <tr>
+                        <td><strong>${listing.parcelId}</strong></td>
+                        <td>${listing.owner}</td>
+                        <td>${listing.address}</td>
+                        <td>${listing.zipCode}</td>
+                        <td><strong>${listing.amount}</strong></td>
+                        <td>${photoHTML}</td>
+                    </tr>
+                `;
+            });
+            
+            tableHTML += '</tbody></table>';
+            listingContainer.innerHTML = tableHTML;
+        }
+        
+        // Map functionality
+        let map = null;
+        let markersLayer = null;
+        let photoFilterActive = false;
+        
+        // Initialize map
+        function initializeMap() {
+            if (map) {
+                map.remove();
+            }
+            
+            // Center on Georgia
+            map = L.map('map').setView([32.1656, -82.9001], 7);
+            
+            // Add OpenStreetMap tiles
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+            
+            // Create markers layer
+            markersLayer = L.layerGroup().addTo(map);
+        }
+        
+        // Toggle map visibility
+        function toggleMap() {
+            const mapContainer = document.getElementById('mapContainer');
+            const showMapBtn = document.getElementById('showMapBtn');
+            const geocodeBtn = document.getElementById('geocodeBtn');
+            const togglePhotosBtn = document.getElementById('togglePhotosMapBtn');
+            
+            if (mapContainer.classList.contains('hidden')) {
+                // Show the map
+                mapContainer.classList.remove('hidden');
+                showMapBtn.textContent = '🗺️ Hide Map';
+                showMapBtn.classList.add('active');
+                geocodeBtn.classList.remove('hidden');
+                togglePhotosBtn.classList.remove('hidden');
+                
+                if (!map) {
+                    initializeMap();
+                }
+                
+                // Refresh map size and plot properties
+                setTimeout(() => {
+                    if (map) {
+                        map.invalidateSize();
+                        plotProperties();
+                    }
+                }, 100);
+            } else {
+                // Hide the map
+                mapContainer.classList.add('hidden');
+                showMapBtn.textContent = '📍 Show Properties on Map';
+                showMapBtn.classList.remove('active');
+                geocodeBtn.classList.add('hidden');
+                togglePhotosBtn.classList.add('hidden');
+            }
+        }
+        
+        // Toggle photo filter on map
+        function togglePhotoFilter() {
+            const btn = document.getElementById('togglePhotosMapBtn');
+            photoFilterActive = !photoFilterActive;
+            
+            if (photoFilterActive) {
+                btn.textContent = '📷 Show All Properties';
+                btn.classList.add('active');
+            } else {
+                btn.textContent = '📷 Show Only Properties with Photos';
+                btn.classList.remove('active');
+            }
+            
+            plotProperties();
+        }
+        
+        // Geocode properties
+        async function geocodeProperties() {
+            if (!currentData || !currentData.parsedListings) {
+                alert('Please load listings first');
+                return;
+            }
+            
+            const btn = document.getElementById('geocodeBtn');
+            btn.textContent = '🔄 Geocoding...';
+            btn.disabled = true;
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/geocode-batch`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        properties: currentData.parsedListings.map(listing => ({
+                            id: listing.parcelId,
+                            address: `${listing.address}, ${listing.zipCode}, GA`
+                        }))
+                    })
+                });
+                
+                const geocodeData = await response.json();
+                
+                // Update currentData with coordinates
+                currentData.parsedListings.forEach(listing => {
+                    const geocodeResult = geocodeData.results.find(r => r.id === listing.parcelId);
+                    if (geocodeResult && geocodeResult.coordinates) {
+                        listing.coordinates = geocodeResult.coordinates;
+                    }
+                });
+                
+                // Re-plot the map
+                plotProperties();
+                
+                btn.textContent = '✅ Geocoded';
+                setTimeout(() => {
+                    btn.textContent = '🔍 Find Property Locations';
+                    btn.disabled = false;
+                }, 2000);
+                
+            } catch (error) {
+                console.error('Geocoding error:', error);
+                btn.textContent = '❌ Geocoding failed';
+                setTimeout(() => {
+                    btn.textContent = '🔍 Find Property Locations';
+                    btn.disabled = false;
+                }, 2000);
+            }
+        }
+        
+        // Plot properties on map
+        function plotProperties() {
+            if (!map || !currentData || !currentData.parsedListings) {
+                return;
+            }
+            
+            markersLayer.clearLayers();
+            
+            const listings = photoFilterActive 
+                ? currentData.parsedListings.filter(listing => listing.hasPhotos)
+                : currentData.parsedListings;
+            
+            let mappedCount = 0;
+            let bounds = [];
+            
+            listings.forEach((listing, index) => {
+                if (listing.coordinates) {
+                    const coords = [listing.coordinates.lat, listing.coordinates.lng];
+                    const marker = L.marker(coords).addTo(markersLayer);
+                    bounds.push(coords);
+                    mappedCount++;
+                    
+                    const popupContent = `
+                        <div class="popup-content">
+                            <h4>Parcel: ${listing.parcelId}</h4>
+                            <p><strong>Owner:</strong> ${listing.owner}</p>
+                            <p><strong>Address:</strong> ${listing.address}</p>
+                            <p><strong>Zip:</strong> ${listing.zipCode}</p>
+                            <p class="amount"><strong>Starting Bid:</strong> ${listing.amount}</p>
+                            ${listing.hasPhotos ? '<p>📷 <em>Property photo available</em></p>' : ''}
+                        </div>
+                    `;
+                    
+                    marker.bindPopup(popupContent);
+                }
+            });
+            
+            // Fit map to show all markers
+            if (bounds.length > 0) {
+                const group = new L.featureGroup(markersLayer.getLayers());
+                map.fitBounds(group.getBounds().pad(0.1));
+            }
+            
+            console.log(`Plotted ${mappedCount} properties on map`);
+        }
+        
+        // Initialize page
+        window.addEventListener('load', () => {
+            loadCounties();
+        });
+    </script>
+</body>
+</html>
