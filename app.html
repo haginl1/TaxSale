@@ -68,6 +68,14 @@
         .popup-content h4 { margin: 0 0 0.5rem 0; color: #764ba2; }
         .popup-content p { margin: 0.2rem 0; }
         .popup-content .amount { font-weight: bold; color: #dc3545; }
+        .popup-content .street-view-link { 
+            color: #007bff !important; 
+            text-decoration: underline; 
+            font-size: 0.85rem;
+        }
+        .popup-content .street-view-link:hover { 
+            color: #0056b3 !important; 
+        }
     </style>
 </head>
 <body>
@@ -542,6 +550,15 @@
                     bounds.push(coords);
                     mappedCount++;
                     
+                    // Generate Street View link for popup
+                    let streetViewLink = '';
+                    if (listing.address && listing.address.trim() !== '' && listing.zipCode) {
+                        const fullAddress = `${listing.address}, ${listing.zipCode}, GA, USA`;
+                        const encodedAddress = encodeURIComponent(fullAddress);
+                        const streetViewUrl = `https://www.google.com/maps/search/${encodedAddress}`;
+                        streetViewLink = `<p><a href="${streetViewUrl}" target="_blank" class="street-view-link" title="View ${listing.address} on Google Maps / Street View">🌍 View on Google Maps / Street View</a></p>`;
+                    }
+                    
                     const popupContent = `
                         <div class="popup-content">
                             <h4>Parcel: ${listing.parcelId}</h4>
@@ -549,6 +566,7 @@
                             <p><strong>Address:</strong> ${listing.address}</p>
                             <p><strong>Zip:</strong> ${listing.zipCode}</p>
                             <p class="amount"><strong>Starting Bid:</strong> ${listing.amount}</p>
+                            ${streetViewLink}
                         </div>
                     `;
                     
