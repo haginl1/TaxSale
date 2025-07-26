@@ -6,6 +6,10 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+console.log('Starting server...');
+console.log('Environment:', process.env.NODE_ENV || 'development');
+console.log('Port:', PORT);
+
 // Add CORS middleware
 app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
@@ -76,13 +80,20 @@ const COUNTY_CONFIGS = {
 
 // Endpoint to get available counties
 app.get('/api/counties', (req, res) => {
-    const counties = Object.keys(COUNTY_CONFIGS).map(key => ({
-        id: key,
-        name: COUNTY_CONFIGS[key].name,
-        state: COUNTY_CONFIGS[key].state,
-        status: COUNTY_CONFIGS[key].status || 'active'
-    }));
-    res.json(counties);
+    console.log('Counties API endpoint accessed');
+    try {
+        const counties = Object.keys(COUNTY_CONFIGS).map(key => ({
+            id: key,
+            name: COUNTY_CONFIGS[key].name,
+            state: COUNTY_CONFIGS[key].state,
+            status: COUNTY_CONFIGS[key].status || 'active'
+        }));
+        console.log('Returning counties:', counties);
+        res.json(counties);
+    } catch (error) {
+        console.error('Error in counties endpoint:', error);
+        res.status(500).json({ error: 'Failed to load counties' });
+    }
 });
 
 // Geocoding endpoint using OpenStreetMap Nominatim API
@@ -261,17 +272,23 @@ app.get('/api/tax-sale-listings', async (req, res) => {
 
 app.get('/api/tax-sale-listings/:county', async (req, res) => {
     const county = req.params.county || 'chatham'; // Default to Chatham County
+    console.log(`Tax sale listings requested for county: ${county}`);
+    
     const config = COUNTY_CONFIGS[county];
     
     if (!config) {
+        console.log(`Unsupported county requested: ${county}`);
         return res.status(400).json({ 
             error: 'Unsupported county', 
             availableCounties: Object.keys(COUNTY_CONFIGS) 
         });
     }
     
+    console.log(`Configuration found for ${county}:`, config);
+    
     // Check if county service is under maintenance
     if (config.status === 'maintenance') {
+        console.log(`County ${county} is under maintenance`);
         return res.status(503).json({
             error: 'Service temporarily unavailable',
             message: `${config.name} tax sale listings are currently under maintenance`,
@@ -292,34 +309,43 @@ app.get('/api/tax-sale-listings/:county', async (req, res) => {
             throw new Error(`Unsupported data type: ${config.dataType}`);
         }
     } catch (err) {
+        console.error(`Error processing tax sale listings for ${county}:`, err);
+        console.error('Error stack:', err.stack);
+        
         res.status(500).json({ 
             error: err.message,
-            county: config.name 
+            county: config.name,
+            details: process.env.NODE_ENV === 'development' ? err.stack : undefined
         });
     }
 });
 
 // Chatham County PDF parser
 async function parseChathamPdf(pdfUrl, res, config) {
-    const response = await fetch(pdfUrl);
+    console.log(`Starting PDF parsing for ${config.name} from:`, pdfUrl);
     
-    if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-    }
-    
-    console.log('PDF fetch successful, status:', response.status);
-    console.log('Content-Type:', response.headers.get('content-type'));
-    console.log('Content-Length:', response.headers.get('content-length'));
-    
-    const buffer = await response.buffer();
-    console.log('Buffer size:', buffer.length);
-    
-    const data = await pdfParse(buffer);
-    console.log('PDF parsing successful, text length:', data.text.length);
-    console.log('PDF info:', data.info);
-    console.log('Number of pages:', data.numpages);
-    console.log('First 200 chars:', data.text.substring(0, 200));
-    console.log('Last 200 chars:', data.text.substring(data.text.length - 200));
+    try {
+        const response = await fetch(pdfUrl);
+        
+        if (!response.ok) {
+            const errorMsg = `HTTP ${response.status}: ${response.statusText}`;
+            console.error('PDF fetch failed:', errorMsg);
+            throw new Error(errorMsg);
+        }
+        
+        console.log('PDF fetch successful, status:', response.status);
+        console.log('Content-Type:', response.headers.get('content-type'));
+        console.log('Content-Length:', response.headers.get('content-length'));
+        
+        const buffer = await response.buffer();
+        console.log('Buffer size:', buffer.length);
+        
+        const data = await pdfParse(buffer);
+        console.log('PDF parsing successful, text length:', data.text.length);
+        console.log('PDF info:', data.info);
+        console.log('Number of pages:', data.numpages);
+        console.log('First 200 chars:', data.text.substring(0, 200));
+        console.log('Last 200 chars:', data.text.substring(data.text.length - 200));
 
     // Fetch photo list if available
     let photoData = null;
@@ -558,6 +584,10 @@ async function parseChathamPdf(pdfUrl, res, config) {
             note: "✅ This is the current official tax sale list from tax.chathamcountyga.gov/TaxSaleList"
         }
     });
+    } catch (error) {
+        console.error('Error in parseChathamPdf:', error);
+        throw error;
+    }
 }
 
 // DeKalb County CSV parser (placeholder for when system comes back online)
