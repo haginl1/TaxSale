@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Georgia Tax Sale Listings</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            background: #f8f8f8; 
+            margin: 0; 
+            padding: 20px; 
+        }
+        .container { 
+            max-width: 1200px; 
+            margin: 2rem auto; 
+            background: #fff; 
+            border-radius: 10px; 
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08); 
+            padding: 2rem; 
+        }
+        h1 { 
+            color: #764ba2; 
+            margin-bottom: 1.5rem; 
+            text-align: center;
+        }
+        .status {
+            text-align: center;
+            padding: 20px;
+            background: #e3f2fd;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .error {
+            background: #ffebee;
+            color: #c62828;
+        }
+        .success {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+        button {
+            background: #764ba2;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        button:hover {
+            background: #5a2d91;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Georgia Tax Sale Listings</h1>
+        <div id="status" class="status">
+            🔧 Checking server connection...
+        </div>
+        <div style="text-align: center;">
+            <button onclick="checkServer()">Test Server Connection</button>
+            <button onclick="loadApp()">Load Full Application</button>
+        </div>
+    </div>
+
+    <script>
+        async function checkServer() {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = '🔄 Testing server...';
+            
+            try {
+                const response = await fetch('/api/counties');
+                if (response.ok) {
+                    const data = await response.json();
+                    statusDiv.className = 'status success';
+                    statusDiv.innerHTML = `✅ Server is working! Found ${data.length} counties available.`;
+                } else {
+                    throw new Error(`Server responded with ${response.status}`);
+                }
+            } catch (error) {
+                statusDiv.className = 'status error';
+                statusDiv.innerHTML = `❌ Server connection failed: ${error.message}`;
+            }
+        }
+
+        function loadApp() {
+            // Redirect to the full app
+            window.location.href = '/app.html';
+        }
+
+        // Auto-check on load
+        window.addEventListener('load', checkServer);
+    </script>
+</body>
+</html>

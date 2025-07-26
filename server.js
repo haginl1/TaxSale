@@ -467,8 +467,8 @@ async function parseChathamPdf(pdfUrl, res, config) {
             
             // Look ahead to gather related data
             let j = i + 1;
-            let ownerParts = [];
-            let addressParts = [];
+            // Collect all lines for this property entry
+            let allDataLines = [];
             let foundAmount = false;
             
             while (j < lines.length && j < i + 25) { // Look ahead max 25 lines
@@ -481,6 +481,7 @@ async function parseChathamPdf(pdfUrl, res, config) {
                 }
                 
                 currentListing.allLines.push(nextLine);
+                allDataLines.push(nextLine);
                 
                 // Identify amount (contains $ and numbers)
                 if (nextLine.includes('$') && /[\d,]+\.?\d*/.test(nextLine)) {
@@ -496,30 +497,59 @@ async function parseChathamPdf(pdfUrl, res, config) {
                     currentListing.zipCode = nextLine;
                 }
                 
-                // Identify address parts (numbers + street words)
-                if (/^\d+$/.test(nextLine) || /^(ST|AVE|DR|RD|CT|CIR|LN|WAY|BLVD|STREET|AVENUE|DRIVE|ROAD|COURT|CIRCLE|LANE)$/i.test(nextLine)) {
-                    addressParts.push(nextLine);
-                }
-                
-                // Collect potential owner names (alphabetic words, but not street types)
-                if (/^[A-Z]+$/.test(nextLine) && 
-                    !/^(ST|AVE|DR|RD|CT|CIR|LN|WAY|BLVD|STREET|AVENUE|DRIVE|ROAD|COURT|CIRCLE|LANE)$/i.test(nextLine) &&
-                    !foundAmount && 
-                    nextLine.length > 1) {
-                    ownerParts.push(nextLine);
-                }
-                
                 j++;
             }
             
-            // Assemble owner name (first few alphabetic parts)
-            if (ownerParts.length > 0) {
-                currentListing.owner = ownerParts.slice(0, 4).join(' ');
-            }
-            
-            // Assemble address
-            if (addressParts.length > 0) {
-                currentListing.address = addressParts.join(' ');
+            // Parse owner and address from the collected lines
+            if (allDataLines.length > 0) {
+                // Find the house number (first number that's not 5 digits)
+                let houseNumberIndex = -1;
+                let zipIndex = -1;
+                
+                for (let k = 0; k < allDataLines.length; k++) {
+                    // Find house number (first number that's not a zip code)
+                    if (/^\d+$/.test(allDataLines[k]) && !(/^\d{5}$/.test(allDataLines[k])) && houseNumberIndex === -1) {
+                        houseNumberIndex = k;
+                    }
+                    // Find zip code
+                    if (/^\d{5}$/.test(allDataLines[k])) {
+                        zipIndex = k;
+                    }
+                }
+                
+                if (houseNumberIndex !== -1) {
+                    // Owner name: everything before the house number
+                    const rawOwnerParts = allDataLines.slice(0, houseNumberIndex);
+                    const ownerParts = rawOwnerParts.filter(part => 
+                        part.length > 0 && 
+                        !part.includes('$') && 
+                        !/^[\d,]+\.?\d*$/.test(part)
+                    );
+                    currentListing.owner = ownerParts.slice(0, 4).join(' ');
+                    
+                    // Address: from house number to zip code (or end if no zip)
+                    const addressEndIndex = zipIndex !== -1 ? zipIndex : allDataLines.length;
+                    const rawAddressParts = allDataLines.slice(houseNumberIndex, addressEndIndex);
+                    const addressParts = rawAddressParts.filter(part => 
+                        part.length > 0 && 
+                        !part.includes('$') && 
+                        !/^[\d,]+\.?\d*$/.test(part) &&
+                        !/^\d{5}$/.test(part)
+                    );
+                    currentListing.address = addressParts.join(' ');
+                } else {
+                    // Fallback: if no house number found, split roughly in half
+                    const splitPoint = Math.floor(allDataLines.length / 2);
+                    const ownerParts = allDataLines.slice(0, splitPoint).filter(part => 
+                        part.length > 0 && !part.includes('$') && !/^[\d,]+\.?\d*$/.test(part)
+                    );
+                    const addressParts = allDataLines.slice(splitPoint).filter(part => 
+                        part.length > 0 && !part.includes('$') && !/^[\d,]+\.?\d*$/.test(part) && !/^\d{5}$/.test(part)
+                    );
+                    
+                    currentListing.owner = ownerParts.slice(0, 4).join(' ');
+                    currentListing.address = addressParts.join(' ');
+                }
             }
             
             // Skip processed lines
