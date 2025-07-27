@@ -32,6 +32,266 @@ app.use((req, res, next) => {
 // Add body parser for JSON requests
 app.use(express.json());
 
+// Geocoding cache setup
+const fs = require('fs');
+const GEOCODE_CACHE_FILE = path.join(__dirname, 'geocode_cache.json');
+let geocodeCache = {};
+
+// Load existing geocode cache
+function loadGeocodeCache() {
+    try {
+        if (fs.existsSync(GEOCODE_CACHE_FILE)) {
+            const cacheData = fs.readFileSync(GEOCODE_CACHE_FILE, 'utf8');
+            geocodeCache = JSON.parse(cacheData);
+            console.log(`Loaded ${Object.keys(geocodeCache).length} cached geocode entries`);
+        }
+    } catch (error) {
+        console.error('Error loading geocode cache:', error);
+        geocodeCache = {};
+    }
+}
+
+// Save geocode cache
+function saveGeocodeCache() {
+    try {
+        fs.writeFileSync(GEOCODE_CACHE_FILE, JSON.stringify(geocodeCache, null, 2));
+        console.log(`Saved ${Object.keys(geocodeCache).length} geocode entries to cache`);
+    } catch (error) {
+        console.error('Error saving geocode cache:', error);
+    }
+}
+
+// Generate cache key for an address
+function getCacheKey(address, zipCode) {
+    return `${address.toLowerCase().trim()}_${zipCode || ''}`.replace(/[^a-z0-9_]/g, '_');
+}
+
+// Initialize geocode cache
+loadGeocodeCache();
+
+// Clean address for geocoding by removing legal descriptions
+function cleanAddressForGeocoding(address) {
+    if (!address || typeof address !== 'string') {
+        return '';
+    }
+    
+    let cleaned = address;
+    
+    // Remove common legal description patterns
+    const legalPatterns = [
+        /,?\s*said\s+property\s+being\s+formerly.*$/i,
+        /,?\s*said\s+property.*$/i,
+        /,?\s*being\s+formerly\s+in\s+the\s+name\s+of.*$/i,
+        /,?\s*formerly\s+in\s+the\s+name\s+of.*$/i,
+        /,?\s*in\s+rem\s+against\s+the\s+property\s+known\s+as\s+/i,
+        /^in\s+rem\s*/i,
+        /\s+in\s+rem.*$/i,
+        /^lot\s+\d+.*?\s+(\d+\s+\w+.*?)$/i, // Extract address from "LOT 26 MISTWOODE SUB 17 RUSTIC LN"
+        /^lots?\s+\d+.*?\s+(\d+\s+\w+.*?)$/i,
+        /^east\s+half\s+lot\s+\d+.*?\s+(\d+\s+\w+.*?)$/i,
+        /^west\s+half\s+lot\s+\d+.*?\s+(\d+\s+\w+.*?)$/i,
+        /^(east|west|north|south)\s+\d+\s+ft.*?\s+(\d+\s+\w+.*?)$/i,
+        /^e\s+1\/2\s+lt\s+\d+.*?\s+(\d+\s+\w+.*?)$/i,
+        /^w\s+1\/2\s+lt\s+\d+.*?\s+(\d+\s+\w+.*?)$/i,
+        /^lts?\s+\d+.*?\s+(\d+\s+\w+.*?)$/i,
+        /^lt\s+\d+.*?\s+(\d+\s+\w+.*?)$/i,
+        /blk\s+\d+/i,
+        /block\s+\d+/i,
+        /sub\s*$/i,
+        /s\/d\s*/i,
+        /phase\s+\d+/i,
+        /,\s*$/, // trailing comma
+    ];
+    
+    // Apply each pattern
+    for (const pattern of legalPatterns) {
+        // Check if pattern has a capture group for extracting the address
+        const match = cleaned.match(pattern);
+        if (match && match[1]) {
+            // Use the captured group (the actual address)
+            cleaned = match[1].trim();
+            break;
+        } else {
+            // Remove the pattern
+            cleaned = cleaned.replace(pattern, '').trim();
+        }
+    }
+    
+    // Clean up extra spaces and formatting
+    cleaned = cleaned
+        .replace(/\s+/g, ' ') // Multiple spaces to single space
+        .replace(/^\s*,\s*|\s*,\s*$/g, '') // Leading/trailing commas
+        .replace(/^(and\s+|&\s+)/i, '') // Remove leading "and" or "&"
+        .replace(/\s+(and\s+|&\s+).*$/i, '') // Remove everything after "and" or "&"
+        .replace(/[‐–—]/g, '-') // Normalize dashes
+        .trim();
+    
+    // If we have a reasonable street address pattern, keep it
+    if (/^\d+\s+[A-Z\s]+(?:ST|AVE|DR|CT|CIR|LN|RD|WAY|PL|BLVD|PKWY|HWY|HIGHWAY)\b/i.test(cleaned)) {
+        return cleaned;
+    }
+    
+    // If we have just a house number and some text, keep it
+    if (/^\d+\s+\w+/.test(cleaned) && cleaned.length > 5) {
+        return cleaned;
+    }
+    
+    // If the cleaned address is too short or doesn't look like an address, try to extract from original
+    if (cleaned.length < 5) {
+        // Try to extract a street address pattern from the original
+        const addressMatch = address.match(/(\d+\s+[A-Z\s]+(?:ST|AVE|DR|CT|CIR|LN|RD|WAY|PL|BLVD|PKWY|HWY|HIGHWAY))\b/i);
+        if (addressMatch) {
+            return addressMatch[1].trim();
+        }
+        
+        // Try to extract any number followed by words pattern
+        const basicMatch = address.match(/(\d+\s+[A-Z\s]{3,})/i);
+        if (basicMatch) {
+            return basicMatch[1].trim();
+        }
+    }
+    
+    return cleaned;
+}
+
+// Geocode a single address
+async function geocodeSingleAddress(address, zipCode, county = 'Chatham County', state = 'GA') {
+    // Clean the address first
+    const cleanAddress = cleanAddressForGeocoding(address);
+    
+    if (cleanAddress.length <= 5) {
+        console.log(`⚠️  Address too short after cleaning: "${address}" -> "${cleanAddress}"`);
+        return { success: false, message: 'Address too short after cleaning' };
+    }
+    
+    const cacheKey = getCacheKey(cleanAddress, zipCode);
+    
+    // Check cache first
+    if (geocodeCache[cacheKey]) {
+        return {
+            success: true,
+            coordinates: geocodeCache[cacheKey].coordinates,
+            display_name: geocodeCache[cacheKey].display_name,
+            cached: true
+        };
+    }
+    
+    try {
+        const searchQuery = `${cleanAddress}, ${zipCode}, ${county}, ${state}, USA`;
+        const encodedQuery = encodeURIComponent(searchQuery);
+        const nominatimUrl = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodedQuery}`;
+        
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+        
+        const response = await fetch(nominatimUrl, {
+            headers: { 'User-Agent': 'TaxSaleListings/1.0' },
+            signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (response.ok) {
+            const geocodeResults = await response.json();
+            
+            if (geocodeResults && geocodeResults.length > 0) {
+                const result = geocodeResults[0];
+                const coordinates = {
+                    lat: parseFloat(result.lat),
+                    lng: parseFloat(result.lon)
+                };
+                
+                // Cache the result
+                geocodeCache[cacheKey] = {
+                    coordinates: coordinates,
+                    display_name: result.display_name,
+                    cached_at: new Date().toISOString()
+                };
+                
+                return {
+                    success: true,
+                    coordinates: coordinates,
+                    display_name: result.display_name,
+                    cached: false
+                };
+            }
+        }
+        
+        return { success: false, message: 'No coordinates found' };
+        
+    } catch (error) {
+        if (error.name === 'AbortError') {
+            return { success: false, message: 'Request timeout' };
+        }
+        return { success: false, message: error.message };
+    }
+}
+
+// Geocode all listings with rate limiting
+async function geocodeAllListings(listings, county = 'Chatham County', state = 'GA') {
+    console.log(`🗺️  Starting background geocoding for ${listings.length} properties...`);
+    
+    let geocoded = 0;
+    let cached = 0;
+    let failed = 0;
+    
+    for (let i = 0; i < listings.length; i++) {
+        const listing = listings[i];
+        
+        try {
+            const result = await geocodeSingleAddress(listing.address || '', listing.zipCode || '', county, state);
+            
+            if (result.success) {
+                listing.coordinates = result.coordinates;
+                listing.geocoded = true;
+                listing.geocodeSource = result.cached ? 'cache' : 'nominatim';
+                
+                if (result.cached) {
+                    cached++;
+                } else {
+                    geocoded++;
+                    // Rate limiting: wait between API calls
+                    await new Promise(resolve => setTimeout(resolve, 200));
+                }
+                
+                console.log(`✅ Geocoded ${i + 1}/${listings.length}: ${listing.address} -> ${result.coordinates.lat}, ${result.coordinates.lng}`);
+            } else {
+                listing.coordinates = null;
+                listing.geocoded = false;
+                listing.geocodeError = result.message;
+                failed++;
+                console.log(`❌ Failed ${i + 1}/${listings.length}: ${listing.address} - ${result.message}`);
+            }
+        } catch (error) {
+            listing.coordinates = null;
+            listing.geocoded = false;
+            listing.geocodeError = error.message;
+            failed++;
+            console.error(`❌ Error geocoding ${listing.address}:`, error.message);
+        }
+        
+        // Progress update every 10 items
+        if ((i + 1) % 10 === 0) {
+            console.log(`🗺️  Progress: ${i + 1}/${listings.length} processed (${geocoded + cached} successful, ${failed} failed)`);
+        }
+    }
+    
+    // Save cache if we added new entries
+    if (geocoded > 0) {
+        saveGeocodeCache();
+    }
+    
+    console.log(`🗺️  Geocoding complete: ${geocoded + cached}/${listings.length} successful (${cached} from cache, ${geocoded} new, ${failed} failed)`);
+    
+    return {
+        total: listings.length,
+        successful: geocoded + cached,
+        fromCache: cached,
+        newlyGeocoded: geocoded,
+        failed: failed
+    };
+}
+
 // Root route - serve the main application (must come before static middleware)
 app.get('/', (req, res) => {
     console.log('Root route accessed');
@@ -661,6 +921,10 @@ async function parseChathamPdf(pdfUrl, res, config) {
         }
     });
     
+    // Geocode all listings before returning them
+    console.log(`🗺️  Starting background geocoding for ${parsedListings.length} properties...`);
+    const geocodeStats = await geocodeAllListings(parsedListings, config.name, 'GA');
+    
     res.json({ 
         rawLines: lines,
         parsedListings: parsedListings,
@@ -669,6 +933,7 @@ async function parseChathamPdf(pdfUrl, res, config) {
         pdfUrl: pdfUrl, // Include the PDF URL so frontend can show the correct link
         photoListUrl: config.photoListUrl,
         county: config.name,
+        geocodeStats: geocodeStats, // Include geocoding statistics
         metadata: {
             processedAt: new Date().toISOString(),
             pdfSize: buffer.length,
@@ -680,6 +945,8 @@ async function parseChathamPdf(pdfUrl, res, config) {
             photoListSize: photoData ? photoData.text.length : 0,
             propertiesWithPhotos: parsedListings.filter(l => l.hasPhotos).length,
             totalPhotoReferences: Object.keys(photoMap).length,
+            geocodedProperties: geocodeStats.successful,
+            geocodingDetails: `${geocodeStats.successful}/${geocodeStats.total} properties geocoded (${geocodeStats.fromCache} from cache, ${geocodeStats.newlyGeocoded} new)`,
             taxSaleDate: "Tuesday, August 05, 2025",
             lastUpdated: "July 25, 2025",
             source: `Official ${config.name} Tax Commissioner - August 2025 Tax Sale List`,

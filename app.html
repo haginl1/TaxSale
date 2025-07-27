@@ -29,6 +29,37 @@
         .listing-table th { background: #f0e6fa; color: #764ba2; font-weight: bold; }
         .listing-table tr:nth-child(even) { background: #f8f8f8; }
         .listing-table tr:hover { background: #e8f4fd; }
+        
+        /* Sorting styles */
+        .table-container { position: relative; }
+        .table-controls { 
+            margin-bottom: 0.5rem; 
+            padding: 0.5rem; 
+            background: #f8f9fa; 
+            border-radius: 5px; 
+            border: 1px solid #e0e0e0;
+        }
+        .listing-table th[onclick] { 
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none; 
+            transition: background-color 0.2s;
+        }
+        .listing-table th[onclick]:hover { 
+            background: #e6d3f7; 
+        }
+        .sort-indicator { 
+            font-size: 0.8em; 
+            opacity: 0.3; 
+            margin-left: 0.3em;
+            display: inline-block;
+            transition: opacity 0.2s;
+        }
+        .sort-indicator.active { 
+            opacity: 1; 
+            color: #764ba2;
+        }
         .no-data { color: #b47ddb; margin-top: 2rem; text-align: center; }
         .pdf-link { margin-top: 1rem; display: inline-block; color: #667eea; text-decoration: underline; }
         .error { background: #ffe6e6; color: #d63031; padding: 1rem; border-radius: 8px; margin: 1rem 0; }
@@ -144,6 +175,51 @@
         /* Default: Show table, hide mobile cards */
         .mobile-cards {
             display: none;
+        }
+        
+        /* Mobile sort controls */
+        .mobile-sort-controls {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .mobile-sort-controls label {
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .mobile-sort-controls select {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+            font-size: 14px;
+        }
+        
+        .mobile-sort-controls button {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+            cursor: pointer;
+            font-size: 14px;
+            min-width: 40px;
+            transition: background-color 0.2s;
+        }
+        
+        .mobile-sort-controls button:hover {
+            background: #e9ecef;
+        }
+        
+        .mobile-sort-controls button:active {
+            background: #dee2e6;
         }
         
         .listing-table {
@@ -604,6 +680,17 @@
                         }
                     }
                     
+                    // Add geocoding info
+                    if (data.geocodeStats) {
+                        statsHTML += `🗺️ ${data.geocodeStats.successful}/${data.geocodeStats.total} properties geocoded<br>`;
+                        if (data.geocodeStats.successful > 0) {
+                            statsHTML += `<small style="color: #666;">📍 Properties pre-mapped on server and ready to view</small><br>`;
+                        }
+                        if (data.geocodeStats.fromCache > 0) {
+                            statsHTML += `<small style="color: #666;">⚡ ${data.geocodeStats.fromCache} loaded from cache, ${data.geocodeStats.newlyGeocoded} newly geocoded</small><br>`;
+                        }
+                    }
+                    
                     // Add Street View info
                     const propertiesWithAddresses = data.parsedListings.filter(listing => 
                         listing.address && listing.address.trim() !== '' && listing.zipCode
@@ -624,7 +711,7 @@
                 if (data.parsedListings && data.parsedListings.length > 0) {
                     renderListingsTable(data.parsedListings);
                     
-                    // Automatically show map and start geocoding
+                    // Automatically show map with pre-geocoded properties
                     setTimeout(() => {
                         // Automatically show the map
                         const mapContainer = document.getElementById('mapContainer');
@@ -634,11 +721,14 @@
                             // Show the map automatically
                             toggleMap();
                             
-                            // After map is shown, automatically start geocoding
+                            // After map is shown, plot the pre-geocoded properties
                             setTimeout(() => {
-                                console.log('Auto-starting property location finding...');
-                                geocodeProperties();
+                                console.log('Auto-plotting pre-geocoded properties...');
+                                plotProperties();
                             }, 1000); // Give map time to initialize
+                        } else if (map) {
+                            // Map is already visible, just plot properties
+                            plotProperties();
                         }
                     }, 500); // Give table time to render
                 } else {
@@ -664,25 +754,73 @@
         function renderListingsTable(listings) {
             const listingContainer = document.getElementById('listingContainer');
             
-            // Generate table HTML for desktop/tablet
+            // Store current listings for sorting
+            window.currentListings = listings;
+            
+            // Generate table HTML for desktop/tablet with sortable headers
             let tableHTML = `
-                <table class="listing-table">
-                    <thead>
-                        <tr>
-                            <th>Parcel ID</th>
-                            <th>Owner</th>
-                            <th>Address</th>
-                            <th>Zip Code</th>
-                            <th>Amount</th>
-                            <th>Street View</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+                <div class="table-container">
+                    <div class="table-controls">
+                        <span style="font-size: 0.9em; color: #666;">Click column headers to sort</span>
+                    </div>
+                    <table class="listing-table">
+                        <thead>
+                            <tr>
+                                <th onclick="sortTable('parcelId')" style="cursor: pointer;" title="Click to sort by Parcel ID">
+                                    Parcel ID <span id="sort-parcelId" class="sort-indicator">⬍</span>
+                                </th>
+                                <th onclick="sortTable('owner')" style="cursor: pointer;" title="Click to sort by Owner">
+                                    Owner <span id="sort-owner" class="sort-indicator">⬍</span>
+                                </th>
+                                <th onclick="sortTable('address')" style="cursor: pointer;" title="Click to sort by Address">
+                                    Address <span id="sort-address" class="sort-indicator">⬍</span>
+                                </th>
+                                <th onclick="sortTable('zipCode')" style="cursor: pointer;" title="Click to sort by Zip Code">
+                                    Zip Code <span id="sort-zipCode" class="sort-indicator">⬍</span>
+                                </th>
+                                <th onclick="sortTable('amount')" style="cursor: pointer;" title="Click to sort by Amount">
+                                    Amount <span id="sort-amount" class="sort-indicator">⬍</span>
+                                </th>
+                                <th>Street View</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
             `;
             
-            // Generate mobile cards HTML
-            let cardsHTML = '<div class="mobile-cards">';
+            // Generate table rows
+            tableHTML += generateTableRows(listings);
             
+            tableHTML += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            // Generate mobile cards HTML with sort controls
+            let cardsHTML = `
+                <div class="mobile-cards" id="mobileCards">
+                    <div class="mobile-sort-controls">
+                        <label for="mobileSortSelect">Sort by:</label>
+                        <select id="mobileSortSelect" onchange="handleMobileSort()">
+                            <option value="parcelId">Parcel ID</option>
+                            <option value="owner">Owner</option>
+                            <option value="address">Address</option>
+                            <option value="zipCode">Zip Code</option>
+                            <option value="amount">Amount</option>
+                        </select>
+                        <button id="mobileSortDirection" onclick="toggleMobileSortDirection()" title="Toggle sort direction">↑</button>
+                    </div>
+            `;
+            cardsHTML += generateMobileCards(listings);
+            cardsHTML += '</div>';
+            
+            // Combine table and cards - CSS will control which is displayed
+            listingContainer.innerHTML = tableHTML + cardsHTML;
+        }
+        
+        // Generate table rows
+        function generateTableRows(listings) {
+            let rowsHTML = '';
             listings.forEach((listing, index) => {
                 // Generate Street View link for table
                 let streetViewHTML = '';
@@ -696,7 +834,7 @@
                 }
                 
                 // Add row to table
-                tableHTML += `
+                rowsHTML += `
                     <tr>
                         <td><strong>${listing.parcelId}</strong></td>
                         <td>${listing.owner}</td>
@@ -706,8 +844,15 @@
                         <td>${streetViewHTML}</td>
                     </tr>
                 `;
-                
-                // Add card for mobile
+            });
+            return rowsHTML;
+        }
+        
+        // Generate mobile cards
+        function generateMobileCards(listings) {
+            let cardsHTML = '';
+            listings.forEach((listing, index) => {
+                // Generate Street View link for mobile
                 let mobileStreetViewHTML = '';
                 if (listing.address && listing.address.trim() !== '' && listing.zipCode) {
                     mobileStreetViewHTML = `<a href="#" onclick="openStreetViewModal('${listing.address.replace(/'/g, "\\'")}', '${listing.zipCode}', '${listing.parcelId}'); return false;" class="street-view-link">🌍 Street View</a>`;
@@ -741,12 +886,164 @@
                     </div>
                 `;
             });
+            return cardsHTML;
+        }
+        
+        // Sorting functionality
+        let sortColumn = null;
+        let sortDirection = 'asc';
+        
+        function sortTable(column) {
+            if (!window.currentListings) return;
             
-            tableHTML += '</tbody></table>';
-            cardsHTML += '</div>';
+            // Toggle direction if same column, otherwise default to ascending
+            if (sortColumn === column) {
+                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortColumn = column;
+                sortDirection = 'asc';
+            }
             
-            // Combine table and cards - CSS will control which is displayed
-            listingContainer.innerHTML = tableHTML + cardsHTML;
+            // Clear all sort indicators
+            document.querySelectorAll('.sort-indicator').forEach(indicator => {
+                indicator.textContent = '⬍';
+                indicator.style.opacity = '0.3';
+            });
+            
+            // Update current column indicator
+            const indicator = document.getElementById(`sort-${column}`);
+            if (indicator) {
+                indicator.textContent = sortDirection === 'asc' ? '▲' : '▼';
+                indicator.style.opacity = '1';
+            }
+            
+            // Sort the listings
+            const sortedListings = [...window.currentListings].sort((a, b) => {
+                let aVal = a[column] || '';
+                let bVal = b[column] || '';
+                
+                // Handle numeric sorting for amount
+                if (column === 'amount') {
+                    // Extract numeric value from amount string (remove $ and commas)
+                    aVal = parseFloat(aVal.replace(/[$,]/g, '')) || 0;
+                    bVal = parseFloat(bVal.replace(/[$,]/g, '')) || 0;
+                } else {
+                    // String comparison
+                    aVal = aVal.toString().toLowerCase();
+                    bVal = bVal.toString().toLowerCase();
+                }
+                
+                if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
+                if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
+                return 0;
+            });
+            
+            // Update table body
+            const tableBody = document.getElementById('tableBody');
+            if (tableBody) {
+                tableBody.innerHTML = generateTableRows(sortedListings);
+            }
+            
+            // Update mobile cards
+            const mobileCards = document.getElementById('mobileCards');
+            if (mobileCards) {
+                // Find and preserve the sort controls
+                const sortControls = mobileCards.querySelector('.mobile-sort-controls');
+                if (sortControls) {
+                    const sortControlsHTML = sortControls.outerHTML;
+                    mobileCards.innerHTML = sortControlsHTML + generateMobileCards(sortedListings);
+                } else {
+                    mobileCards.innerHTML = generateMobileCards(sortedListings);
+                }
+            }
+            
+            // Update mobile sort controls
+            updateMobileSortControls();
+            
+            // Update map if visible
+            if (map && !document.getElementById('mapContainer').classList.contains('hidden')) {
+                // Update currentData with sorted listings for map
+                if (currentData && currentData.parsedListings) {
+                    currentData.parsedListings = sortedListings;
+                    plotProperties();
+                }
+            }
+        }
+        
+        // Mobile sorting functions
+        function handleMobileSort() {
+            const select = document.getElementById('mobileSortSelect');
+            if (select) {
+                sortTable(select.value);
+                // Update mobile sort controls to reflect current state
+                updateMobileSortControls();
+            }
+        }
+        
+        function toggleMobileSortDirection() {
+            // Toggle the current sort direction
+            sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            
+            // Re-sort with the current column and new direction
+            if (sortColumn && window.currentListings) {
+                const sortedListings = [...window.currentListings].sort((a, b) => {
+                    let aVal = a[sortColumn];
+                    let bVal = b[sortColumn];
+                    
+                    // Handle numeric values for amount
+                    if (sortColumn === 'amount') {
+                        aVal = parseFloat(aVal.replace(/[$,]/g, '')) || 0;
+                        bVal = parseFloat(bVal.replace(/[$,]/g, '')) || 0;
+                    }
+                    
+                    // Handle string comparison
+                    if (typeof aVal === 'string') aVal = aVal.toLowerCase();
+                    if (typeof bVal === 'string') bVal = bVal.toLowerCase();
+                    
+                    if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
+                    if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
+                    return 0;
+                });
+                
+                // Update mobile cards
+                const mobileCards = document.getElementById('mobileCards');
+                if (mobileCards) {
+                    // Find and preserve the sort controls
+                    const sortControlsHTML = mobileCards.querySelector('.mobile-sort-controls').outerHTML;
+                    mobileCards.innerHTML = sortControlsHTML + generateMobileCards(sortedListings);
+                }
+                
+                // Update table if visible
+                const tableBody = document.getElementById('tableBody');
+                if (tableBody) {
+                    tableBody.innerHTML = generateTableRows(sortedListings);
+                }
+                
+                // Update map if visible
+                if (map && !document.getElementById('mapContainer').classList.contains('hidden')) {
+                    if (currentData && currentData.parsedListings) {
+                        currentData.parsedListings = sortedListings;
+                        plotProperties();
+                    }
+                }
+            }
+            
+            // Update button appearance
+            updateMobileSortControls();
+        }
+        
+        function updateMobileSortControls() {
+            const select = document.getElementById('mobileSortSelect');
+            const button = document.getElementById('mobileSortDirection');
+            
+            if (select && sortColumn) {
+                select.value = sortColumn;
+            }
+            
+            if (button) {
+                button.textContent = sortDirection === 'asc' ? '↑' : '↓';
+                button.title = sortDirection === 'asc' ? 'Ascending - click to sort descending' : 'Descending - click to sort ascending';
+            }
         }
         
         // Map functionality
@@ -1017,7 +1314,12 @@
                     // Generate Street View link for popup
                     let streetViewLink = '';
                     if (listing.address && listing.address.trim() !== '' && listing.zipCode) {
-                        streetViewLink = `<p><a href="#" onclick="openStreetViewModal('${listing.address.replace(/'/g, "\\'")}', '${listing.zipCode}', '${listing.parcelId}'); return false;" class="street-view-link" title="View ${listing.address} on Google Maps / Street View">🌍 View on Google Maps / Street View</a></p>`;
+                        const fullAddress = `${listing.address}, ${listing.zipCode}, GA, USA`;
+                        const encodedAddress = encodeURIComponent(fullAddress);
+                        streetViewLink = `
+                            <p><a href="#" onclick="openStreetViewModal('${listing.address.replace(/'/g, "\\'")}', '${listing.zipCode}', '${listing.parcelId}'); return false;" class="street-view-link" title="View ${listing.address} on Google Maps / Street View">🌍 View on Google Maps / Street View</a></p>
+                            <p><a href="https://www.google.com/maps/search/${encodedAddress}" target="_blank" class="street-view-link" title="Open ${listing.address} in new tab">🗺️ View larger map</a></p>
+                        `;
                     }
                     
                     const popupContent = `
@@ -1057,13 +1359,35 @@
             const fullAddress = `${address}, ${zipCode}, GA, USA`;
             const encodedAddress = encodeURIComponent(fullAddress);
             
-            // Use a Google Maps URL that works in iframe (this will show the location)
-            const mapUrl = `https://maps.google.com/maps?q=${encodedAddress}&output=embed&z=18`;
+            // Try Google Maps embed URL - this should work better
+            const mapUrl = `https://www.google.com/maps/embed/v1/place?key=&q=${encodedAddress}&zoom=18&maptype=satellite`;
             
-            streetViewFrame.src = mapUrl;
+            // Fallback: if embed doesn't work, use a more basic approach
+            const fallbackUrl = `https://maps.google.com/maps?q=${encodedAddress}&output=embed&z=18`;
+            
+            // Try the embed URL first, then fallback
+            streetViewFrame.src = fallbackUrl;
             
             // Show modal
             modal.classList.remove('hidden');
+            
+            // Add a backup button to open in new tab if iframe fails
+            setTimeout(() => {
+                const modalBody = streetViewFrame.parentElement;
+                if (!modalBody.querySelector('.backup-link')) {
+                    const backupLink = document.createElement('div');
+                    backupLink.className = 'backup-link';
+                    backupLink.style.cssText = 'text-align: center; margin-top: 10px; padding: 10px;';
+                    backupLink.innerHTML = `
+                        <p style="margin: 5px 0;">Having trouble viewing the map?</p>
+                        <a href="https://www.google.com/maps/search/${encodedAddress}" target="_blank" 
+                           style="display: inline-block; padding: 8px 16px; background: #4285f4; color: white; text-decoration: none; border-radius: 4px;">
+                           🗺️ Open in Google Maps
+                        </a>
+                    `;
+                    modalBody.appendChild(backupLink);
+                }
+            }, 1000);
             
             // Add escape key listener
             document.addEventListener('keydown', handleModalEscape);
@@ -1078,6 +1402,13 @@
             
             // Clear iframe to stop loading
             streetViewFrame.src = '';
+            
+            // Remove any backup links
+            const modalBody = streetViewFrame.parentElement;
+            const backupLink = modalBody.querySelector('.backup-link');
+            if (backupLink) {
+                backupLink.remove();
+            }
             
             // Remove escape key listener
             document.removeEventListener('keydown', handleModalEscape);
