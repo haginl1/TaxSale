@@ -64,6 +64,15 @@
         .pdf-link { margin-top: 1rem; display: inline-block; color: #667eea; text-decoration: underline; }
         .error { background: #ffe6e6; color: #d63031; padding: 1rem; border-radius: 8px; margin: 1rem 0; }
         .loading { color: #764ba2; text-align: center; margin: 2rem 0; }
+        .cache-indicator { 
+            background: #e8f5e8; 
+            color: #2d8f2d; 
+            padding: 0.8rem; 
+            border-radius: 8px; 
+            margin: 1rem 0; 
+            text-align: center;
+            border: 1px solid #4caf50;
+        }
         .maintenance { background: #fff3cd; color: #856404; padding: 1rem; border-radius: 8px; margin: 1rem 0; }
         .raw-button { background: #17a2b8; color: white; border: none; padding: 0.3rem 0.6rem; border-radius: 3px; cursor: pointer; font-size: 0.8rem; }
         .raw-button:hover { background: #138496; }
@@ -639,28 +648,75 @@
             listingContainer.innerHTML = '';
             
             try {
-                const response = await fetch(`${API_BASE}/api/tax-sale-listings/${county}`);
-                const data = await response.json();
+                // First try to load cached data from database
+                console.log('🗂️ Checking for cached data...');
+                let useCache = true;
+                let response, data;
                 
-                if (!response.ok) {
-                    if (response.status === 503) {
-                        // Service unavailable (maintenance)
-                        statusContainer.innerHTML = `
-                            <div class="maintenance">
-                                <strong>Service Temporarily Unavailable</strong><br>
-                                ${data.message || 'This county\'s tax sale system is currently under maintenance.'}
-                            </div>
-                        `;
-                        return;
+                try {
+                    response = await fetch(`${API_BASE}/api/cached-properties`);
+                    if (response.ok) {
+                        const cachedData = await response.json();
+                        if (cachedData.properties && cachedData.properties.length > 0) {
+                            console.log(`📊 Found ${cachedData.properties.length} cached properties`);
+                            
+                            // Convert cached data to expected format
+                            data = {
+                                parsedListings: cachedData.properties,
+                                totalListings: cachedData.totalProperties,
+                                geocodeStats: cachedData.geocodeStats,
+                                fromCache: true,
+                                county: county,
+                                metadata: {
+                                    processedAt: cachedData.cachedAt,
+                                    source: 'Database Cache',
+                                    cacheUsed: true
+                                }
+                            };
+                            
+                            // Show cache indicator
+                            statusContainer.innerHTML = '<div class="cache-indicator">📊 Loaded from database cache (instant)</div>';
+                        } else {
+                            useCache = false;
+                        }
                     } else {
-                        throw new Error(data.error || 'Failed to load listings');
+                        useCache = false;
+                    }
+                } catch (cacheError) {
+                    console.log('Cache not available, loading fresh data...');
+                    useCache = false;
+                }
+                
+                // If no cache available, load fresh data
+                if (!useCache) {
+                    console.log('🔄 Loading fresh data from PDF...');
+                    statusContainer.innerHTML = '<div class="loading">Processing PDF and geocoding properties...</div>';
+                    
+                    response = await fetch(`${API_BASE}/api/tax-sale-listings/${county}`);
+                    data = await response.json();
+                    
+                    if (!response.ok) {
+                        if (response.status === 503) {
+                            // Service unavailable (maintenance)
+                            statusContainer.innerHTML = `
+                                <div class="maintenance">
+                                    <strong>Service Temporarily Unavailable</strong><br>
+                                    ${data.message || 'This county\'s tax sale system is currently under maintenance.'}
+                                </div>
+                            `;
+                            return;
+                        } else {
+                            throw new Error(data.error || 'Failed to load listings');
+                        }
                     }
                 }
                 
                 currentData = data;
                 
-                // Clear loading state
-                statusContainer.innerHTML = '';
+                // Clear loading state (unless showing cache indicator)
+                if (!data.fromCache) {
+                    statusContainer.innerHTML = '';
+                }
                 
                 // Show statistics
                 let statsHTML = `
@@ -668,6 +724,13 @@
                         <strong>${data.county} Statistics:</strong><br>
                         📄 ${data.totalListings} properties found<br>
                 `;
+                
+                // Add cache/database info
+                if (data.fromCache) {
+                    statsHTML += `💾 Data source: Database cache (instant loading)<br>`;
+                } else if (data.metadata && data.metadata.databaseStored) {
+                    statsHTML += `💾 Data cached to database for future use<br>`;
+                }
                 
                 if (data.metadata) {
                     if (data.metadata.taxSaleDate) {

@@ -2,9 +2,13 @@ const express = require('express');
 const fetch = require('node-fetch');
 const pdfParse = require('pdf-parse');
 const path = require('path');
+const PropertyDatabase = require('./database');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+// Initialize database
+const db = new PropertyDatabase();
 
 // Disable ETag caching for development
 app.set('etag', false);
@@ -641,7 +645,7 @@ app.get('/api/tax-sale-listings/:county', async (req, res) => {
     }
 });
 
-// Chatham County PDF parser
+// Chatham County PDF parser with database caching
 async function parseChathamPdf(pdfUrl, res, config) {
     console.log(`Starting PDF parsing for ${config.name} from:`, pdfUrl);
     
@@ -655,18 +659,45 @@ async function parseChathamPdf(pdfUrl, res, config) {
         }
         
         console.log('PDF fetch successful, status:', response.status);
-        console.log('Content-Type:', response.headers.get('content-type'));
-        console.log('Content-Length:', response.headers.get('content-length'));
-        
         const buffer = await response.buffer();
         console.log('Buffer size:', buffer.length);
+
+        // Check if PDF has changed using database
+        const filename = `${config.name}_tax_sale_${new Date().toISOString().split('T')[0]}.pdf`;
+        const fileCheck = await db.hasFileChanged(filename, buffer);
         
+        console.log('File change check:', fileCheck);
+
+        if (!fileCheck.changed && !fileCheck.isNew) {
+            // File hasn't changed, return cached data from database
+            console.log('📊 PDF unchanged, returning cached data from database');
+            const cachedProperties = await db.getAllProperties();
+            const geocodeStats = await db.getGeocodingStats();
+            
+            return res.json({
+                parsedListings: cachedProperties,
+                totalListings: cachedProperties.length,
+                fromCache: true,
+                county: config.name,
+                geocodeStats: {
+                    successful: geocodeStats.geocoded,
+                    total: geocodeStats.total,
+                    fromCache: geocodeStats.geocoded,
+                    newlyGeocoded: 0
+                },
+                metadata: {
+                    processedAt: new Date().toISOString(),
+                    cacheUsed: true,
+                    lastGeocoded: geocodeStats.lastGeocoded,
+                    source: `Cached data from ${config.name} Tax Commissioner`
+                }
+            });
+        }
+
+        // File is new or changed, process it
+        console.log('📄 Processing new/changed PDF file...');
         const data = await pdfParse(buffer);
         console.log('PDF parsing successful, text length:', data.text.length);
-        console.log('PDF info:', data.info);
-        console.log('Number of pages:', data.numpages);
-        console.log('First 200 chars:', data.text.substring(0, 200));
-        console.log('Last 200 chars:', data.text.substring(data.text.length - 200));
 
     // Fetch photo list if available
     let photoData = null;
@@ -925,6 +956,12 @@ async function parseChathamPdf(pdfUrl, res, config) {
     console.log(`🗺️  Starting background geocoding for ${parsedListings.length} properties...`);
     const geocodeStats = await geocodeAllListings(parsedListings, config.name, 'GA');
     
+    // Store the PDF file and properties in database
+    console.log('💾 Storing properties in database...');
+    const pdfFileId = await db.storePdfFile(filename, fileCheck.currentHash);
+    await db.storeProperties(pdfFileId, parsedListings);
+    console.log(`✅ Stored ${parsedListings.length} properties in database`);
+    
     res.json({ 
         rawLines: lines,
         parsedListings: parsedListings,
@@ -934,6 +971,7 @@ async function parseChathamPdf(pdfUrl, res, config) {
         photoListUrl: config.photoListUrl,
         county: config.name,
         geocodeStats: geocodeStats, // Include geocoding statistics
+        fromCache: false,
         metadata: {
             processedAt: new Date().toISOString(),
             pdfSize: buffer.length,
@@ -950,7 +988,8 @@ async function parseChathamPdf(pdfUrl, res, config) {
             taxSaleDate: "Tuesday, August 05, 2025",
             lastUpdated: "July 25, 2025",
             source: `Official ${config.name} Tax Commissioner - August 2025 Tax Sale List`,
-            note: "✅ This is the current official tax sale list from tax.chathamcountyga.gov/TaxSaleList"
+            note: "✅ This is the current official tax sale list from tax.chathamcountyga.gov/TaxSaleList",
+            databaseStored: true
         }
     });
     } catch (error) {
@@ -974,6 +1013,67 @@ async function parseDekalbCsv(csvUrl, res, config) {
         }
     });
 }
+
+// Get cached properties from database
+app.get('/api/cached-properties', async (req, res) => {
+    try {
+        const properties = await db.getAllProperties();
+        const stats = await db.getGeocodingStats();
+        
+        res.json({
+            properties: properties,
+            totalProperties: properties.length,
+            geocodeStats: stats,
+            fromDatabase: true,
+            cachedAt: new Date().toISOString()
+        });
+    } catch (error) {
+        console.error('Error fetching cached properties:', error);
+        res.status(500).json({ error: 'Failed to fetch cached properties' });
+    }
+});
+
+// Get database statistics
+app.get('/api/database-stats', async (req, res) => {
+    try {
+        const stats = await db.getGeocodingStats();
+        
+        res.json({
+            database: 'SQLite',
+            stats: stats,
+            status: 'connected',
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        console.error('Error fetching database stats:', error);
+        res.status(500).json({ error: 'Failed to fetch database statistics' });
+    }
+});
+
+// Force refresh - clears database and re-processes PDF
+app.post('/api/force-refresh/:county', async (req, res) => {
+    try {
+        const county = req.params.county;
+        const config = COUNTY_CONFIGS[county];
+        
+        if (!config) {
+            return res.status(404).json({ error: 'County not found' });
+        }
+
+        console.log('🔄 Force refresh requested - will re-process PDF...');
+        
+        // Re-process the PDF (the parseChathamPdf function will handle database updates)
+        if (config.dataType === 'pdf') {
+            return await parseChathamPdf(config.dataUrl, res, config);
+        } else {
+            throw new Error(`Unsupported data type: ${config.dataType}`);
+        }
+        
+    } catch (error) {
+        console.error('Error in force refresh:', error);
+        res.status(500).json({ error: 'Failed to force refresh' });
+    }
+});
 
 // Error handling middleware
 app.use((err, req, res, next) => {
