@@ -73,6 +73,80 @@
             text-align: center;
             border: 1px solid #4caf50;
         }
+        
+        /* Progress Indicators */
+        .progress-container {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 0.5rem 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 10px;
+            transition: width 0.3s ease;
+            position: relative;
+        }
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                45deg,
+                rgba(255,255,255,0.2) 25%,
+                transparent 25%,
+                transparent 50%,
+                rgba(255,255,255,0.2) 50%,
+                rgba(255,255,255,0.2) 75%,
+                transparent 75%
+            );
+            background-size: 20px 20px;
+            animation: progress-stripes 1s linear infinite;
+        }
+        @keyframes progress-stripes {
+            0% { background-position: 0 0; }
+            100% { background-position: 20px 0; }
+        }
+        .progress-text {
+            text-align: center;
+            margin: 0.5rem 0;
+            color: #495057;
+            font-weight: 500;
+        }
+        .progress-details {
+            font-size: 0.9rem;
+            color: #6c757d;
+            text-align: center;
+            margin-top: 0.5rem;
+        }
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #764ba2;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 0.5rem;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
         .maintenance { background: #fff3cd; color: #856404; padding: 1rem; border-radius: 8px; margin: 1rem 0; }
         .raw-button { background: #17a2b8; color: white; border: none; padding: 0.3rem 0.6rem; border-radius: 3px; cursor: pointer; font-size: 0.8rem; }
         .raw-button:hover { background: #138496; }
@@ -642,14 +716,16 @@
             const statsContainer = document.getElementById('statsContainer');
             const listingContainer = document.getElementById('listingContainer');
             
-            // Show loading state
-            statusContainer.innerHTML = '<div class="loading">Loading tax sale listings...</div>';
+            // Show initial loading state
+            showProgressIndicator(statusContainer, 'Initializing...', 0);
             statsContainer.innerHTML = '';
             listingContainer.innerHTML = '';
             
             try {
                 // First try to load cached data from database
                 console.log('🗂️ Checking for cached data...');
+                showProgressIndicator(statusContainer, 'Checking database cache...', 10);
+                
                 let useCache = true;
                 let response, data;
                 
@@ -659,6 +735,7 @@
                         const cachedData = await response.json();
                         if (cachedData.properties && cachedData.properties.length > 0) {
                             console.log(`📊 Found ${cachedData.properties.length} cached properties`);
+                            showProgressIndicator(statusContainer, 'Loading from cache...', 100);
                             
                             // Convert cached data to expected format
                             data = {
@@ -674,8 +751,10 @@
                                 }
                             };
                             
-                            // Show cache indicator
-                            statusContainer.innerHTML = '<div class="cache-indicator">📊 Loaded from database cache (instant)</div>';
+                            // Show cache indicator after a brief delay
+                            setTimeout(function() {
+                                statusContainer.innerHTML = '<div class="cache-indicator">📊 Loaded from database cache (instant)</div>';
+                            }, 500);
                         } else {
                             useCache = false;
                         }
@@ -690,10 +769,16 @@
                 // If no cache available, load fresh data
                 if (!useCache) {
                     console.log('🔄 Loading fresh data from PDF...');
-                    statusContainer.innerHTML = '<div class="loading">Processing PDF and geocoding properties...</div>';
+                    showProgressIndicator(statusContainer, 'Downloading PDF file...', 20);
+                    
+                    // Start progress monitoring
+                    const progressMonitor = startProgressMonitoring(statusContainer);
                     
                     response = await fetch(`${API_BASE}/api/tax-sale-listings/${county}`);
                     data = await response.json();
+                    
+                    // Stop progress monitoring
+                    clearInterval(progressMonitor);
                     
                     if (!response.ok) {
                         if (response.status === 503) {
@@ -1490,6 +1575,50 @@
                 closeStreetViewModal();
             }
         });
+
+        // Progress indicator functions
+        function showProgressIndicator(container, message, percentage) {
+            const progressHTML = `
+                <div class="progress-container">
+                    <div class="progress-text">
+                        <span class="spinner"></span>${message}
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${percentage}%"></div>
+                    </div>
+                    <div class="progress-details">${percentage}% complete</div>
+                </div>
+            `;
+            container.innerHTML = progressHTML;
+        }
+
+        function startProgressMonitoring(container) {
+            let progress = 20;
+            const stages = [
+                { min: 20, max: 40, message: 'Parsing PDF document...' },
+                { min: 40, max: 60, message: 'Extracting property data...' },
+                { min: 60, max: 85, message: 'Geocoding addresses...' },
+                { min: 85, max: 95, message: 'Storing in database...' },
+                { min: 95, max: 99, message: 'Finalizing results...' }
+            ];
+            let currentStage = 0;
+
+            const interval = setInterval(function() {
+                if (currentStage < stages.length) {
+                    const stage = stages[currentStage];
+                    progress += Math.random() * 3; // Random increment
+                    
+                    if (progress >= stage.max) {
+                        progress = stage.max;
+                        currentStage++;
+                    }
+                    
+                    showProgressIndicator(container, stage.message, Math.min(progress, 99));
+                }
+            }, 800);
+
+            return interval;
+        }
         
         // Initialize page
         window.addEventListener('load', () => {

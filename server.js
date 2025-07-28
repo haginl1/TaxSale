@@ -247,6 +247,8 @@ async function geocodeAllListings(listings, county = 'Chatham County', state = '
             
             if (result.success) {
                 listing.coordinates = result.coordinates;
+                listing.latitude = result.coordinates.lat;
+                listing.longitude = result.coordinates.lng;
                 listing.geocoded = true;
                 listing.geocodeSource = result.cached ? 'cache' : 'nominatim';
                 
@@ -258,25 +260,33 @@ async function geocodeAllListings(listings, county = 'Chatham County', state = '
                     await new Promise(resolve => setTimeout(resolve, 200));
                 }
                 
-                console.log(`✅ Geocoded ${i + 1}/${listings.length}: ${listing.address} -> ${result.coordinates.lat}, ${result.coordinates.lng}`);
+                const progress = Math.round(((i + 1) / listings.length) * 100);
+                console.log(`✅ Geocoded ${i + 1}/${listings.length} (${progress}%): ${listing.address} -> ${result.coordinates.lat}, ${result.coordinates.lng}`);
             } else {
                 listing.coordinates = null;
+                listing.latitude = null;
+                listing.longitude = null;
                 listing.geocoded = false;
                 listing.geocodeError = result.message;
                 failed++;
-                console.log(`❌ Failed ${i + 1}/${listings.length}: ${listing.address} - ${result.message}`);
+                
+                const progress = Math.round(((i + 1) / listings.length) * 100);
+                console.log(`❌ Failed ${i + 1}/${listings.length} (${progress}%): ${listing.address} - ${result.message}`);
             }
         } catch (error) {
             listing.coordinates = null;
+            listing.latitude = null;
+            listing.longitude = null;
             listing.geocoded = false;
             listing.geocodeError = error.message;
             failed++;
             console.error(`❌ Error geocoding ${listing.address}:`, error.message);
         }
         
-        // Progress update every 10 items
-        if ((i + 1) % 10 === 0) {
-            console.log(`🗺️  Progress: ${i + 1}/${listings.length} processed (${geocoded + cached} successful, ${failed} failed)`);
+        // Progress update every 5 items or every 10%
+        const progressPercent = Math.round(((i + 1) / listings.length) * 100);
+        if ((i + 1) % 5 === 0 || progressPercent % 10 === 0) {
+            console.log(`🗺️  Geocoding Progress: ${i + 1}/${listings.length} (${progressPercent}%) - ${geocoded + cached} successful, ${failed} failed`);
         }
     }
     
