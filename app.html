@@ -717,14 +717,14 @@
             const listingContainer = document.getElementById('listingContainer');
             
             // Show initial loading state
-            showProgressIndicator(statusContainer, 'Initializing...', 0);
+            showProgressIndicator(statusContainer, 'Initializing...', 0.00);
             statsContainer.innerHTML = '';
             listingContainer.innerHTML = '';
             
             try {
                 // First try to load cached data from database
                 console.log('🗂️ Checking for cached data...');
-                showProgressIndicator(statusContainer, 'Checking database cache...', 10);
+                showProgressIndicator(statusContainer, 'Checking database cache...', 10.00);
                 
                 let useCache = true;
                 let response, data;
@@ -735,7 +735,7 @@
                         const cachedData = await response.json();
                         if (cachedData.properties && cachedData.properties.length > 0) {
                             console.log(`📊 Found ${cachedData.properties.length} cached properties`);
-                            showProgressIndicator(statusContainer, 'Loading from cache...', 100);
+                            showProgressIndicator(statusContainer, 'Loading from cache...', 100.00);
                             
                             // Convert cached data to expected format
                             data = {
@@ -769,7 +769,7 @@
                 // If no cache available, load fresh data
                 if (!useCache) {
                     console.log('🔄 Loading fresh data from PDF...');
-                    showProgressIndicator(statusContainer, 'Downloading PDF file...', 20);
+                    showProgressIndicator(statusContainer, 'Downloading PDF file...', 20.00);
                     
                     // Start progress monitoring
                     const progressMonitor = startProgressMonitoring(statusContainer);
@@ -1586,34 +1586,34 @@
                     <div class="progress-bar">
                         <div class="progress-fill" style="width: ${percentage}%"></div>
                     </div>
-                    <div class="progress-details">${percentage}% complete</div>
+                    <div class="progress-details">${percentage.toFixed(2)}% complete</div>
                 </div>
             `;
             container.innerHTML = progressHTML;
         }
 
         function startProgressMonitoring(container) {
-            let progress = 20;
+            let progress = 20.00;
             const stages = [
-                { min: 20, max: 40, message: 'Parsing PDF document...' },
-                { min: 40, max: 60, message: 'Extracting property data...' },
-                { min: 60, max: 85, message: 'Geocoding addresses...' },
-                { min: 85, max: 95, message: 'Storing in database...' },
-                { min: 95, max: 99, message: 'Finalizing results...' }
+                { min: 20.00, max: 40.00, message: 'Parsing PDF document...' },
+                { min: 40.00, max: 60.00, message: 'Extracting property data...' },
+                { min: 60.00, max: 85.00, message: 'Geocoding addresses...' },
+                { min: 85.00, max: 95.00, message: 'Storing in database...' },
+                { min: 95.00, max: 99.00, message: 'Finalizing results...' }
             ];
             let currentStage = 0;
 
             const interval = setInterval(function() {
                 if (currentStage < stages.length) {
                     const stage = stages[currentStage];
-                    progress += Math.random() * 3; // Random increment
+                    progress += Math.random() * 2.5; // More precise random increment
                     
                     if (progress >= stage.max) {
                         progress = stage.max;
                         currentStage++;
                     }
                     
-                    showProgressIndicator(container, stage.message, Math.min(progress, 99));
+                    showProgressIndicator(container, stage.message, Math.min(progress, 99.00));
                 }
             }, 800);
 
