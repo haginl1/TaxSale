@@ -1,11 +1,2180 @@
 {
+  "7205_w_sugar_tree_ct_": {
+    "place_id": 377048938,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 9085818,
+    "lat": "32.0272462",
+    "lon": "-80.9697315",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "7205, West Sugar Tree Court, River Oaks, Golden Isles, Talahi Island, Chatham County, Georgia, 31410, United States",
+    "address": {
+      "house_number": "7205",
+      "road": "West Sugar Tree Court",
+      "neighbourhood": "River Oaks",
+      "hamlet": "Golden Isles",
+      "village": "Talahi Island",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31410",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "32.0271962",
+      "32.0272962",
+      "-80.9697815",
+      "-80.9696815"
+    ]
+  },
+  "102_redan_dr_": {
+    "place_id": 377057811,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 9090769,
+    "lat": "32.0390637",
+    "lon": "-81.0007367",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "102, Redan Drive, Whitemarsh Island, Chatham County, Georgia, 31410, United States",
+    "address": {
+      "house_number": "102",
+      "road": "Redan Drive",
+      "village": "Whitemarsh Island",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31410",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "32.0390137",
+      "32.0391137",
+      "-81.0007867",
+      "-81.0006867"
+    ]
+  },
+  "121_bobstay_ct_": {
+    "place_id": 377057809,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 9090038,
+    "lat": "32.0358759",
+    "lon": "-80.9996570",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "121, Bobstay Court, Whitemarsh Island, Chatham County, Georgia, 31410, United States",
+    "address": {
+      "house_number": "121",
+      "road": "Bobstay Court",
+      "village": "Whitemarsh Island",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31410",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "32.0358259",
+      "32.0359259",
+      "-80.9997070",
+      "-80.9996070"
+    ]
+  },
+  "147_s_robin_hood_dr_": {
+    "place_id": 316500701,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 9334409,
+    "lat": "32.6045527",
+    "lon": "-83.6457099",
+    "class": "highway",
+    "type": "residential",
+    "place_rank": 26,
+    "importance": 0.05339254367895015,
+    "addresstype": "road",
+    "name": "Robin Hood Drive",
+    "display_name": "Robin Hood Drive, Shirley Hills Estates, Warner Robins, Houston County, Georgia, 31088, United States",
+    "address": {
+      "road": "Robin Hood Drive",
+      "neighbourhood": "Shirley Hills Estates",
+      "city": "Warner Robins",
+      "county": "Houston County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31088",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "32.6024150",
+      "32.6067830",
+      "-83.6459670",
+      "-83.6452380"
+    ]
+  },
+  "30_rivers_bend_dr_": {
+    "place_id": 377044873,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 9092948,
+    "lat": "31.9543179",
+    "lon": "-81.1107575",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "30, Rivers Bend Drive, Burnside, Montgomery, Chatham County, Georgia, 31406, United States",
+    "address": {
+      "house_number": "30",
+      "road": "Rivers Bend Drive",
+      "hamlet": "Burnside",
+      "village": "Montgomery",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31406",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "31.9542679",
+      "31.9543679",
+      "-81.1108075",
+      "-81.1107075"
+    ]
+  },
+  "116_chalice_way_": {
+    "place_id": 377060099,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 202397779,
+    "lat": "31.9802871",
+    "lon": "-81.2275752",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "116, Chalice Way, Georgetown, Chatham County, Georgia, 31419, United States",
+    "address": {
+      "house_number": "116",
+      "road": "Chalice Way",
+      "town": "Georgetown",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31419",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "31.9802371",
+      "31.9803371",
+      "-81.2276252",
+      "-81.2275252"
+    ]
+  },
+  "13_wild_heron_villas_rd_": {
+    "place_id": 377048412,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 202397780,
+    "lat": "31.9705058",
+    "lon": "-81.2330798",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "13, Wild Heron Villas Road, Georgetown, Chatham County, Georgia, 31419, United States",
+    "address": {
+      "house_number": "13",
+      "road": "Wild Heron Villas Road",
+      "town": "Georgetown",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31419",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "31.9704558",
+      "31.9705558",
+      "-81.2331298",
+      "-81.2330298"
+    ]
+  },
+  "argyle_rd_": {
+    "place_id": 318208419,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 540576076,
+    "lat": "32.0743540",
+    "lon": "-81.3640509",
+    "class": "highway",
+    "type": "secondary",
+    "place_rank": 26,
+    "importance": 0.05340147631036847,
+    "addresstype": "road",
+    "name": "Fort Argyle Road",
+    "display_name": "Fort Argyle Road, Chatham County, Georgia, United States",
+    "address": {
+      "road": "Fort Argyle Road",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "32.0677474",
+      "32.0802460",
+      "-81.3709654",
+      "-81.3579877"
+    ]
+  },
+  "240_price_st_": {
+    "place_id": 377058409,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 775839112,
+    "lat": "32.0739432",
+    "lon": "-81.0879202",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "240, Price Street, Savannah Historic District, Savannah, Chatham County, Georgia, 31401, United States",
+    "address": {
+      "house_number": "240",
+      "road": "Price Street",
+      "suburb": "Savannah Historic District",
+      "city": "Savannah",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31401",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "32.0738932",
+      "32.0739932",
+      "-81.0879702",
+      "-81.0878702"
+    ]
+  },
+  "1203_new_castle_st_": {
+    "place_id": 377054795,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 9078982,
+    "lat": "32.0820704",
+    "lon": "-81.1180401",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "1203, New Castle Street, Savannah, Chatham County, Georgia, 31415, United States",
+    "address": {
+      "house_number": "1203",
+      "road": "New Castle Street",
+      "city": "Savannah",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31415",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "32.0820204",
+      "32.0821204",
+      "-81.1180901",
+      "-81.1179901"
+    ]
+  },
+  "1943_greenwood_st_": {
+    "place_id": 377064453,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 9083097,
+    "lat": "32.0658754",
+    "lon": "-81.0598751",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "1943, Greenwood Street, Pine Gardens, Savannah, Chatham County, Georgia, 31404, United States",
+    "address": {
+      "house_number": "1943",
+      "road": "Greenwood Street",
+      "neighbourhood": "Pine Gardens",
+      "city": "Savannah",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31404",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "32.0658254",
+      "32.0659254",
+      "-81.0599251",
+      "-81.0598251"
+    ]
+  },
+  "805_e_henry_st_": {
+    "place_id": 377055417,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 9081841,
+    "lat": "32.0597501",
+    "lon": "-81.0852221",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "805, East Henry Street, Gordonston, Savannah, Chatham County, Georgia, 31401, United States",
+    "address": {
+      "house_number": "805",
+      "road": "East Henry Street",
+      "neighbourhood": "Gordonston",
+      "city": "Savannah",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31401",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "32.0597001",
+      "32.0598001",
+      "-81.0852721",
+      "-81.0851721"
+    ]
+  },
+  "1220_e_32nd_st_": {
+    "place_id": 377061380,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 9081530,
+    "lat": "32.0560337",
+    "lon": "-81.0800501",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "1220, East 32nd Street, Gordonston, Savannah, Chatham County, Georgia, 31404, United States",
+    "address": {
+      "house_number": "1220",
+      "road": "East 32nd Street",
+      "neighbourhood": "Gordonston",
+      "city": "Savannah",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31404",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "32.0559837",
+      "32.0560837",
+      "-81.0801001",
+      "-81.0800001"
+    ]
+  },
+  "1012_e_33rd_st_": {
+    "place_id": 377052583,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 768692663,
+    "lat": "32.0562010",
+    "lon": "-81.0834629",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "1012, East 33rd Street, Savannah, Chatham County, Georgia, 31401, United States",
+    "address": {
+      "house_number": "1012",
+      "road": "East 33rd Street",
+      "city": "Savannah",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31401",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "32.0561510",
+      "32.0562510",
+      "-81.0835129",
+      "-81.0834129"
+    ]
+  },
+  "13_blk_": {
+    "place_id": 377355670,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 9328695,
+    "lat": "33.6243474",
+    "lon": "-84.2614767",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "13, Anvil Block Court, Henry County, Georgia, 30294, United States",
+    "address": {
+      "house_number": "13",
+      "road": "Anvil Block Court",
+      "county": "Henry County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "30294",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "33.6242974",
+      "33.6243974",
+      "-84.2615267",
+      "-84.2614267"
+    ]
+  },
+  "2127_e_gwinnett_st_": {
+    "place_id": 377064418,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 87906485,
+    "lat": "32.0569894",
+    "lon": "-81.0587864",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "2127, East Gwinnett Street, Avon Park, Savannah, Chatham County, Georgia, 31404, United States",
+    "address": {
+      "house_number": "2127",
+      "road": "East Gwinnett Street",
+      "neighbourhood": "Avon Park",
+      "city": "Savannah",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31404",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "32.0569394",
+      "32.0570394",
+      "-81.0588364",
+      "-81.0587364"
+    ]
+  },
+  "2115_e_gwinnett_st_": {
+    "place_id": 377064418,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 87906485,
+    "lat": "32.0570381",
+    "lon": "-81.0589634",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "2115, East Gwinnett Street, Avon Park, Savannah, Chatham County, Georgia, 31404, United States",
+    "address": {
+      "house_number": "2115",
+      "road": "East Gwinnett Street",
+      "neighbourhood": "Avon Park",
+      "city": "Savannah",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31404",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "32.0569881",
+      "32.0570881",
+      "-81.0590134",
+      "-81.0589134"
+    ]
+  },
+  "17_rustic_ln_": {
+    "place_id": 377047963,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 491240431,
+    "lat": "31.9713799",
+    "lon": "-81.1018530",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "17, Rustic Lane, Kings Wood, Chatham County, Georgia, 31406, United States",
+    "address": {
+      "house_number": "17",
+      "road": "Rustic Lane",
+      "hamlet": "Kings Wood",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31406",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "31.9713299",
+      "31.9714299",
+      "-81.1019030",
+      "-81.1018030"
+    ]
+  },
+  "108_blaine_ct_": {
+    "place_id": 358372121,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 709677896,
+    "lat": "31.0103380",
+    "lon": "-83.8575730",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "108, Blaine Court, Coolidge, Thomas County, Georgia, 31738, United States",
+    "address": {
+      "house_number": "108",
+      "road": "Blaine Court",
+      "village": "Coolidge",
+      "county": "Thomas County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31738",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "31.0102880",
+      "31.0103880",
+      "-83.8576230",
+      "-83.8575230"
+    ]
+  },
+  "112_st_ives_dr_": {
+    "place_id": 377059895,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 9090425,
+    "lat": "31.9756986",
+    "lon": "-81.2235160",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "112, Saint Ives Drive, Georgetown, Chatham County, Georgia, 31419, United States",
+    "address": {
+      "house_number": "112",
+      "road": "Saint Ives Drive",
+      "town": "Georgetown",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31419",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "31.9756486",
+      "31.9757486",
+      "-81.2235660",
+      "-81.2234660"
+    ]
+  },
+  "315_east_congress_st_": {
+    "place_id": 377052326,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 632986427,
+    "lat": "32.0785426",
+    "lon": "-81.0878976",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "315, East Congress Street, Savannah Historic District, Savannah, Chatham County, Georgia, 31401, United States",
+    "address": {
+      "house_number": "315",
+      "road": "East Congress Street",
+      "suburb": "Savannah Historic District",
+      "city": "Savannah",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31401",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "32.0784926",
+      "32.0785926",
+      "-81.0879476",
+      "-81.0878476"
+    ]
+  },
+  "524_e_park_ave_": {
+    "place_id": 379527028,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 1170448420,
+    "lat": "30.8569091",
+    "lon": "-83.2805268",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "524, East Park Avenue, Valdosta, Lowndes County, Georgia, 31602, United States",
+    "address": {
+      "house_number": "524",
+      "road": "East Park Avenue",
+      "city": "Valdosta",
+      "county": "Lowndes County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31602",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "30.8568591",
+      "30.8569591",
+      "-83.2805768",
+      "-83.2804768"
+    ]
+  },
+  "2148_alaska_st_": {
+    "place_id": 377055576,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 9093379,
+    "lat": "32.0555800",
+    "lon": "-81.0592930",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "2148, Alaska Street, Avon Park, Savannah, Chatham County, Georgia, 31404, United States",
+    "address": {
+      "house_number": "2148",
+      "road": "Alaska Street",
+      "neighbourhood": "Avon Park",
+      "city": "Savannah",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31404",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "32.0555300",
+      "32.0556300",
+      "-81.0593430",
+      "-81.0592430"
+    ]
+  },
+  "8_all_": {
+    "place_id": 317031745,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 185511425,
+    "lat": "33.9478736",
+    "lon": "-83.4341131",
+    "class": "highway",
+    "type": "residential",
+    "place_rank": 26,
+    "importance": 0.053399195086594915,
+    "addresstype": "road",
+    "name": "Alley",
+    "display_name": "Alley, Athens, Clarke County, Georgia, 30606, United States",
+    "address": {
+      "road": "Alley",
+      "city": "Athens",
+      "county": "Clarke County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "30606",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "33.9474007",
+      "33.9482812",
+      "-83.4341649",
+      "-83.4338477"
+    ]
+  },
+  "1229_e_39th_st_": {
+    "place_id": 377046836,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 9086297,
+    "lat": "32.0503383",
+    "lon": "-81.0819371",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "1229, East 39th Street, Ardsley Park-Chatham Crescent Historic District, Savannah, Chatham County, Georgia, 31404, United States",
+    "address": {
+      "house_number": "1229",
+      "road": "East 39th Street",
+      "neighbourhood": "Ardsley Park-Chatham Crescent Historic District",
+      "city": "Savannah",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31404",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "32.0502883",
+      "32.0503883",
+      "-81.0819871",
+      "-81.0818871"
+    ]
+  },
+  "1126_seiler_ave_": {
+    "place_id": 377058387,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 9091561,
+    "lat": "32.0520873",
+    "lon": "-81.0833312",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "1126, Seiler Avenue, Ardsley Park-Chatham Crescent Historic District, Savannah, Chatham County, Georgia, 31404, United States",
+    "address": {
+      "house_number": "1126",
+      "road": "Seiler Avenue",
+      "neighbourhood": "Ardsley Park-Chatham Crescent Historic District",
+      "city": "Savannah",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31404",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "32.0520373",
+      "32.0521373",
+      "-81.0833812",
+      "-81.0832812"
+    ]
+  },
+  "1109_e_38th_st_": {
+    "place_id": 377061364,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 9086077,
+    "lat": "32.0514351",
+    "lon": "-81.0838748",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "1109, East 38th Street, Ardsley Park-Chatham Crescent Historic District, Savannah, Chatham County, Georgia, 31404, United States",
+    "address": {
+      "house_number": "1109",
+      "road": "East 38th Street",
+      "neighbourhood": "Ardsley Park-Chatham Crescent Historic District",
+      "city": "Savannah",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31404",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "32.0513851",
+      "32.0514851",
+      "-81.0839248",
+      "-81.0838248"
+    ]
+  },
+  "534_seiler_ave_": {
+    "place_id": 377049587,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 9091561,
+    "lat": "32.0551430",
+    "lon": "-81.0941670",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "534, Seiler Avenue, Ardsley Park-Chatham Crescent Historic District, Savannah, Chatham County, Georgia, 31401, United States",
+    "address": {
+      "house_number": "534",
+      "road": "Seiler Avenue",
+      "neighbourhood": "Ardsley Park-Chatham Crescent Historic District",
+      "city": "Savannah",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31401",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "32.0550930",
+      "32.0551930",
+      "-81.0942170",
+      "-81.0941170"
+    ]
+  },
+  "84_ft_of_the_west_": {
+    "place_id": 365600805,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 500582867,
+    "lat": "42.3308620",
+    "lon": "-83.0472840",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "84, West Fort Street, West Side Industrial Park, Detroit, Wayne County, Michigan, 48209, United States",
+    "address": {
+      "house_number": "84",
+      "road": "West Fort Street",
+      "neighbourhood": "West Side Industrial Park",
+      "city": "Detroit",
+      "county": "Wayne County",
+      "state": "Michigan",
+      "ISO3166-2-lvl4": "US-MI",
+      "postcode": "48209",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "42.3308120",
+      "42.3309120",
+      "-83.0473340",
+      "-83.0472340"
+    ]
+  },
+  "306_e_39th_st_": {
+    "place_id": 377058460,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 9086297,
+    "lat": "32.0545858",
+    "lon": "-81.0970704",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "306, East 39th Street, Ardsley Park-Chatham Crescent Historic District, Savannah, Chatham County, Georgia, 31401, United States",
+    "address": {
+      "house_number": "306",
+      "road": "East 39th Street",
+      "neighbourhood": "Ardsley Park-Chatham Crescent Historic District",
+      "city": "Savannah",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31401",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "32.0545358",
+      "32.0546358",
+      "-81.0971204",
+      "-81.0970204"
+    ]
+  },
+  "1610_ogeechee_rd_": {
+    "place_id": 377047670,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 9083744,
+    "lat": "32.0631340",
+    "lon": "-81.1073640",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "1610, Ogeechee Road, Savannah, Chatham County, Georgia, 31415, United States",
+    "address": {
+      "house_number": "1610",
+      "road": "Ogeechee Road",
+      "city": "Savannah",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31415",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "32.0630840",
+      "32.0631840",
+      "-81.1074140",
+      "-81.1073140"
+    ]
+  },
+  "306_w_33rd_st_": {
+    "place_id": 377056230,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 1281811092,
+    "lat": "32.0614397",
+    "lon": "-81.1023840",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "306, West 33rd Street, Savannah, Chatham County, Georgia, 31401, United States",
+    "address": {
+      "house_number": "306",
+      "road": "West 33rd Street",
+      "city": "Savannah",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31401",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "32.0613897",
+      "32.0614897",
+      "-81.1024340",
+      "-81.1023340"
+    ]
+  },
+  "1417_audubon_dr_": {
+    "place_id": 377068062,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 9090419,
+    "lat": "32.0655586",
+    "lon": "-81.1205303",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "1417, Audubon Drive, Carver Village, Savannah, Chatham County, Georgia, 31415, United States",
+    "address": {
+      "house_number": "1417",
+      "road": "Audubon Drive",
+      "neighbourhood": "Carver Village",
+      "city": "Savannah",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31415",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "32.0655086",
+      "32.0656086",
+      "-81.1205803",
+      "-81.1204803"
+    ]
+  },
+  "1515_eleanor_st_": {
+    "place_id": 377062149,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 9090505,
+    "lat": "32.0683085",
+    "lon": "-81.1253670",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "1515, Eleanor Street, Carver Village, Savannah, Chatham County, Georgia, 31415, United States",
+    "address": {
+      "house_number": "1515",
+      "road": "Eleanor Street",
+      "neighbourhood": "Carver Village",
+      "city": "Savannah",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31415",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "32.0682585",
+      "32.0683585",
+      "-81.1254170",
+      "-81.1253170"
+    ]
+  },
+  "42_and_east_": {
+    "place_id": 299976604,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 106479460,
+    "lat": "38.0580755",
+    "lon": "-122.1487041",
+    "class": "amenity",
+    "type": "parking",
+    "place_rank": 30,
+    "importance": 0.00005567635614552556,
+    "addresstype": "amenity",
+    "name": "East Second St Park And Ride",
+    "display_name": "East Second St Park And Ride, East S Street, Benicia, Solano County, California, 94510, United States",
+    "address": {
+      "amenity": "East Second St Park And Ride",
+      "road": "East S Street",
+      "town": "Benicia",
+      "county": "Solano County",
+      "state": "California",
+      "ISO3166-2-lvl4": "US-CA",
+      "postcode": "94510",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "38.0579420",
+      "38.0582570",
+      "-122.1489016",
+      "-122.1485535"
+    ]
+  },
+  "1110_e_41st_st_": {
+    "place_id": 377064618,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 9087352,
+    "lat": "32.0497233",
+    "lon": "-81.0844499",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "1110, East 41st Street, Ardsley Park-Chatham Crescent Historic District, Savannah, Chatham County, Georgia, 31404, United States",
+    "address": {
+      "house_number": "1110",
+      "road": "East 41st Street",
+      "neighbourhood": "Ardsley Park-Chatham Crescent Historic District",
+      "city": "Savannah",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31404",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "32.0496733",
+      "32.0497733",
+      "-81.0844999",
+      "-81.0843999"
+    ]
+  },
+  "1225_e_40th_st_": {
+    "place_id": 377047068,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 9091770,
+    "lat": "32.0498088",
+    "lon": "-81.0821933",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "1225, East 40th Street, Ardsley Park-Chatham Crescent Historic District, Savannah, Chatham County, Georgia, 31404, United States",
+    "address": {
+      "house_number": "1225",
+      "road": "East 40th Street",
+      "neighbourhood": "Ardsley Park-Chatham Crescent Historic District",
+      "city": "Savannah",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31404",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "32.0497588",
+      "32.0498588",
+      "-81.0822433",
+      "-81.0821433"
+    ]
+  },
+  "1231_e_40th_st_": {
+    "place_id": 377047068,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 9091770,
+    "lat": "32.0497838",
+    "lon": "-81.0820964",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "1231, East 40th Street, Ardsley Park-Chatham Crescent Historic District, Savannah, Chatham County, Georgia, 31404, United States",
+    "address": {
+      "house_number": "1231",
+      "road": "East 40th Street",
+      "neighbourhood": "Ardsley Park-Chatham Crescent Historic District",
+      "city": "Savannah",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31404",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "32.0497338",
+      "32.0498338",
+      "-81.0821464",
+      "-81.0820464"
+    ]
+  },
+  "1217_e_56th_st_": {
+    "place_id": 377067532,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 310556657,
+    "lat": "32.0378679",
+    "lon": "-81.0877829",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "1217, East 56th Street, Edgemere, Savannah, Chatham County, Georgia, 31404, United States",
+    "address": {
+      "house_number": "1217",
+      "road": "East 56th Street",
+      "neighbourhood": "Edgemere",
+      "city": "Savannah",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31404",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "32.0378179",
+      "32.0379179",
+      "-81.0878329",
+      "-81.0877329"
+    ]
+  },
+  "1609_e_51st_st_": {
+    "place_id": 377049951,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 9091886,
+    "lat": "32.0395594",
+    "lon": "-81.0787150",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "1609, East 51st Street, Edgemere, Savannah, Chatham County, Georgia, 31404, United States",
+    "address": {
+      "house_number": "1609",
+      "road": "East 51st Street",
+      "neighbourhood": "Edgemere",
+      "city": "Savannah",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31404",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "32.0395094",
+      "32.0396094",
+      "-81.0787650",
+      "-81.0786650"
+    ]
+  },
+  "3702_eastgate_dr_": {
+    "place_id": 377058720,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 9083559,
+    "lat": "32.0355706",
+    "lon": "-81.0730287",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "3702, Eastgate Drive, Oakland Park, Savannah, Chatham County, Georgia, 31404, United States",
+    "address": {
+      "house_number": "3702",
+      "road": "Eastgate Drive",
+      "neighbourhood": "Oakland Park",
+      "city": "Savannah",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31404",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "32.0355206",
+      "32.0356206",
+      "-81.0730787",
+      "-81.0729787"
+    ]
+  },
+  "2332_bayberry_dr_": {
+    "place_id": 377067703,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 9092103,
+    "lat": "32.0299509",
+    "lon": "-81.0702190",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "2332, Bayberry Drive, Fleetwood, Savannah, Chatham County, Georgia, 31404, United States",
+    "address": {
+      "house_number": "2332",
+      "road": "Bayberry Drive",
+      "neighbourhood": "Fleetwood",
+      "city": "Savannah",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31404",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "32.0299009",
+      "32.0300009",
+      "-81.0702690",
+      "-81.0701690"
+    ]
+  },
+  "7_and_west_": {
+    "place_id": 404343369,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 431500354,
+    "lat": "39.4559765",
+    "lon": "-77.7522451",
+    "class": "building",
+    "type": "yes",
+    "place_rank": 30,
+    "importance": 0.000044389257648539214,
+    "addresstype": "building",
+    "name": "House corner of Alley 7 and West Antietam Street",
+    "display_name": "House corner of Alley 7 and West Antietam Street, Alley 7, Sharpsburg, Washington County, Maryland, United States",
+    "address": {
+      "building": "House corner of Alley 7 and West Antietam Street",
+      "road": "Alley 7",
+      "village": "Sharpsburg",
+      "county": "Washington County",
+      "state": "Maryland",
+      "ISO3166-2-lvl4": "US-MD",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "39.4559114",
+      "39.4560888",
+      "-77.7523868",
+      "-77.7521579"
+    ]
+  },
+  "108_linden_dr_": {
+    "place_id": 372537636,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 9526936,
+    "lat": "31.2302643",
+    "lon": "-82.3348798",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "108, Linden Drive, Waycross, Ware County, Georgia, 31501, United States",
+    "address": {
+      "house_number": "108",
+      "road": "Linden Drive",
+      "town": "Waycross",
+      "county": "Ware County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31501",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "31.2302143",
+      "31.2303143",
+      "-82.3349298",
+      "-82.3348298"
+    ]
+  },
+  "16_hampstead_ave_": {
+    "place_id": 377059292,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 539514719,
+    "lat": "32.0257900",
+    "lon": "-81.1122867",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "16, Hampstead Avenue, Groveland, Savannah, Chatham County, Georgia, 31405, United States",
+    "address": {
+      "house_number": "16",
+      "road": "Hampstead Avenue",
+      "neighbourhood": "Groveland",
+      "city": "Savannah",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31405",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "32.0257400",
+      "32.0258400",
+      "-81.1123367",
+      "-81.1122367"
+    ]
+  },
+  "1927_colonial_dr_": {
+    "place_id": 377049989,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 330284885,
+    "lat": "32.0162139",
+    "lon": "-81.0812956",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "1927, Colonial Drive, Barian Terrace, DeRenne Terrace, Savannah, Chatham County, Georgia, 31406, United States",
+    "address": {
+      "house_number": "1927",
+      "road": "Colonial Drive",
+      "neighbourhood": "Barian Terrace",
+      "hamlet": "DeRenne Terrace",
+      "city": "Savannah",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31406",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "32.0161639",
+      "32.0162639",
+      "-81.0813456",
+      "-81.0812456"
+    ]
+  },
+  "700_reserve_cir_": {
+    "place_id": 315121078,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 9183556,
+    "lat": "33.8306270",
+    "lon": "-84.2754409",
+    "class": "highway",
+    "type": "residential",
+    "place_rank": 26,
+    "importance": 0.053377164110780466,
+    "addresstype": "road",
+    "name": "Reserve Circle",
+    "display_name": "Reserve Circle, DeKalb County, Georgia, 30033, United States",
+    "address": {
+      "road": "Reserve Circle",
+      "county": "DeKalb County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "30033",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "33.8302380",
+      "33.8311510",
+      "-84.2756890",
+      "-84.2750950"
+    ]
+  },
+  "404_cranman_dr_": {
+    "place_id": 377062355,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 9086278,
+    "lat": "31.9971150",
+    "lon": "-81.1109880",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "404, Cranman Drive, Grove Park, Savannah, Chatham County, Georgia, 31406, United States",
+    "address": {
+      "house_number": "404",
+      "road": "Cranman Drive",
+      "hamlet": "Grove Park",
+      "city": "Savannah",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31406",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "31.9970650",
+      "31.9971650",
+      "-81.1110380",
+      "-81.1109380"
+    ]
+  },
+  "17_rustic_ln_31406": {
+    "place_id": 377047963,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 491240431,
+    "lat": "31.9713799",
+    "lon": "-81.1018530",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "17, Rustic Lane, Kings Wood, Chatham County, Georgia, 31406, United States",
+    "address": {
+      "house_number": "17",
+      "road": "Rustic Lane",
+      "hamlet": "Kings Wood",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31406",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "31.9713299",
+      "31.9714299",
+      "-81.1019030",
+      "-81.1018030"
+    ]
+  },
+  "108_blaine_ct_31405": {
+    "place_id": 358372121,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 709677896,
+    "lat": "31.0103380",
+    "lon": "-83.8575730",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "108, Blaine Court, Coolidge, Thomas County, Georgia, 31738, United States",
+    "address": {
+      "house_number": "108",
+      "road": "Blaine Court",
+      "village": "Coolidge",
+      "county": "Thomas County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31738",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "31.0102880",
+      "31.0103880",
+      "-83.8576230",
+      "-83.8575230"
+    ]
+  },
+  "8_all_31404": {
+    "place_id": 317031745,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 185511425,
+    "lat": "33.9478736",
+    "lon": "-83.4341131",
+    "class": "highway",
+    "type": "residential",
+    "place_rank": 26,
+    "importance": 0.053399195086594915,
+    "addresstype": "road",
+    "name": "Alley",
+    "display_name": "Alley, Athens, Clarke County, Georgia, 30606, United States",
+    "address": {
+      "road": "Alley",
+      "city": "Athens",
+      "county": "Clarke County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "30606",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "33.9474007",
+      "33.9482812",
+      "-83.4341649",
+      "-83.4338477"
+    ]
+  },
+  "1126_seiler_ave_31404": {
+    "place_id": 377058387,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 9091561,
+    "lat": "32.0520873",
+    "lon": "-81.0833312",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "1126, Seiler Avenue, Ardsley Park-Chatham Crescent Historic District, Savannah, Chatham County, Georgia, 31404, United States",
+    "address": {
+      "house_number": "1126",
+      "road": "Seiler Avenue",
+      "neighbourhood": "Ardsley Park-Chatham Crescent Historic District",
+      "city": "Savannah",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31404",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "32.0520373",
+      "32.0521373",
+      "-81.0833812",
+      "-81.0832812"
+    ]
+  },
+  "524_e_park_ave_31401": {
+    "place_id": 379527028,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 1170448420,
+    "lat": "30.8569091",
+    "lon": "-83.2805268",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "524, East Park Avenue, Valdosta, Lowndes County, Georgia, 31602, United States",
+    "address": {
+      "house_number": "524",
+      "road": "East Park Avenue",
+      "city": "Valdosta",
+      "county": "Lowndes County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31602",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "30.8568591",
+      "30.8569591",
+      "-83.2805768",
+      "-83.2804768"
+    ]
+  },
+  "534_seiler_ave_31401": {
+    "place_id": 377049587,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 9091561,
+    "lat": "32.0551430",
+    "lon": "-81.0941670",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "534, Seiler Avenue, Ardsley Park-Chatham Crescent Historic District, Savannah, Chatham County, Georgia, 31401, United States",
+    "address": {
+      "house_number": "534",
+      "road": "Seiler Avenue",
+      "neighbourhood": "Ardsley Park-Chatham Crescent Historic District",
+      "city": "Savannah",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31401",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "32.0550930",
+      "32.0551930",
+      "-81.0942170",
+      "-81.0941170"
+    ]
+  },
+  "84_ft_of_the_west_31401": {
+    "place_id": 365600805,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 500582867,
+    "lat": "42.3308620",
+    "lon": "-83.0472840",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "84, West Fort Street, West Side Industrial Park, Detroit, Wayne County, Michigan, 48209, United States",
+    "address": {
+      "house_number": "84",
+      "road": "West Fort Street",
+      "neighbourhood": "West Side Industrial Park",
+      "city": "Detroit",
+      "county": "Wayne County",
+      "state": "Michigan",
+      "ISO3166-2-lvl4": "US-MI",
+      "postcode": "48209",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "42.3308120",
+      "42.3309120",
+      "-83.0473340",
+      "-83.0472340"
+    ]
+  },
+  "13_blk_31404": {
+    "place_id": 377355670,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 9328695,
+    "lat": "33.6243474",
+    "lon": "-84.2614767",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "13, Anvil Block Court, Henry County, Georgia, 30294, United States",
+    "address": {
+      "house_number": "13",
+      "road": "Anvil Block Court",
+      "county": "Henry County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "30294",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "33.6242974",
+      "33.6243974",
+      "-84.2615267",
+      "-84.2614267"
+    ]
+  },
+  "2127_e_gwinnett_st_31404": {
+    "place_id": 377064418,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 87906485,
+    "lat": "32.0569894",
+    "lon": "-81.0587864",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "2127, East Gwinnett Street, Avon Park, Savannah, Chatham County, Georgia, 31404, United States",
+    "address": {
+      "house_number": "2127",
+      "road": "East Gwinnett Street",
+      "neighbourhood": "Avon Park",
+      "city": "Savannah",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31404",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "32.0569394",
+      "32.0570394",
+      "-81.0588364",
+      "-81.0587364"
+    ]
+  },
+  "1515_eleanor_st_31415": {
+    "place_id": 377062149,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 9090505,
+    "lat": "32.0683085",
+    "lon": "-81.1253670",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "1515, Eleanor Street, Carver Village, Savannah, Chatham County, Georgia, 31415, United States",
+    "address": {
+      "house_number": "1515",
+      "road": "Eleanor Street",
+      "neighbourhood": "Carver Village",
+      "city": "Savannah",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31415",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "32.0682585",
+      "32.0683585",
+      "-81.1254170",
+      "-81.1253170"
+    ]
+  },
+  "42_and_east_31415": {
+    "place_id": 299976604,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 106479460,
+    "lat": "38.0580755",
+    "lon": "-122.1487041",
+    "class": "amenity",
+    "type": "parking",
+    "place_rank": 30,
+    "importance": 0.00005567635614552556,
+    "addresstype": "amenity",
+    "name": "East Second St Park And Ride",
+    "display_name": "East Second St Park And Ride, East S Street, Benicia, Solano County, California, 94510, United States",
+    "address": {
+      "amenity": "East Second St Park And Ride",
+      "road": "East S Street",
+      "town": "Benicia",
+      "county": "Solano County",
+      "state": "California",
+      "ISO3166-2-lvl4": "US-CA",
+      "postcode": "94510",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "38.0579420",
+      "38.0582570",
+      "-122.1489016",
+      "-122.1485535"
+    ]
+  },
+  "7_and_west_31404": {
+    "place_id": 404343369,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 431500354,
+    "lat": "39.4559765",
+    "lon": "-77.7522451",
+    "class": "building",
+    "type": "yes",
+    "place_rank": 30,
+    "importance": 0.000044389257648539214,
+    "addresstype": "building",
+    "name": "House corner of Alley 7 and West Antietam Street",
+    "display_name": "House corner of Alley 7 and West Antietam Street, Alley 7, Sharpsburg, Washington County, Maryland, United States",
+    "address": {
+      "building": "House corner of Alley 7 and West Antietam Street",
+      "road": "Alley 7",
+      "village": "Sharpsburg",
+      "county": "Washington County",
+      "state": "Maryland",
+      "ISO3166-2-lvl4": "US-MD",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "39.4559114",
+      "39.4560888",
+      "-77.7523868",
+      "-77.7521579"
+    ]
+  },
+  "108_linden_dr_31405": {
+    "place_id": 372537636,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 9526936,
+    "lat": "31.2302643",
+    "lon": "-82.3348798",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "108, Linden Drive, Waycross, Ware County, Georgia, 31501, United States",
+    "address": {
+      "house_number": "108",
+      "road": "Linden Drive",
+      "town": "Waycross",
+      "county": "Ware County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31501",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "31.2302143",
+      "31.2303143",
+      "-82.3349298",
+      "-82.3348298"
+    ]
+  },
+  "16_hampstead_ave_31405": {
+    "place_id": 377059292,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 539514719,
+    "lat": "32.0257900",
+    "lon": "-81.1122867",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "16, Hampstead Avenue, Groveland, Savannah, Chatham County, Georgia, 31405, United States",
+    "address": {
+      "house_number": "16",
+      "road": "Hampstead Avenue",
+      "neighbourhood": "Groveland",
+      "city": "Savannah",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31405",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "32.0257400",
+      "32.0258400",
+      "-81.1123367",
+      "-81.1122367"
+    ]
+  },
+  "1906_champion_st_": {
+    "place_id": 377054749,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 9092532,
+    "lat": "32.0428350",
+    "lon": "-81.1399865",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "1906, Champion Street, Richfield, Liberty City, Savannah, Chatham County, Georgia, 31405, United States",
+    "address": {
+      "house_number": "1906",
+      "road": "Champion Street",
+      "neighbourhood": "Richfield",
+      "hamlet": "Liberty City",
+      "city": "Savannah",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31405",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "32.0427850",
+      "32.0428850",
+      "-81.1400365",
+      "-81.1399365"
+    ]
+  },
+  "3213_college_st_": {
+    "place_id": 367006454,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 9276156,
+    "lat": "33.6673817",
+    "lon": "-84.4505949",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "3213, College Street, College Park, Fulton County, Georgia, 30337, United States",
+    "address": {
+      "house_number": "3213",
+      "road": "College Street",
+      "town": "College Park",
+      "county": "Fulton County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "30337",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "33.6673317",
+      "33.6674317",
+      "-84.4506449",
+      "-84.4505449"
+    ]
+  },
+  "909_jones_ave_": {
+    "place_id": 377066518,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 9083087,
+    "lat": "32.0026987",
+    "lon": "-80.8474790",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "909, Jones Avenue, Tybee Island, Chatham County, Georgia, 31328, United States",
+    "address": {
+      "house_number": "909",
+      "road": "Jones Avenue",
+      "village": "Tybee Island",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31328",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "32.0026487",
+      "32.0027487",
+      "-80.8475290",
+      "-80.8474290"
+    ]
+  },
+  "1209_estill_ave_": {
+    "place_id": 316807030,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 795140969,
+    "lat": "32.0195464",
+    "lon": "-80.8613793",
+    "class": "highway",
+    "type": "residential",
+    "place_rank": 26,
+    "importance": 0.05335803387502858,
+    "addresstype": "road",
+    "name": "Estill Avenue",
+    "display_name": "Estill Avenue, Tybee Island, Chatham County, Georgia, 31328, United States",
+    "address": {
+      "road": "Estill Avenue",
+      "village": "Tybee Island",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31328",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "32.0191668",
+      "32.0198875",
+      "-80.8622056",
+      "-80.8605363"
+    ]
+  },
+  "80_": {
+    "place_id": 320040772,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 50060312,
+    "lat": "32.0701171",
+    "lon": "-81.1356419",
+    "class": "highway",
+    "type": "motorway",
+    "place_rank": 26,
+    "importance": 0.05340147631036847,
+    "addresstype": "road",
+    "name": "Lynes Parkway",
+    "display_name": "Lynes Parkway, Savannah, Chatham County, Georgia, 31415, United States",
+    "address": {
+      "road": "Lynes Parkway",
+      "city": "Savannah",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31415",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "32.0680952",
+      "32.0721450",
+      "-81.1364066",
+      "-81.1348930"
+    ]
+  },
   "7205_w_sugar_tree_ct_31410": {
     "coordinates": {
       "lat": 32.0272462,
       "lng": -80.9697315
     },
     "display_name": "7205, West Sugar Tree Court, River Oaks, Golden Isles, Talahi Island, Chatham County, Georgia, 31410, United States",
-    "cached_at": "2025-07-27T20:41:15.589Z"
+    "cached_at": "2025-07-29T23:29:43.789Z"
   },
   "102_redan_dr_31410": {
     "coordinates": {
@@ -13,7 +2182,7 @@
       "lng": -81.0007367
     },
     "display_name": "102, Redan Drive, Whitemarsh Island, Chatham County, Georgia, 31410, United States",
-    "cached_at": "2025-07-27T20:41:16.317Z"
+    "cached_at": "2025-07-29T23:29:44.574Z"
   },
   "121_bobstay_ct_31410": {
     "coordinates": {
@@ -21,7 +2190,7 @@
       "lng": -80.999657
     },
     "display_name": "121, Bobstay Court, Whitemarsh Island, Chatham County, Georgia, 31410, United States",
-    "cached_at": "2025-07-27T20:41:17.445Z"
+    "cached_at": "2025-07-29T23:29:45.700Z"
   },
   "147_s_robin_hood_dr_31406": {
     "coordinates": {
@@ -29,7 +2198,7 @@
       "lng": -81.072091
     },
     "display_name": "Robin Hood Drive, Herb River Bend, Brookview, Chatham County, Georgia, 31406, United States",
-    "cached_at": "2025-07-27T20:41:19.081Z"
+    "cached_at": "2025-07-29T23:29:47.289Z"
   },
   "30_rivers_bend_dr_31406": {
     "coordinates": {
@@ -37,7 +2206,7 @@
       "lng": -81.1107575
     },
     "display_name": "30, Rivers Bend Drive, Burnside, Montgomery, Chatham County, Georgia, 31406, United States",
-    "cached_at": "2025-07-27T20:41:20.790Z"
+    "cached_at": "2025-07-29T23:29:48.158Z"
   },
   "116_chalice_way_31419": {
     "coordinates": {
@@ -45,7 +2214,7 @@
       "lng": -81.2275752
     },
     "display_name": "116, Chalice Way, Georgetown, Chatham County, Georgia, 31419, United States",
-    "cached_at": "2025-07-27T20:41:23.543Z"
+    "cached_at": "2025-07-29T23:29:48.874Z"
   },
   "13_wild_heron_villas_rd_31419": {
     "coordinates": {
@@ -53,7 +2222,7 @@
       "lng": -81.2330798
     },
     "display_name": "13, Wild Heron Villas Road, Georgetown, Chatham County, Georgia, 31419, United States",
-    "cached_at": "2025-07-27T20:41:24.915Z"
+    "cached_at": "2025-07-29T23:29:50.270Z"
   },
   "argyle_rd_31419": {
     "coordinates": {
@@ -61,7 +2230,15 @@
       "lng": -81.2855127
     },
     "display_name": "Fort Argyle Road, Chatham County, Georgia, 31419, United States",
-    "cached_at": "2025-07-27T20:41:26.074Z"
+    "cached_at": "2025-07-29T23:29:51.362Z"
+  },
+  "315_east_congress_st_31401": {
+    "coordinates": {
+      "lat": 32.0785426,
+      "lng": -81.0878976
+    },
+    "display_name": "315, East Congress Street, Savannah Historic District, Savannah, Chatham County, Georgia, 31401, United States",
+    "cached_at": "2025-07-29T23:29:54.302Z"
   },
   "240_price_st_31401": {
     "coordinates": {
@@ -69,7 +2246,7 @@
       "lng": -81.0879202
     },
     "display_name": "240, Price Street, Savannah Historic District, Savannah, Chatham County, Georgia, 31401, United States",
-    "cached_at": "2025-07-27T20:41:27.975Z"
+    "cached_at": "2025-07-29T23:29:55.531Z"
   },
   "1203_new_castle_st_31415": {
     "coordinates": {
@@ -77,7 +2254,7 @@
       "lng": -81.1180401
     },
     "display_name": "1203, New Castle Street, Savannah, Chatham County, Georgia, 31415, United States",
-    "cached_at": "2025-07-27T20:41:28.651Z"
+    "cached_at": "2025-07-29T23:29:56.350Z"
   },
   "1943_greenwood_st_31404": {
     "coordinates": {
@@ -85,7 +2262,7 @@
       "lng": -81.0598751
     },
     "display_name": "1943, Greenwood Street, Pine Gardens, Savannah, Chatham County, Georgia, 31404, United States",
-    "cached_at": "2025-07-27T20:41:29.781Z"
+    "cached_at": "2025-07-29T23:29:57.373Z"
   },
   "805_e_henry_st_31401": {
     "coordinates": {
@@ -93,7 +2270,40 @@
       "lng": -81.0852221
     },
     "display_name": "805, East Henry Street, Gordonston, Savannah, Chatham County, Georgia, 31401, United States",
-    "cached_at": "2025-07-27T20:41:31.663Z"
+    "cached_at": "2025-07-29T23:29:59.113Z"
+  },
+  "10_us_highway_": {
+    "place_id": 377048233,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 9087027,
+    "lat": "32.1311277",
+    "lon": "-81.2951212",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "10, US Highway 80 West, Ottawa Estates, Bloomingdale, Chatham County, Georgia, 31302, United States",
+    "address": {
+      "house_number": "10",
+      "road": "US Highway 80 West",
+      "hamlet": "Ottawa Estates",
+      "village": "Bloomingdale",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31302",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "32.1310777",
+      "32.1311777",
+      "-81.2951712",
+      "-81.2950712"
+    ]
   },
   "1220_e_32nd_st_31404": {
     "coordinates": {
@@ -101,7 +2311,7 @@
       "lng": -81.0800501
     },
     "display_name": "1220, East 32nd Street, Gordonston, Savannah, Chatham County, Georgia, 31404, United States",
-    "cached_at": "2025-07-27T20:41:34.726Z"
+    "cached_at": "2025-07-29T23:30:03.515Z"
   },
   "1012_e_33rd_st_31401": {
     "coordinates": {
@@ -109,23 +2319,7 @@
       "lng": -81.0834629
     },
     "display_name": "1012, East 33rd Street, Savannah, Chatham County, Georgia, 31401, United States",
-    "cached_at": "2025-07-27T20:41:35.611Z"
-  },
-  "13_blk_": {
-    "coordinates": {
-      "lat": 32.0626936,
-      "lng": -81.1097125
-    },
-    "display_name": "Block Street, Savannah, Chatham County, Georgia, 31415, United States",
-    "cached_at": "2025-07-27T20:41:37.078Z"
-  },
-  "2127_e_gwinnett_st_": {
-    "coordinates": {
-      "lat": 32.0569894,
-      "lng": -81.0587864
-    },
-    "display_name": "2127, East Gwinnett Street, Avon Park, Savannah, Chatham County, Georgia, 31404, United States",
-    "cached_at": "2025-07-27T20:41:37.723Z"
+    "cached_at": "2025-07-29T23:30:05.974Z"
   },
   "2115_e_gwinnett_st_31404": {
     "coordinates": {
@@ -133,7 +2327,7 @@
       "lng": -81.0589634
     },
     "display_name": "2115, East Gwinnett Street, Avon Park, Savannah, Chatham County, Georgia, 31404, United States",
-    "cached_at": "2025-07-27T20:41:38.565Z"
+    "cached_at": "2025-07-29T23:30:06.590Z"
   },
   "2148_alaska_st_31404": {
     "coordinates": {
@@ -141,7 +2335,7 @@
       "lng": -81.059293
     },
     "display_name": "2148, Alaska Street, Avon Park, Savannah, Chatham County, Georgia, 31404, United States",
-    "cached_at": "2025-07-27T20:41:41.376Z"
+    "cached_at": "2025-07-29T23:30:07.614Z"
   },
   "1229_e_39th_st_31404": {
     "coordinates": {
@@ -149,7 +2343,7 @@
       "lng": -81.0819371
     },
     "display_name": "1229, East 39th Street, Ardsley Park-Chatham Crescent Historic District, Savannah, Chatham County, Georgia, 31404, United States",
-    "cached_at": "2025-07-27T20:41:43.318Z"
+    "cached_at": "2025-07-29T23:30:08.942Z"
   },
   "1109_e_38th_st_31404": {
     "coordinates": {
@@ -157,7 +2351,7 @@
       "lng": -81.0838748
     },
     "display_name": "1109, East 38th Street, Ardsley Park-Chatham Crescent Historic District, Savannah, Chatham County, Georgia, 31404, United States",
-    "cached_at": "2025-07-27T20:41:47.464Z"
+    "cached_at": "2025-07-29T23:30:10.172Z"
   },
   "306_e_39th_st_31401": {
     "coordinates": {
@@ -165,7 +2359,7 @@
       "lng": -81.0970704
     },
     "display_name": "306, East 39th Street, Ardsley Park-Chatham Crescent Historic District, Savannah, Chatham County, Georgia, 31401, United States",
-    "cached_at": "2025-07-27T20:41:52.408Z"
+    "cached_at": "2025-07-29T23:30:12.118Z"
   },
   "1610_ogeechee_rd_31415": {
     "coordinates": {
@@ -173,7 +2367,7 @@
       "lng": -81.107364
     },
     "display_name": "1610, Ogeechee Road, Savannah, Chatham County, Georgia, 31415, United States",
-    "cached_at": "2025-07-27T20:41:52.988Z"
+    "cached_at": "2025-07-29T23:30:12.837Z"
   },
   "306_w_33rd_st_31401": {
     "coordinates": {
@@ -181,7 +2375,7 @@
       "lng": -81.102384
     },
     "display_name": "306, West 33rd Street, Savannah, Chatham County, Georgia, 31401, United States",
-    "cached_at": "2025-07-27T20:41:54.312Z"
+    "cached_at": "2025-07-29T23:30:14.174Z"
   },
   "1417_audubon_dr_31415": {
     "coordinates": {
@@ -189,7 +2383,7 @@
       "lng": -81.1205303
     },
     "display_name": "1417, Audubon Drive, Carver Village, Savannah, Chatham County, Georgia, 31415, United States",
-    "cached_at": "2025-07-27T20:41:54.886Z"
+    "cached_at": "2025-07-29T23:30:14.782Z"
   },
   "1110_e_41st_st_31404": {
     "coordinates": {
@@ -197,7 +2391,7 @@
       "lng": -81.0844499
     },
     "display_name": "1110, East 41st Street, Ardsley Park-Chatham Crescent Historic District, Savannah, Chatham County, Georgia, 31404, United States",
-    "cached_at": "2025-07-27T20:41:58.399Z"
+    "cached_at": "2025-07-29T23:30:16.419Z"
   },
   "1225_e_40th_st_31404": {
     "coordinates": {
@@ -205,7 +2399,7 @@
       "lng": -81.0821933
     },
     "display_name": "1225, East 40th Street, Ardsley Park-Chatham Crescent Historic District, Savannah, Chatham County, Georgia, 31404, United States",
-    "cached_at": "2025-07-27T20:41:59.325Z"
+    "cached_at": "2025-07-29T23:30:17.649Z"
   },
   "1231_e_40th_st_31404": {
     "coordinates": {
@@ -213,7 +2407,7 @@
       "lng": -81.0820964
     },
     "display_name": "1231, East 40th Street, Ardsley Park-Chatham Crescent Historic District, Savannah, Chatham County, Georgia, 31404, United States",
-    "cached_at": "2025-07-27T20:42:00.239Z"
+    "cached_at": "2025-07-29T23:30:18.877Z"
   },
   "1217_e_56th_st_31404": {
     "coordinates": {
@@ -221,7 +2415,7 @@
       "lng": -81.0877829
     },
     "display_name": "1217, East 56th Street, Edgemere, Savannah, Chatham County, Georgia, 31404, United States",
-    "cached_at": "2025-07-27T20:42:01.209Z"
+    "cached_at": "2025-07-29T23:30:19.771Z"
   },
   "1609_e_51st_st_31404": {
     "coordinates": {
@@ -229,7 +2423,7 @@
       "lng": -81.078715
     },
     "display_name": "1609, East 51st Street, Edgemere, Savannah, Chatham County, Georgia, 31404, United States",
-    "cached_at": "2025-07-27T20:42:02.175Z"
+    "cached_at": "2025-07-29T23:30:20.622Z"
   },
   "3702_eastgate_dr_31404": {
     "coordinates": {
@@ -237,7 +2431,7 @@
       "lng": -81.0730287
     },
     "display_name": "3702, Eastgate Drive, Oakland Park, Savannah, Chatham County, Georgia, 31404, United States",
-    "cached_at": "2025-07-27T20:42:02.834Z"
+    "cached_at": "2025-07-29T23:30:21.436Z"
   },
   "2332_bayberry_dr_31404": {
     "coordinates": {
@@ -245,7 +2439,7 @@
       "lng": -81.070219
     },
     "display_name": "2332, Bayberry Drive, Fleetwood, Savannah, Chatham County, Georgia, 31404, United States",
-    "cached_at": "2025-07-27T20:42:05.844Z"
+    "cached_at": "2025-07-29T23:30:22.461Z"
   },
   "1927_colonial_dr_31406": {
     "coordinates": {
@@ -253,7 +2447,7 @@
       "lng": -81.0812956
     },
     "display_name": "1927, Colonial Drive, Barian Terrace, DeRenne Terrace, Savannah, Chatham County, Georgia, 31406, United States",
-    "cached_at": "2025-07-27T20:42:10.478Z"
+    "cached_at": "2025-07-29T23:30:24.714Z"
   },
   "700_reserve_cir_31401": {
     "coordinates": {
@@ -261,7 +2455,7 @@
       "lng": -81.0866943
     },
     "display_name": "Reserve Circle, Savannah, Chatham County, Georgia, 31421, United States",
-    "cached_at": "2025-07-27T20:42:12.092Z"
+    "cached_at": "2025-07-29T23:30:26.216Z"
   },
   "1906_champion_st_31405": {
     "coordinates": {
@@ -269,7 +2463,7 @@
       "lng": -81.1399865
     },
     "display_name": "1906, Champion Street, Richfield, Liberty City, Savannah, Chatham County, Georgia, 31405, United States",
-    "cached_at": "2025-07-27T20:42:14.176Z"
+    "cached_at": "2025-07-29T23:30:26.762Z"
   },
   "3213_college_st_31404": {
     "coordinates": {
@@ -277,7 +2471,7 @@
       "lng": -81.0556338
     },
     "display_name": "3213, College Street, Thunderbolt, Chatham County, Georgia, 31404, United States",
-    "cached_at": "2025-07-27T20:42:15.599Z"
+    "cached_at": "2025-07-29T23:30:28.708Z"
   },
   "909_jones_ave_31328": {
     "coordinates": {
@@ -285,7 +2479,7 @@
       "lng": -80.847479
     },
     "display_name": "909, Jones Avenue, Tybee Island, Chatham County, Georgia, 31328, United States",
-    "cached_at": "2025-07-27T20:42:16.306Z"
+    "cached_at": "2025-07-29T23:30:29.385Z"
   },
   "1209_estill_ave_31328": {
     "coordinates": {
@@ -293,15 +2487,15 @@
       "lng": -80.8613793
     },
     "display_name": "Estill Avenue, Tybee Island, Chatham County, Georgia, 31328, United States",
-    "cached_at": "2025-07-27T20:42:17.402Z"
+    "cached_at": "2025-07-29T23:30:30.552Z"
   },
-  "10_us_highway_80_31328": {
+  "10_us_highway_31328": {
     "coordinates": {
       "lat": 32.1311277,
       "lng": -81.2951212
     },
     "display_name": "10, US Highway 80 West, Ottawa Estates, Bloomingdale, Chatham County, Georgia, 31302, United States",
-    "cached_at": "2025-07-27T20:42:19.322Z"
+    "cached_at": "2025-07-29T23:30:34.149Z"
   },
   "206_brighton_woods_dr_31322": {
     "coordinates": {
@@ -309,15 +2503,7 @@
       "lng": -81.2643856
     },
     "display_name": "206, Brighton Woods Drive, Pooler, Chatham County, Georgia, 31322, United States",
-    "cached_at": "2025-07-27T20:42:20.040Z"
-  },
-  "129_e_us_highway_80_31322": {
-    "coordinates": {
-      "lat": 32.1158402,
-      "lng": -81.2483652
-    },
-    "display_name": "129, US Highway 80 East, Pooler, Chatham County, Georgia, 31322, United States",
-    "cached_at": "2025-07-27T20:42:21.754Z"
+    "cached_at": "2025-07-29T23:30:35.050Z"
   },
   "205_n_skinner_ave_31322": {
     "coordinates": {
@@ -325,7 +2511,23 @@
       "lng": -81.2429723
     },
     "display_name": "205, North Skinner Avenue, Pooler, Chatham County, Georgia, 31322, United States",
-    "cached_at": "2025-07-27T20:42:22.344Z"
+    "cached_at": "2025-07-29T23:30:37.100Z"
+  },
+  "110_n_coastal_hwy_": {
+    "coordinates": {
+      "lat": 32.157428,
+      "lng": -81.1651743
+    },
+    "display_name": "110, North Coastal Highway, Port Wentworth, Chatham County, Georgia, 31407, United States",
+    "cached_at": "2025-07-29T23:30:39.352Z"
+  },
+  "308_clifton_dr_": {
+    "coordinates": {
+      "lat": 32.1484354,
+      "lng": -81.1553514
+    },
+    "display_name": "308, Clifton Drive, Port Wentworth, Chatham County, Georgia, 31407, United States",
+    "cached_at": "2025-07-29T23:30:40.068Z"
   },
   "5_dogwood_cir_31407": {
     "coordinates": {
@@ -333,7 +2535,7 @@
       "lng": -81.1927297
     },
     "display_name": "5, Dogwood Circle, Port Wentworth, Chatham County, Georgia, 31407, United States",
-    "cached_at": "2025-07-27T20:42:26.551Z"
+    "cached_at": "2025-07-29T23:30:43.038Z"
   },
   "167_fox_glen_ct_31407": {
     "coordinates": {
@@ -341,7 +2543,7 @@
       "lng": -81.2225721
     },
     "display_name": "167, Fox Glen Court, Port Wentworth, Chatham County, Georgia, 31407, United States",
-    "cached_at": "2025-07-27T20:42:27.502Z"
+    "cached_at": "2025-07-29T23:30:45.291Z"
   },
   "2_red_robin_ct_31407": {
     "coordinates": {
@@ -349,7 +2551,7 @@
       "lng": -81.224296
     },
     "display_name": "2, Red Robin Court, Port Wentworth, Chatham County, Georgia, 31407, United States",
-    "cached_at": "2025-07-27T20:42:29.808Z"
+    "cached_at": "2025-07-29T23:30:46.520Z"
   },
   "4_red_robin_ct_31407": {
     "coordinates": {
@@ -357,7 +2559,7 @@
       "lng": -81.2242705
     },
     "display_name": "4, Red Robin Court, Port Wentworth, Chatham County, Georgia, 31407, United States",
-    "cached_at": "2025-07-27T20:42:30.641Z"
+    "cached_at": "2025-07-29T23:30:47.749Z"
   },
   "6_red_robin_ct_31407": {
     "coordinates": {
@@ -365,7 +2567,7 @@
       "lng": -81.2242466
     },
     "display_name": "6, Red Robin Court, Port Wentworth, Chatham County, Georgia, 31407, United States",
-    "cached_at": "2025-07-27T20:42:31.879Z"
+    "cached_at": "2025-07-29T23:30:48.977Z"
   },
   "8_red_robin_ct_31407": {
     "coordinates": {
@@ -373,7 +2575,7 @@
       "lng": -81.2242218
     },
     "display_name": "8, Red Robin Court, Port Wentworth, Chatham County, Georgia, 31407, United States",
-    "cached_at": "2025-07-27T20:42:32.784Z"
+    "cached_at": "2025-07-29T23:30:50.206Z"
   },
   "10_red_robin_ct_31407": {
     "coordinates": {
@@ -381,7 +2583,7 @@
       "lng": -81.224196
     },
     "display_name": "10, Red Robin Court, Port Wentworth, Chatham County, Georgia, 31407, United States",
-    "cached_at": "2025-07-27T20:42:33.957Z"
+    "cached_at": "2025-07-29T23:30:51.438Z"
   },
   "12_red_robin_ct_31407": {
     "coordinates": {
@@ -389,7 +2591,7 @@
       "lng": -81.2241702
     },
     "display_name": "12, Red Robin Court, Port Wentworth, Chatham County, Georgia, 31407, United States",
-    "cached_at": "2025-07-27T20:42:34.842Z"
+    "cached_at": "2025-07-29T23:30:52.663Z"
   },
   "47_red_robin_ct_31407": {
     "coordinates": {
@@ -397,7 +2599,7 @@
       "lng": -81.223833
     },
     "display_name": "47, Red Robin Court, Port Wentworth, Chatham County, Georgia, 31407, United States",
-    "cached_at": "2025-07-27T20:42:35.824Z"
+    "cached_at": "2025-07-29T23:30:53.891Z"
   },
   "45_red_robin_ct_31407": {
     "coordinates": {
@@ -405,7 +2607,7 @@
       "lng": -81.2238601
     },
     "display_name": "45, Red Robin Court, Port Wentworth, Chatham County, Georgia, 31407, United States",
-    "cached_at": "2025-07-27T20:42:36.840Z"
+    "cached_at": "2025-07-29T23:30:54.974Z"
   },
   "43_red_robin_ct_31407": {
     "coordinates": {
@@ -413,7 +2615,7 @@
       "lng": -81.2238873
     },
     "display_name": "43, Red Robin Court, Port Wentworth, Chatham County, Georgia, 31407, United States",
-    "cached_at": "2025-07-27T20:42:38.032Z"
+    "cached_at": "2025-07-29T23:30:56.042Z"
   },
   "41_red_robin_ct_31407": {
     "coordinates": {
@@ -421,7 +2623,7 @@
       "lng": -81.2239146
     },
     "display_name": "41, Red Robin Court, Port Wentworth, Chatham County, Georgia, 31407, United States",
-    "cached_at": "2025-07-27T20:42:39.093Z"
+    "cached_at": "2025-07-29T23:30:57.272Z"
   },
   "39_red_robin_ct_31407": {
     "coordinates": {
@@ -429,7 +2631,7 @@
       "lng": -81.2239416
     },
     "display_name": "39, Red Robin Court, Port Wentworth, Chatham County, Georgia, 31407, United States",
-    "cached_at": "2025-07-27T20:42:40.111Z"
+    "cached_at": "2025-07-29T23:30:58.235Z"
   },
   "37_red_robin_ct_31407": {
     "coordinates": {
@@ -437,7 +2639,39 @@
       "lng": -81.2239681
     },
     "display_name": "37, Red Robin Court, Port Wentworth, Chatham County, Georgia, 31407, United States",
-    "cached_at": "2025-07-27T20:42:41.082Z"
+    "cached_at": "2025-07-29T23:31:00.138Z"
+  },
+  "206_brighton_woods_dr_": {
+    "place_id": 377045424,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 347775372,
+    "lat": "32.1172761",
+    "lon": "-81.2643856",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "206, Brighton Woods Drive, Pooler, Chatham County, Georgia, 31322, United States",
+    "address": {
+      "house_number": "206",
+      "road": "Brighton Woods Drive",
+      "town": "Pooler",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31322",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "32.1172261",
+      "32.1173261",
+      "-81.2644356",
+      "-81.2643356"
+    ]
   },
   "23_red_robin_ct_31407": {
     "coordinates": {
@@ -445,7 +2679,7 @@
       "lng": -81.2241541
     },
     "display_name": "23, Red Robin Court, Port Wentworth, Chatham County, Georgia, 31407, United States",
-    "cached_at": "2025-07-27T20:42:42.223Z"
+    "cached_at": "2025-07-29T23:31:04.234Z"
   },
   "21_red_robin_ct_31407": {
     "coordinates": {
@@ -453,7 +2687,7 @@
       "lng": -81.2241806
     },
     "display_name": "21, Red Robin Court, Port Wentworth, Chatham County, Georgia, 31407, United States",
-    "cached_at": "2025-07-27T20:42:43.130Z"
+    "cached_at": "2025-07-29T23:31:08.534Z"
   },
   "19_red_robin_ct_31407": {
     "coordinates": {
@@ -461,7 +2695,7 @@
       "lng": -81.2242072
     },
     "display_name": "19, Red Robin Court, Port Wentworth, Chatham County, Georgia, 31407, United States",
-    "cached_at": "2025-07-27T20:42:44.243Z"
+    "cached_at": "2025-07-29T23:31:11.301Z"
   },
   "17_red_robin_ct_31407": {
     "coordinates": {
@@ -469,7 +2703,7 @@
       "lng": -81.2242337
     },
     "display_name": "17, Red Robin Court, Port Wentworth, Chatham County, Georgia, 31407, United States",
-    "cached_at": "2025-07-27T20:42:45.346Z"
+    "cached_at": "2025-07-29T23:31:13.170Z"
   },
   "15_red_robin_ct_31407": {
     "coordinates": {
@@ -477,7 +2711,7 @@
       "lng": -81.2242603
     },
     "display_name": "15, Red Robin Court, Port Wentworth, Chatham County, Georgia, 31407, United States",
-    "cached_at": "2025-07-27T20:42:46.241Z"
+    "cached_at": "2025-07-29T23:31:14.488Z"
   },
   "13_red_robin_ct_31407": {
     "coordinates": {
@@ -485,7 +2719,7 @@
       "lng": -81.2242868
     },
     "display_name": "13, Red Robin Court, Port Wentworth, Chatham County, Georgia, 31407, United States",
-    "cached_at": "2025-07-27T20:42:47.330Z"
+    "cached_at": "2025-07-29T23:31:15.600Z"
   },
   "130_roseberry_cir_31407": {
     "coordinates": {
@@ -493,6 +2727,294 @@
       "lng": -81.2198354
     },
     "display_name": "130, Roseberry Circle, Port Wentworth, Chatham County, Georgia, 31407, United States",
-    "cached_at": "2025-07-27T20:42:47.881Z"
+    "cached_at": "2025-07-29T23:31:16.068Z"
+  },
+  "129_e_us_highway_": {
+    "place_id": 317959755,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 166975141,
+    "lat": "32.0792921",
+    "lon": "-81.1066032",
+    "class": "highway",
+    "type": "motorway",
+    "place_rank": 26,
+    "importance": 0.2671990544766661,
+    "addresstype": "road",
+    "name": "Atlantic Coastal Highway",
+    "display_name": "Atlantic Coastal Highway, Savannah, Chatham County, Georgia, 31402, United States",
+    "address": {
+      "road": "Atlantic Coastal Highway",
+      "city": "Savannah",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31402",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "32.0761934",
+      "32.0818552",
+      "-81.1069288",
+      "-81.1046504"
+    ]
+  },
+  "205_n_skinner_ave_": {
+    "place_id": 377059899,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 348025256,
+    "lat": "32.1173091",
+    "lon": "-81.2429723",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "205, North Skinner Avenue, Pooler, Chatham County, Georgia, 31322, United States",
+    "address": {
+      "house_number": "205",
+      "road": "North Skinner Avenue",
+      "town": "Pooler",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31322",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "32.1172591",
+      "32.1173591",
+      "-81.2430223",
+      "-81.2429223"
+    ]
+  },
+  "5_dogwood_cir_": {
+    "place_id": 379528699,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 9374908,
+    "lat": "30.8565973",
+    "lon": "-83.3114972",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "5, Dogwood Circle, Dellwood, Valdosta, Lowndes County, Georgia, 31602, United States",
+    "address": {
+      "house_number": "5",
+      "road": "Dogwood Circle",
+      "neighbourhood": "Dellwood",
+      "city": "Valdosta",
+      "county": "Lowndes County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31602",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "30.8565473",
+      "30.8566473",
+      "-83.3115472",
+      "-83.3114472"
+    ]
+  },
+  "167_fox_glen_ct_": {
+    "place_id": 377054501,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 192471905,
+    "lat": "32.1865588",
+    "lon": "-81.2225721",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "167, Fox Glen Court, Port Wentworth, Chatham County, Georgia, 31407, United States",
+    "address": {
+      "house_number": "167",
+      "road": "Fox Glen Court",
+      "village": "Port Wentworth",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31407",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "32.1865088",
+      "32.1866088",
+      "-81.2226221",
+      "-81.2225221"
+    ]
+  },
+  "2_red_robin_ct_": {
+    "place_id": 377063346,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 1244716019,
+    "lat": "32.1849600",
+    "lon": "-81.2242960",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "2, Red Robin Court, Port Wentworth, Chatham County, Georgia, 31407, United States",
+    "address": {
+      "house_number": "2",
+      "road": "Red Robin Court",
+      "village": "Port Wentworth",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31407",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "32.1849100",
+      "32.1850100",
+      "-81.2243460",
+      "-81.2242460"
+    ]
+  },
+  "4_red_robin_ct_": {
+    "place_id": 377063346,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 1244716019,
+    "lat": "32.1849450",
+    "lon": "-81.2242705",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "4, Red Robin Court, Port Wentworth, Chatham County, Georgia, 31407, United States",
+    "address": {
+      "house_number": "4",
+      "road": "Red Robin Court",
+      "village": "Port Wentworth",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31407",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "32.1848950",
+      "32.1849950",
+      "-81.2243205",
+      "-81.2242205"
+    ]
+  },
+  "6_red_robin_ct_": {
+    "place_id": 377063346,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 1244716019,
+    "lat": "32.1849277",
+    "lon": "-81.2242466",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "6, Red Robin Court, Port Wentworth, Chatham County, Georgia, 31407, United States",
+    "address": {
+      "house_number": "6",
+      "road": "Red Robin Court",
+      "village": "Port Wentworth",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31407",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "32.1848777",
+      "32.1849777",
+      "-81.2242966",
+      "-81.2241966"
+    ]
+  },
+  "8_red_robin_ct_": {
+    "place_id": 377063346,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 1244716019,
+    "lat": "32.1849116",
+    "lon": "-81.2242218",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "8, Red Robin Court, Port Wentworth, Chatham County, Georgia, 31407, United States",
+    "address": {
+      "house_number": "8",
+      "road": "Red Robin Court",
+      "village": "Port Wentworth",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31407",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "32.1848616",
+      "32.1849616",
+      "-81.2242718",
+      "-81.2241718"
+    ]
+  },
+  "10_red_robin_ct_": {
+    "place_id": 377063346,
+    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+    "osm_type": "way",
+    "osm_id": 1244716019,
+    "lat": "32.1848972",
+    "lon": "-81.2241960",
+    "class": "place",
+    "type": "house",
+    "place_rank": 30,
+    "importance": 0.00000999999999995449,
+    "addresstype": "place",
+    "name": "",
+    "display_name": "10, Red Robin Court, Port Wentworth, Chatham County, Georgia, 31407, United States",
+    "address": {
+      "house_number": "10",
+      "road": "Red Robin Court",
+      "village": "Port Wentworth",
+      "county": "Chatham County",
+      "state": "Georgia",
+      "ISO3166-2-lvl4": "US-GA",
+      "postcode": "31407",
+      "country": "United States",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "32.1848472",
+      "32.1849472",
+      "-81.2242460",
+      "-81.2241460"
+    ]
   }
 }

@@ -277,6 +277,31 @@ class PropertyDatabase {
         });
     }
 
+    // Clear all data for testing
+    async clearAllData() {
+        return new Promise((resolve, reject) => {
+            this.db.serialize(() => {
+                this.db.run('DELETE FROM properties', (err) => {
+                    if (err) {
+                        console.error('Error clearing properties:', err);
+                        reject(err);
+                        return;
+                    }
+                });
+                
+                this.db.run('DELETE FROM pdf_files', (err) => {
+                    if (err) {
+                        console.error('Error clearing pdf_files:', err);
+                        reject(err);
+                        return;
+                    }
+                    console.log('✅ All database data cleared');
+                    resolve();
+                });
+            });
+        });
+    }
+
     // Close database connection
     close() {
         if (this.db) {

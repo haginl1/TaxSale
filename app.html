@@ -525,7 +525,7 @@
             box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
         }
 
-        /* Street View Modal */
+        /* Modal Styles */
         .street-view-modal {
             position: fixed;
             top: 0;
@@ -539,16 +539,438 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 20px;
+            box-sizing: border-box;
         }
 
         .street-view-content {
             background: white;
             border-radius: 20px;
             padding: 20px;
-            max-width: 90%;
-            max-height: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            width: 100%;
             overflow: auto;
             position: relative;
+            box-sizing: border-box;
+        }
+
+        /* Property Modal Specific Styles */
+        .property-modal-header {
+            margin: 0 0 20px 0;
+            color: #667eea;
+            display: flex;
+            align-items: center;
+            font-size: 1.4rem;
+            font-weight: bold;
+            text-align: center;
+            justify-content: center;
+        }
+
+        .property-info-card {
+            background: #f8fafc;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 0;
+        }
+
+        .property-street-view {
+            margin-bottom: 25px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .property-street-view iframe {
+            width: 100%;
+            height: 350px;
+            border: none;
+            border-radius: 12px;
+        }
+
+        .property-details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 0;
+        }
+
+        .property-detail-item {
+            display: flex;
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .property-detail-label {
+            color: #64748b;
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        .property-detail-value {
+            color: #475569;
+            font-size: 1.1rem;
+        }
+
+        .property-amount {
+            font-size: 1.3em;
+            color: #dc2626;
+            font-weight: bold;
+        }
+
+        .property-details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .property-detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .property-detail-label {
+            color: #64748b;
+            font-weight: bold;
+            margin-bottom: 4px;
+            font-size: 0.9rem;
+        }
+
+        .property-detail-value {
+            color: #475569;
+        }
+
+        .property-amount {
+            font-size: 1.1em;
+            color: #dc2626;
+            font-weight: bold;
+        }
+
+        .property-coordinates {
+            color: #475569;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+
+        .property-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .property-action-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            min-height: 44px;
+            box-sizing: border-box;
+        }
+
+        .property-action-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .property-action-btn:active {
+            transform: translateY(0);
+        }
+
+        .property-action-btn.street-view {
+            background: #f093fb;
+        }
+
+        .property-action-btn.street-view:hover {
+            box-shadow: 0 4px 12px rgba(240, 147, 251, 0.3);
+        }
+
+        .property-action-btn.copy {
+            background: #059669;
+        }
+
+        .property-action-btn.copy:hover {
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+        }
+
+        .property-action-btn.copied {
+            background: #16a34a !important;
+        }
+
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+            .street-view-modal {
+                padding: 10px;
+                align-items: flex-start;
+                padding-top: 20px;
+            }
+
+            .street-view-content {
+                max-height: 95vh;
+                border-radius: 15px;
+                padding: 15px;
+                margin-top: 0;
+            }
+
+            .property-modal-header {
+                font-size: 1.3rem;
+                margin-bottom: 15px;
+            }
+
+            .property-street-view iframe {
+                height: 250px;
+            }
+
+            .property-street-view-loading {
+                height: 250px;
+                font-size: 1rem;
+            }
+
+            .property-info-card {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+
+            .property-address {
+                font-size: 1.1em;
+                margin-bottom: 12px;
+            }
+
+            .property-details-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+                margin-bottom: 12px;
+            }
+
+            .property-actions {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .property-action-btn {
+                width: 100%;
+                justify-content: center;
+                padding: 14px 16px;
+                font-size: 1rem;
+            }
+
+            .modal-close {
+                font-size: 1.8rem;
+                top: 10px;
+                right: 15px;
+                padding: 5px;
+                min-width: 40px;
+                min-height: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+        }
+
+        /* Progress Bar Styles */
+        .progress-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            z-index: 1500;
+            min-width: 300px;
+            max-width: 400px;
+            transform: translateX(420px);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .progress-container.show {
+            transform: translateX(0);
+        }
+
+        .progress-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            font-weight: bold;
+            color: #334155;
+        }
+
+        .progress-icon {
+            margin-right: 10px;
+            font-size: 1.2rem;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .progress-text {
+            font-size: 0.9rem;
+            color: #64748b;
+            text-align: center;
+        }
+
+        .progress-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+
+        /* Mobile Progress Bar */
+        @media (max-width: 768px) {
+            .progress-container {
+                top: 10px;
+                right: 10px;
+                left: 10px;
+                min-width: auto;
+                max-width: none;
+                transform: translateY(-120px);
+            }
+
+            .progress-container.show {
+                transform: translateY(0);
+            }
+            
+            .street-view-modal {
+                padding: 10px;
+                align-items: flex-start;
+                padding-top: 20px;
+            }
+
+            .street-view-content {
+                max-height: 95vh;
+                border-radius: 15px;
+                padding: 15px;
+                margin-top: 0;
+            }
+
+            .property-modal-header {
+                font-size: 1.3rem;
+                margin-bottom: 15px;
+            }
+
+            .property-street-view iframe {
+                height: 250px;
+            }
+
+            .property-street-view-loading {
+                height: 250px;
+                font-size: 1rem;
+            }
+
+            .property-info-card {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+
+            .property-address {
+                font-size: 1.1em;
+                margin-bottom: 12px;
+            }
+
+            .property-details-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+                margin-bottom: 12px;
+            }
+
+            .property-actions {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .property-action-btn {
+                width: 100%;
+                justify-content: center;
+                padding: 14px 16px;
+                font-size: 1rem;
+            }
+
+            .modal-close {
+                font-size: 1.8rem;
+                top: 10px;
+                right: 15px;
+                padding: 5px;
+                min-width: 40px;
+                min-height: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .street-view-modal {
+                padding: 5px;
+                padding-top: 10px;
+            }
+
+            .street-view-content {
+                border-radius: 10px;
+                padding: 12px;
+                max-height: 98vh;
+            }
+
+            .property-modal-header {
+                font-size: 1.2rem;
+            }
+
+            .property-street-view iframe {
+                height: 200px;
+            }
+
+            .property-street-view-loading {
+                height: 200px;
+                font-size: 0.9rem;
+            }
+
+            .property-info-card {
+                padding: 12px;
+            }
+
+            .property-address {
+                font-size: 1rem;
+            }
+
+            .property-detail-label {
+                font-size: 0.85rem;
+            }
+
+            .property-detail-value {
+                font-size: 0.9rem;
+            }
         }
 
         .modal-close {
@@ -688,6 +1110,30 @@
         <div class="street-view-content">
             <button class="modal-close" onclick="closeStreetView()">&times;</button>
             <div id="streetViewContent"></div>
+        </div>
+    </div>
+
+    <!-- Property Details Modal -->
+    <div id="propertyModal" class="street-view-modal hidden">
+        <div class="street-view-content">
+            <button class="modal-close" onclick="closePropertyModal()">&times;</button>
+            <div id="propertyModalContent"></div>
+        </div>
+    </div>
+
+    <!-- Progress Bar -->
+    <div id="progressContainer" class="progress-container">
+        <div class="progress-header">
+            <span class="progress-icon">🗺️</span>
+            <span id="progressTitle">Plotting Properties on Map</span>
+        </div>
+        <div class="progress-bar">
+            <div id="progressFill" class="progress-fill"></div>
+        </div>
+        <div id="progressText" class="progress-text">Preparing...</div>
+        <div class="progress-stats">
+            <span id="progressCurrent">0</span>
+            <span id="progressTotal">0</span>
         </div>
     </div>
 
@@ -1276,10 +1722,32 @@
             
             console.log('Adding markers for', listings.length, 'listings...');
             
-            let successfulCount = 0;
+            // Show progress bar
+            showProgress('Plotting Properties on Map', listings.length);
             
-            for (let i = 0; i < listings.length; i++) {
-                const listing = listings[i];
+            let successfulCount = 0;
+            let processedCount = 0;
+            
+            // Process markers with a small delay to allow UI updates
+            function processNextMarker(index) {
+                if (index >= listings.length) {
+                    // All markers processed
+                    console.log(`✅ Added ${successfulCount} markers to map`);
+                    
+                    // Fit map to show all markers if we have any
+                    if (markers.length > 0) {
+                        const group = new L.featureGroup(markers);
+                        map.fitBounds(group.getBounds().pad(0.1));
+                    }
+                    
+                    // Update progress to completion
+                    updateProgress(listings.length, listings.length, `Completed! ${successfulCount} properties plotted on map`);
+                    hideProgress(2000);
+                    return;
+                }
+                
+                const listing = listings[index];
+                processedCount++;
                 
                 // Check if listing has coordinates from batch geocoding
                 if (listing.coordinates && listing.coordinates.lat && listing.coordinates.lng) {
@@ -1290,36 +1758,35 @@
                     if (lat >= 30.0 && lat <= 35.0 && lng >= -85.0 && lng <= -80.0) {
                         console.log('✅ Adding marker for', listing.address, ':', lat, lng);
                         
-                        const amount = listing.taxAmount || listing.bidAmount || 'N/A';
                         const marker = L.marker([lat, lng])
-                            .bindPopup(`
-                                <div style="min-width: 200px;">
-                                    <h4 style="margin: 0 0 10px 0; color: #667eea;">${listing.address}</h4>
-                                    <p><strong>Amount Due:</strong> ${amount}</p>
-                                    <p><strong>Parcel ID:</strong> ${listing.parcelId || 'N/A'}</p>
-                                    <p><strong>Address Location:</strong> ${lat.toFixed(6)}, ${lng.toFixed(6)}</p>
-                                    <button onclick="openGoogleStreetViewByAddress('${listing.address.replace(/'/g, "\\'")}')" style="background: #f093fb; color: white; border: none; padding: 8px 12px; border-radius: 5px;">📍 View Location</button>
-                                </div>
-                            `)
-                            .addTo(map);
+                            .addTo(map)
+                            .on('click', function() {
+                                openPropertyModal(listing);
+                            });
+                        
                         markers.push(marker);
                         successfulCount++;
+                        
+                        // Update progress
+                        updateProgress(processedCount, listings.length, `Added marker for ${listing.address}`);
                     } else {
                         console.log('❌ Invalid coordinates for', listing.address, ':', lat, lng);
+                        updateProgress(processedCount, listings.length, `Skipped ${listing.address} (invalid coordinates)`);
                     }
                 } else if (listing.address) {
                     // No coordinates available yet - could be geocoded individually if needed
                     console.log('⚠️ No coordinates available for:', listing.address);
+                    updateProgress(processedCount, listings.length, `Skipped ${listing.address} (no coordinates)`);
+                } else {
+                    updateProgress(processedCount, listings.length, `Skipped property ${index + 1} (no address)`);
                 }
+                
+                // Process next marker with a small delay for UI responsiveness
+                setTimeout(() => processNextMarker(index + 1), 20);
             }
             
-            console.log(`✅ Added ${successfulCount} markers to map`);
-            
-            // Fit map to show all markers if we have any
-            if (markers.length > 0) {
-                const group = new L.featureGroup(markers);
-                map.fitBounds(group.getBounds().pad(0.1));
-            }
+            // Start processing
+            processNextMarker(0);
         }
 
         // Helper function to try multiple geocoding strategies using server proxy
@@ -1550,6 +2017,141 @@
             document.getElementById('streetViewModal').classList.add('hidden');
         }
 
+        // Property Details Modal Functions
+        function openPropertyModal(property) {
+            const propertyContent = document.getElementById('propertyModalContent');
+            const amount = property.taxAmount || property.bidAmount || 'N/A';
+            const coordinates = property.coordinates || {};
+            
+            // Create Street View URL for iframe
+            let streetViewHtml = '';
+            if (coordinates.lat && coordinates.lng) {
+                const fallbackUrl = `https://maps.google.com/maps?q=${coordinates.lat},${coordinates.lng}&layer=c&cbll=${coordinates.lat},${coordinates.lng}&cbp=11,0,0,0,0&output=embed`;
+                
+                streetViewHtml = `
+                    <div class="property-street-view">
+                        <iframe src="${fallbackUrl}" 
+                                loading="lazy"
+                                allowfullscreen
+                                referrerpolicy="no-referrer-when-downgrade"
+                                title="Street View of ${property.address}">
+                        </iframe>
+                    </div>
+                `;
+            } else if (property.address) {
+                const encodedAddress = encodeURIComponent(property.address + ', Georgia, USA');
+                const fallbackUrl = `https://maps.google.com/maps?q=${encodedAddress}&layer=c&output=embed`;
+                
+                streetViewHtml = `
+                    <div class="property-street-view">
+                        <iframe src="${fallbackUrl}" 
+                                loading="lazy"
+                                allowfullscreen
+                                referrerpolicy="no-referrer-when-downgrade"
+                                title="Street View of ${property.address}">
+                        </iframe>
+                    </div>
+                `;
+            }
+            
+            propertyContent.innerHTML = `
+                <div>
+                    <h2 class="property-modal-header">
+                        🏠 ${property.address}
+                    </h2>
+                    
+                    ${streetViewHtml}
+                    
+                    <div class="property-info-card">
+                        <div class="property-details-grid">
+                            <div class="property-detail-item">
+                                <span class="property-detail-label">Amount Due:</span>
+                                <span class="property-detail-value property-amount">${amount}</span>
+                            </div>
+                            <div class="property-detail-item">
+                                <span class="property-detail-label">Parcel ID:</span>
+                                <span class="property-detail-value">${property.parcelId || 'N/A'}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('propertyModal').classList.remove('hidden');
+        }
+
+        function closePropertyModal() {
+            document.getElementById('propertyModal').classList.add('hidden');
+        }
+
+        // Close modals when clicking outside
+        document.addEventListener('click', function(event) {
+            const streetViewModal = document.getElementById('streetViewModal');
+            const propertyModal = document.getElementById('propertyModal');
+            
+            if (event.target === streetViewModal) {
+                closeStreetView();
+            }
+            if (event.target === propertyModal) {
+                closePropertyModal();
+            }
+        });
+
+        // Close modals with Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const streetViewModal = document.getElementById('streetViewModal');
+                const propertyModal = document.getElementById('propertyModal');
+                
+                if (!streetViewModal.classList.contains('hidden')) {
+                    closeStreetView();
+                } else if (!propertyModal.classList.contains('hidden')) {
+                    closePropertyModal();
+                }
+            }
+        });
+
+        // Progress Bar Functions
+        function showProgress(title = 'Plotting Properties on Map', total = 0) {
+            const container = document.getElementById('progressContainer');
+            const titleElement = document.getElementById('progressTitle');
+            const progressFill = document.getElementById('progressFill');
+            const progressText = document.getElementById('progressText');
+            const progressCurrent = document.getElementById('progressCurrent');
+            const progressTotal = document.getElementById('progressTotal');
+            
+            titleElement.textContent = title;
+            progressFill.style.width = '0%';
+            progressText.textContent = 'Starting...';
+            progressCurrent.textContent = '0';
+            progressTotal.textContent = total.toString();
+            
+            container.classList.add('show');
+        }
+
+        function updateProgress(current, total, message = '') {
+            const progressFill = document.getElementById('progressFill');
+            const progressText = document.getElementById('progressText');
+            const progressCurrent = document.getElementById('progressCurrent');
+            
+            const percentage = total > 0 ? (current / total) * 100 : 0;
+            progressFill.style.width = percentage + '%';
+            progressCurrent.textContent = current.toString();
+            
+            if (message) {
+                progressText.textContent = message;
+            } else {
+                progressText.textContent = `Processing ${current} of ${total} properties`;
+            }
+        }
+
+        function hideProgress(delay = 1500) {
+            setTimeout(() => {
+                const container = document.getElementById('progressContainer');
+                container.classList.remove('show');
+            }, delay);
+        }
+
         // Geocoding functions
         async function geocodeProperties() {
             if (!currentData || !currentData.parsedListings) {
@@ -1573,6 +2175,10 @@
                 
                 console.log(`Starting batch geocoding for ${addresses.length} addresses`);
                 
+                // Show progress for geocoding
+                showProgress('Geocoding Addresses', addresses.length);
+                updateProgress(0, addresses.length, 'Starting batch geocoding...');
+                
                 const response = await fetch(`${API_BASE}/api/geocode-batch`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1580,6 +2186,8 @@
                 });
                 
                 if (response.ok) {
+                    updateProgress(addresses.length, addresses.length, 'Processing geocoding results...');
+                    
                     const geocodedData = await response.json();
                     console.log('Geocoding response:', geocodedData);
                     
@@ -1606,14 +2214,21 @@
                     }
                     
                     const successCount = geocodedData.results.filter(r => r.success).length;
+                    
+                    // Update progress to completion
+                    updateProgress(addresses.length, addresses.length, `Geocoding complete! ${successCount}/${addresses.length} properties located`);
+                    hideProgress(2000);
+                    
                     showNotification(`✅ Geocoded ${successCount}/${addresses.length} properties`);
                 } else {
                     const errorText = await response.text();
                     console.error('Geocoding failed:', response.status, errorText);
+                    hideProgress(0);
                     throw new Error(`Geocoding failed: ${response.status}`);
                 }
             } catch (error) {
                 console.error('Error geocoding:', error);
+                hideProgress(0);
                 showNotification(`❌ Geocoding failed: ${error.message}`);
             } finally {
                 geocodeBtn.textContent = '🔍 Find Property Locations';
