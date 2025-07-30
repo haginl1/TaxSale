@@ -1090,6 +1090,7 @@
         <div class="map-section hidden" id="mapContainer">
             <div class="map-controls">
                 <button id="showMapBtn" class="btn btn-primary" onclick="toggleMap()">📍 Hide Map</button>
+                <button id="fitToPropertiesBtn" class="btn btn-outline" onclick="fitMapToProperties()">🎯 Fit to Properties</button>
             </div>
             <div class="map-container">
                 <div id="map"></div>
@@ -1710,6 +1711,29 @@
             }
         }
 
+        function fitMapToProperties() {
+            if (!map) {
+                console.log('Map not initialized');
+                return;
+            }
+            
+            if (markers.length === 0) {
+                console.log('No markers to fit to');
+                showNotification('⚠️ No properties plotted on map yet');
+                return;
+            }
+            
+            console.log(`🎯 Fitting map to ${markers.length} property markers`);
+            
+            // Create a feature group from all markers
+            const group = new L.featureGroup(markers);
+            
+            // Fit the map bounds to include all markers with padding
+            map.fitBounds(group.getBounds().pad(0.1));
+            
+            showNotification(`🎯 Map fitted to ${markers.length} properties`);
+        }
+
         async function showPropertiesOnMap(listings) {
             showNotification('🗺️ Mapping properties... This may take a moment.');
             await addMarkersToMap(listings);
@@ -1720,19 +1744,40 @@
             markers.forEach(marker => map.removeLayer(marker));
             markers = [];
             
-            console.log('Adding markers for', listings.length, 'listings...');
+            console.log('🗺️ Adding markers for', listings.length, 'listings...');
+            
+            // Debug: Check coordinate data structure for first few listings
+            console.log('🔍 Debugging coordinate data structure:');
+            listings.slice(0, 5).forEach((listing, i) => {
+                console.log(`  Property ${i + 1}: ${listing.address}`);
+                console.log(`    coordinates:`, listing.coordinates);
+                console.log(`    latitude:`, listing.latitude);
+                console.log(`    longitude:`, listing.longitude);
+                console.log(`    lat:`, listing.lat);
+                console.log(`    lng:`, listing.lng);
+                console.log(`    lon:`, listing.lon);
+                console.log('    ---');
+            });
             
             // Show progress bar
             showProgress('Plotting Properties on Map', listings.length);
             
             let successfulCount = 0;
             let processedCount = 0;
+            let coordinateFieldCounts = {
+                'coordinates.lat/.lng': 0,
+                'latitude/longitude': 0,
+                'lat/lng': 0,
+                'lat/lon': 0,
+                'none': 0
+            };
             
             // Process markers with a small delay to allow UI updates
             function processNextMarker(index) {
                 if (index >= listings.length) {
                     // All markers processed
-                    console.log(`✅ Added ${successfulCount} markers to map`);
+                    console.log(`✅ Added ${successfulCount} markers to map out of ${listings.length} total properties`);
+                    console.log('📊 Coordinate field distribution:', coordinateFieldCounts);
                     
                     // Fit map to show all markers if we have any
                     if (markers.length > 0) {
@@ -1749,14 +1794,39 @@
                 const listing = listings[index];
                 processedCount++;
                 
-                // Check if listing has coordinates from batch geocoding
+                let lat = null;
+                let lng = null;
+                let coordinateSource = '';
+                
+                // Check multiple possible coordinate formats
                 if (listing.coordinates && listing.coordinates.lat && listing.coordinates.lng) {
-                    const lat = listing.coordinates.lat;
-                    const lng = listing.coordinates.lng;
-                    
+                    lat = listing.coordinates.lat;
+                    lng = listing.coordinates.lng;
+                    coordinateSource = 'coordinates.lat/.lng';
+                    coordinateFieldCounts['coordinates.lat/.lng']++;
+                } else if (listing.latitude && listing.longitude) {
+                    lat = listing.latitude;
+                    lng = listing.longitude;
+                    coordinateSource = 'latitude/longitude';
+                    coordinateFieldCounts['latitude/longitude']++;
+                } else if (listing.lat && listing.lng) {
+                    lat = listing.lat;
+                    lng = listing.lng;
+                    coordinateSource = 'lat/lng';
+                    coordinateFieldCounts['lat/lng']++;
+                } else if (listing.lat && listing.lon) {
+                    lat = listing.lat;
+                    lng = listing.lon;
+                    coordinateSource = 'lat/lon';
+                    coordinateFieldCounts['lat/lon']++;
+                } else {
+                    coordinateFieldCounts['none']++;
+                }
+                
+                if (lat && lng) {
                     // Validate coordinates are reasonable (rough Georgia bounds)
                     if (lat >= 30.0 && lat <= 35.0 && lng >= -85.0 && lng <= -80.0) {
-                        console.log('✅ Adding marker for', listing.address, ':', lat, lng);
+                        console.log(`✅ Adding marker for ${listing.address} (${coordinateSource}): ${lat}, ${lng}`);
                         
                         const marker = L.marker([lat, lng])
                             .addTo(map)
