@@ -2,6 +2,9 @@ const express = require('express');
 const fetch = require('node-fetch');
 const pdfParse = require('pdf-parse');
 const path = require('path');
+const fs = require('fs').promises;
+const fsSync = require('fs');
+const pdf2pic = require('pdf2pic');
 const PropertyDatabase = require('./database');
 
 const app = express();
@@ -37,15 +40,14 @@ app.use((req, res, next) => {
 app.use(express.json());
 
 // Geocoding cache setup
-const fs = require('fs');
 const GEOCODE_CACHE_FILE = path.join(__dirname, 'geocode_cache.json');
 let geocodeCache = {};
 
 // Load existing geocode cache
 function loadGeocodeCache() {
     try {
-        if (fs.existsSync(GEOCODE_CACHE_FILE)) {
-            const cacheData = fs.readFileSync(GEOCODE_CACHE_FILE, 'utf8');
+        if (fsSync.existsSync(GEOCODE_CACHE_FILE)) {
+            const cacheData = fsSync.readFileSync(GEOCODE_CACHE_FILE, 'utf8');
             geocodeCache = JSON.parse(cacheData);
             console.log(`Loaded ${Object.keys(geocodeCache).length} cached geocode entries`);
         }
@@ -58,7 +60,7 @@ function loadGeocodeCache() {
 // Save geocode cache
 function saveGeocodeCache() {
     try {
-        fs.writeFileSync(GEOCODE_CACHE_FILE, JSON.stringify(geocodeCache, null, 2));
+        fsSync.writeFileSync(GEOCODE_CACHE_FILE, JSON.stringify(geocodeCache, null, 2));
         console.log(`Saved ${Object.keys(geocodeCache).length} geocode entries to cache`);
     } catch (error) {
         console.error('Error saving geocode cache:', error);
@@ -76,49 +78,99 @@ loadGeocodeCache();
 // Clean address for geocoding by removing legal descriptions
 function cleanAddressForGeocoding(address) {
     if (!address || typeof address !== 'string') {
-        return '';
+        return { cleaned: '', zipCode: null };
     }
     
     let cleaned = address;
+    console.log(`🧹 Cleaning address: "${address}"`);
     
-    // Remove common legal description patterns
+    // Extract zip code if it's embedded in the address before cleaning
+    let extractedZipCode = null;
+    const zipPatterns = [
+        /(\d{5})(?:\s*,?\s*(?:said|SAID)\s+property\s+being)/i,  // Zip followed by "said property being"
+        /(\d{5})(?:\s*,?\s*(?:said|SAID)\s+property)/i,  // Zip followed by "said property"
+        /(\d{5})(?:\s*,?\s*(?:said|SAID))/i,  // Zip followed by "said"
+        /(\d{5})\s*,?\s*$/,  // Zip at end of line
+        /\b(\d{5})\b(?=\s*,?\s*(?:said|SAID))/i,  // Zip before "said" with lookahead
+        /\b(\d{5})\b/,  // Standard zip code with word boundaries
+        /([A-Z]{2,})(\d{5})\b/i,  // Zip code immediately after letters (like "CT31405")
+    ];
+    
+    for (const pattern of zipPatterns) {
+        const zipMatch = cleaned.match(pattern);
+        if (zipMatch) {
+            if (pattern.source.includes('([A-Z]{2,})')) {
+                // For the pattern that captures letters + zip, the zip is in the second capture group
+                extractedZipCode = zipMatch[2];
+                console.log(`🏷️ Found zip code attached to text: ${extractedZipCode}`);
+                // Also clean the address by separating the zip code
+                cleaned = cleaned.replace(pattern, '$1 $2');
+            } else {
+                extractedZipCode = zipMatch[1];
+                console.log(`🏷️ Found zip code in address: ${extractedZipCode}`);
+            }
+            break;
+        }
+    }
+    
+    // First, try to extract addresses from lot/subdivision patterns
+    const extractionPatterns = [
+        // "LOT 26 MISTWOODE SUB 17 RUSTIC LN" -> "17 RUSTIC LN"
+        /^lot\s+\d+.*?\s+(\d+\s+[A-Z\s]+(?:ST|AVE|DR|CT|CIR|LN|RD|WAY|PL|BLVD|PKWY|HWY))/i,
+        // "105 MILLS RUN S/D PHASE 3 108 BLAINE CT 31405" -> "108 BLAINE CT"  
+        /^.*?(\d+\s+[A-Z\s]+(?:ST|AVE|DR|CT|CIR|LN|RD|WAY|PL|BLVD|PKWY|HWY))\s+\d{5}\b/i,
+        // "105 MILLS RUN S/D PHASE 3 108 BLAINE CT" -> "108 BLAINE CT" (with comma)
+        /^.*?(\d+\s+[A-Z\s]+(?:ST|AVE|DR|CT|CIR|LN|RD|WAY|PL|BLVD|PKWY|HWY))\s+\d+,/i,
+        // Generic: "SOMETHING 123 MAIN ST" -> "123 MAIN ST"
+        /^.*?(\d+\s+[A-Z\s]+(?:ST|AVE|DR|CT|CIR|LN|RD|WAY|PL|BLVD|PKWY|HWY))/i,
+        // "88 KNIGHTSBRIDGE SUB PH 3 SMB 13S 3, 112 ST IVES DR" -> "112 ST IVES DR"
+        /^.*?,\s*(\d+\s+[A-Z\s]+(?:ST|AVE|DR|CT|CIR|LN|RD|WAY|PL|BLVD|PKWY|HWY))/i,
+    ];
+    
+    // Try extraction patterns first
+    for (const pattern of extractionPatterns) {
+        const match = cleaned.match(pattern);
+        if (match && match[1]) {
+            cleaned = match[1].trim();
+            console.log(`🎯 Extracted address: "${cleaned}"`);
+            break;
+        }
+    }
+    
+    // Remove "said property" and similar legal language patterns
     const legalPatterns = [
         /,?\s*said\s+property\s+being\s+formerly.*$/i,
         /,?\s*said\s+property.*$/i,
+        /,?\s*SAID\s+property\s+being\s+formerly.*$/i,
+        /,?\s*SAID\s+property.*$/i,
+        /,?\s*SAID.*$/i,
+        /,?\s*said.*$/i,
         /,?\s*being\s+formerly\s+in\s+the\s+name\s+of.*$/i,
         /,?\s*formerly\s+in\s+the\s+name\s+of.*$/i,
         /,?\s*in\s+rem\s+against\s+the\s+property\s+known\s+as\s+/i,
         /^in\s+rem\s*/i,
         /\s+in\s+rem.*$/i,
-        /^lot\s+\d+.*?\s+(\d+\s+\w+.*?)$/i, // Extract address from "LOT 26 MISTWOODE SUB 17 RUSTIC LN"
-        /^lots?\s+\d+.*?\s+(\d+\s+\w+.*?)$/i,
-        /^east\s+half\s+lot\s+\d+.*?\s+(\d+\s+\w+.*?)$/i,
-        /^west\s+half\s+lot\s+\d+.*?\s+(\d+\s+\w+.*?)$/i,
-        /^(east|west|north|south)\s+\d+\s+ft.*?\s+(\d+\s+\w+.*?)$/i,
-        /^e\s+1\/2\s+lt\s+\d+.*?\s+(\d+\s+\w+.*?)$/i,
-        /^w\s+1\/2\s+lt\s+\d+.*?\s+(\d+\s+\w+.*?)$/i,
-        /^lts?\s+\d+.*?\s+(\d+\s+\w+.*?)$/i,
-        /^lt\s+\d+.*?\s+(\d+\s+\w+.*?)$/i,
-        /blk\s+\d+/i,
-        /block\s+\d+/i,
-        /sub\s*$/i,
-        /s\/d\s*/i,
-        /phase\s+\d+/i,
-        /,\s*$/, // trailing comma
+        // Remove zip codes followed by "said property" patterns (but we should have extracted them already)
+        /\s+\d{5}\s*,?\s*said\s+property.*$/i,
+        /\s+\d{5}\s*,?\s*SAID.*$/i,
+        // Remove subdivision and lot references that are at the end
+        /\s+s\/d.*$/i,
+        /\s+sub.*$/i,
+        /\s+subdivision.*$/i,
+        /\s+phase\s+\d+.*$/i,
+        /\s+ph\s+\d+.*$/i,
+        /\s+smb.*$/i,
+        /\s+blk\s+\d+.*$/i,
+        /\s+block\s+\d+.*$/i,
+        /\s+lot\s+\d+.*$/i,
+        /\s+lt\s+\d+.*$/i,
+        /\s+\d+,\s*$/i, // trailing numbers with comma
+        /,\s*$/i, // trailing comma
     ];
     
-    // Apply each pattern
+    // Apply legal description removal patterns
     for (const pattern of legalPatterns) {
-        // Check if pattern has a capture group for extracting the address
-        const match = cleaned.match(pattern);
-        if (match && match[1]) {
-            // Use the captured group (the actual address)
-            cleaned = match[1].trim();
-            break;
-        } else {
-            // Remove the pattern
-            cleaned = cleaned.replace(pattern, '').trim();
-        }
+        cleaned = cleaned.replace(pattern, '').trim();
     }
     
     // Clean up extra spaces and formatting
@@ -130,38 +182,53 @@ function cleanAddressForGeocoding(address) {
         .replace(/[‐–—]/g, '-') // Normalize dashes
         .trim();
     
+    console.log(`🧹 After cleaning: "${cleaned}"`);
+    
     // If we have a reasonable street address pattern, keep it
     if (/^\d+\s+[A-Z\s]+(?:ST|AVE|DR|CT|CIR|LN|RD|WAY|PL|BLVD|PKWY|HWY|HIGHWAY)\b/i.test(cleaned)) {
-        return cleaned;
+        console.log(`✅ Valid street address pattern found`);
+        return { cleaned, zipCode: extractedZipCode };
     }
     
     // If we have just a house number and some text, keep it
     if (/^\d+\s+\w+/.test(cleaned) && cleaned.length > 5) {
-        return cleaned;
+        console.log(`✅ Basic address pattern found`);
+        return { cleaned, zipCode: extractedZipCode };
     }
     
     // If the cleaned address is too short or doesn't look like an address, try to extract from original
     if (cleaned.length < 5) {
+        console.log(`⚠️ Cleaned address too short, trying extraction from original`);
         // Try to extract a street address pattern from the original
         const addressMatch = address.match(/(\d+\s+[A-Z\s]+(?:ST|AVE|DR|CT|CIR|LN|RD|WAY|PL|BLVD|PKWY|HWY|HIGHWAY))\b/i);
         if (addressMatch) {
-            return addressMatch[1].trim();
+            console.log(`🎯 Extracted from original: "${addressMatch[1]}"`);
+            return { cleaned: addressMatch[1].trim(), zipCode: extractedZipCode };
         }
         
         // Try to extract any number followed by words pattern
         const basicMatch = address.match(/(\d+\s+[A-Z\s]{3,})/i);
         if (basicMatch) {
-            return basicMatch[1].trim();
+            console.log(`🎯 Basic extraction from original: "${basicMatch[1]}"`);
+            return { cleaned: basicMatch[1].trim(), zipCode: extractedZipCode };
         }
     }
     
-    return cleaned;
+    console.log(`🧹 Final cleaned address: "${cleaned}"`);
+    return { cleaned, zipCode: extractedZipCode };
 }
 
 // Geocode a single address
 async function geocodeSingleAddress(address, zipCode, county = 'Chatham County', state = 'GA') {
     // Clean the address first
-    const cleanAddress = cleanAddressForGeocoding(address);
+    const cleanResult = cleanAddressForGeocoding(address);
+    const cleanAddress = cleanResult.cleaned;
+    
+    // Use extracted zip code if none was provided
+    if (!zipCode && cleanResult.zipCode) {
+        zipCode = cleanResult.zipCode;
+        console.log(`🏷️ Using extracted zip code: ${zipCode}`);
+    }
     
     if (cleanAddress.length <= 5) {
         console.log(`⚠️  Address too short after cleaning: "${address}" -> "${cleanAddress}"`);
@@ -374,7 +441,7 @@ app.get('/api/counties', (req, res) => {
     }
 });
 
-// Geocoding endpoint using OpenStreetMap Nominatim API
+// Geocoding endpoint using OpenStreetMap Nominatim API (GET method)
 app.get('/api/geocode', async (req, res) => {
     const { address, county = 'Chatham County', state = 'GA' } = req.query;
     
@@ -421,6 +488,147 @@ app.get('/api/geocode', async (req, res) => {
                 address: searchQuery
             });
         }
+        
+    } catch (error) {
+        console.error('Geocoding error:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message,
+            address: address
+        });
+    }
+});
+
+// Test endpoint for address cleaning
+app.post('/api/test-clean-address', (req, res) => {
+    const { address } = req.body;
+    
+    if (!address) {
+        return res.status(400).json({ 
+            error: 'Address parameter required' 
+        });
+    }
+    
+    try {
+        const cleanResult = cleanAddressForGeocoding(address);
+        const cleaned = cleanResult.cleaned;
+        const extractedZip = cleanResult.zipCode;
+        const isValid = cleaned.length > 5 && /^\d+\s+\w+/.test(cleaned);
+        
+        res.json({
+            original: address,
+            cleaned: cleaned,
+            extractedZipCode: extractedZip,
+            isValid: isValid,
+            length: cleaned.length
+        });
+    } catch (error) {
+        res.status(500).json({
+            error: error.message,
+            original: address
+        });
+    }
+});
+
+// Single address geocoding endpoint (POST method) for frontend
+app.post('/api/geocode', async (req, res) => {
+    const { address } = req.body;
+    
+    if (!address) {
+        return res.status(400).json({ 
+            success: false, 
+            error: 'Address parameter required' 
+        });
+    }
+    
+    try {
+        console.log('🔍 Server geocoding request for:', address);
+        
+        // Clean the address first
+        const cleanResult = cleanAddressForGeocoding(address);
+        const cleanedAddress = cleanResult.cleaned;
+        const extractedZip = cleanResult.zipCode;
+        console.log('🧹 Cleaned address:', cleanedAddress);
+        if (extractedZip) {
+            console.log('🏷️ Extracted zip code:', extractedZip);
+        }
+        
+        // Check cache first
+        const cacheKey = getCacheKey(cleanedAddress, extractedZip);
+        if (geocodeCache[cacheKey]) {
+            console.log('📦 Cache hit for:', cleanedAddress);
+            return res.json({
+                success: true,
+                results: [geocodeCache[cacheKey]],
+                cached: true,
+                strategy: 'cache'
+            });
+        }
+        
+        // Try multiple strategies, prioritizing Chatham County/Savannah area
+        const strategies = [
+            `${cleanedAddress}, Chatham County, Georgia, USA`,
+            `${cleanedAddress}, Savannah, Georgia, USA`,
+            `${cleanedAddress}, 31401, Georgia, USA`,  // Savannah downtown zip
+            `${cleanedAddress}, 31404, Georgia, USA`,  // Common Savannah zip
+            `${cleanedAddress}, 31406, Georgia, USA`,  // Common Savannah zip
+            `${cleanedAddress}, Georgia, USA`,
+            cleanedAddress
+        ];
+        
+        for (let i = 0; i < strategies.length; i++) {
+            const strategy = strategies[i];
+            try {
+                console.log(`   Strategy ${i+1}/4: "${strategy}"`);
+                
+                const nominatimUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(strategy)}&limit=1&addressdetails=1&countrycodes=us`;
+                
+                const response = await fetch(nominatimUrl, {
+                    headers: {
+                        'User-Agent': 'TaxSaleListings/1.0'
+                    }
+                });
+                
+                if (!response.ok) {
+                    console.log(`   ❌ HTTP error ${response.status} for strategy: "${strategy}"`);
+                    continue;
+                }
+                
+                const results = await response.json();
+                
+                if (results && results.length > 0) {
+                    const result = results[0];
+                    console.log(`   ✅ Found result: ${result.lat}, ${result.lon}`);
+                    
+                    // Cache the result
+                    geocodeCache[cacheKey] = result;
+                    saveGeocodeCache();
+                    
+                    return res.json({
+                        success: true,
+                        results: [result],
+                        cached: false,
+                        strategy: `Strategy ${i+1}: ${strategy}`
+                    });
+                } else {
+                    console.log(`   ❌ No results for strategy: "${strategy}"`);
+                }
+                
+                // Rate limiting delay
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+            } catch (error) {
+                console.log(`   ❌ Error with strategy "${strategy}":`, error.message);
+            }
+        }
+        
+        console.log(`❌ All geocoding strategies failed for: "${address}"`);
+        res.json({
+            success: false,
+            error: 'No coordinates found for address',
+            address: address,
+            cleanedAddress: cleanedAddress
+        });
         
     } catch (error) {
         console.error('Geocoding error:', error);
@@ -655,8 +863,122 @@ app.get('/api/tax-sale-listings/:county', async (req, res) => {
     }
 });
 
+// Function to extract images from PDF and map them to properties
+async function extractImagesFromPdf(pdfBuffer, photoListText, parsedListings) {
+    try {
+        console.log('🖼️  Starting image extraction from PDF...');
+        
+        // Create images directory if it doesn't exist
+        const imagesDir = path.join(__dirname, 'images');
+        try {
+            await fs.access(imagesDir);
+        } catch {
+            await fs.mkdir(imagesDir, { recursive: true });
+        }
+        
+        console.log('🖼️  Converting PDF pages to images...');
+        
+        // Try multiple extraction methods to handle different PDF formats
+        let results = [];
+        let extractionMethod = 'unknown';
+        
+        try {
+            // Method 1: pdf2pic with basic settings
+            console.log('🖼️  Trying pdf2pic extraction...');
+            const convert = pdf2pic.fromBuffer(pdfBuffer, {
+                density: 150,           // Lower DPI to reduce memory usage
+                saveFilename: "page",   // Base filename
+                savePath: imagesDir,    // Save to images directory
+                format: "jpg",          // Output format
+                width: 600,             // Reduced width
+                height: 900,            // Reduced height
+                quality: 75             // Lower quality to reduce size
+            });
+            
+            results = await convert.bulk(-1); // -1 means all pages
+            extractionMethod = 'pdf2pic';
+            console.log(`🖼️  pdf2pic extracted ${results.length} page images`);
+            
+        } catch (pdf2picError) {
+            console.log('⚠️  pdf2pic failed, trying alternative method:', pdf2picError.message);
+            
+            try {
+                // Method 2: Try with even simpler settings
+                console.log('🖼️  Trying pdf2pic with minimal settings...');
+                const convertSimple = pdf2pic.fromBuffer(pdfBuffer, {
+                    density: 72,            // Very low DPI
+                    saveFilename: "simple",
+                    savePath: imagesDir,
+                    format: "png",          // Try PNG instead
+                    quality: 50
+                });
+                
+                results = await convertSimple.bulk(-1);
+                extractionMethod = 'pdf2pic-simple';
+                console.log(`🖼️  Simple pdf2pic extracted ${results.length} page images`);
+                
+            } catch (simpleError) {
+                console.log('⚠️  Simple pdf2pic also failed:', simpleError.message);
+                console.log('🖼️  Continuing without image extraction - photos will show placeholder text');
+                return {};
+            }
+        }
+        
+        // Map images to properties based on estimated page numbers from photo parsing
+        const imageMap = {};
+        
+        for (const listing of parsedListings) {
+            if (listing.photoData && listing.photoData.estimatedPage) {
+                const pageNumber = listing.photoData.estimatedPage;
+                
+                // Find the corresponding image file based on extraction method
+                let pageImage = null;
+                
+                if (extractionMethod === 'pdf2pic') {
+                    pageImage = results.find(result => 
+                        result.name && result.name.includes(`page.${pageNumber}`)
+                    );
+                } else if (extractionMethod === 'pdf2pic-simple') {
+                    pageImage = results.find(result => 
+                        result.name && result.name.includes(`simple.${pageNumber}`)
+                    );
+                }
+                
+                if (pageImage && pageImage.path) {
+                    // Create a web-accessible filename
+                    const imageFilename = `property_${listing.parcelId}_page_${pageNumber}.jpg`;
+                    const imagePath = path.join(imagesDir, imageFilename);
+                    
+                    // Copy the image with a more descriptive name
+                    try {
+                        await fs.copyFile(pageImage.path, imagePath);
+                        
+                        imageMap[listing.parcelId] = {
+                            filename: imageFilename,
+                            path: imagePath,
+                            webPath: `/images/${imageFilename}`,
+                            page: pageNumber
+                        };
+                        
+                        console.log(`🖼️  Mapped image for parcel ${listing.parcelId} from page ${pageNumber}`);
+                    } catch (copyError) {
+                        console.error(`❌ Failed to copy image for ${listing.parcelId}:`, copyError.message);
+                    }
+                }
+            }
+        }
+        
+        console.log(`🖼️  Image extraction complete: ${Object.keys(imageMap).length} properties have images`);
+        return imageMap;
+        
+    } catch (error) {
+        console.error('❌ Image extraction failed:', error.message);
+        return {};
+    }
+}
+
 // Chatham County PDF parser with database caching
-async function parseChathamPdf(pdfUrl, res, config) {
+async function parseChathamPdf(pdfUrl, res, config, forceRefresh = false) {
     console.log(`Starting PDF parsing for ${config.name} from:`, pdfUrl);
     
     try {
@@ -672,13 +994,18 @@ async function parseChathamPdf(pdfUrl, res, config) {
         const buffer = await response.buffer();
         console.log('Buffer size:', buffer.length);
 
-        // Check if PDF has changed using database
+        // Check if PDF has changed using database (unless force refresh is requested)
         const filename = `${config.name}_tax_sale_${new Date().toISOString().split('T')[0]}.pdf`;
-        const fileCheck = await db.hasFileChanged(filename, buffer);
+        let fileCheck = { changed: true, isNew: true };
         
-        console.log('File change check:', fileCheck);
+        if (!forceRefresh) {
+            fileCheck = await db.hasFileChanged(filename, buffer);
+            console.log('File change check:', fileCheck);
+        } else {
+            console.log('🔄 Force refresh mode - bypassing cache check');
+        }
 
-        if (!fileCheck.changed && !fileCheck.isNew) {
+        if (!forceRefresh && !fileCheck.changed && !fileCheck.isNew) {
             // File hasn't changed, return cached data from database
             console.log('📊 PDF unchanged, returning cached data from database');
             const cachedProperties = await db.getAllProperties();
@@ -762,6 +1089,21 @@ async function parseChathamPdf(pdfUrl, res, config) {
             
             // Save previous listing if it exists
             if (Object.keys(currentListing).length > 0) {
+                // Map parsed amount to taxAmount field for database storage
+                if (currentListing.amount && !currentListing.taxAmount) {
+                    // Remove $ and convert to number, then back to string with $
+                    const cleanAmount = currentListing.amount.replace(/[$,]/g, '');
+                    if (!isNaN(parseFloat(cleanAmount))) {
+                        currentListing.taxAmount = currentListing.amount;
+                        console.log(`DEBUG: Successfully mapped amount to taxAmount for ${currentListing.property}: ${currentListing.taxAmount}`);
+                    } else {
+                        console.log(`DEBUG: Failed to parse amount as number: ${currentListing.amount}`);
+                    }
+                } else if (!currentListing.amount) {
+                    console.log(`DEBUG: No amount found for property: ${currentListing.property}`);
+                } else {
+                    console.log(`DEBUG: taxAmount already set for ${currentListing.property}: ${currentListing.taxAmount}`);
+                }
                 parsedListings.push({...currentListing});
             }
             
@@ -794,23 +1136,70 @@ async function parseChathamPdf(pdfUrl, res, config) {
                 currentListing.allLines.push(nextLine);
                 allDataLines.push(nextLine);
                 
-                // Identify amount - handle both combined ($1234.56) and separate lines
-                if (nextLine.includes('$') && /[\d,]+\.?\d*/.test(nextLine)) {
-                    // Case 1: Dollar sign and amount on same line
-                    const amountMatch = nextLine.match(/[\d,]+\.?\d*/);
-                    if (amountMatch) {
-                        currentListing.amount = '$' + amountMatch[0];
-                        foundAmount = true;
+                // Enhanced amount detection - look for various amount patterns
+                if (!foundAmount) {
+                    let amountMatch = null;
+                    console.log(`DEBUG: Checking line for amount: "${nextLine}"`);
+                    
+                    // Pattern 1: Dollar sign with amount ($1,234.56)
+                    if (nextLine.includes('$')) {
+                        amountMatch = nextLine.match(/\$[\d,]+\.?\d*/);
+                        if (amountMatch) {
+                            currentListing.amount = amountMatch[0];
+                            foundAmount = true;
+                            console.log(`DEBUG: Found $ amount: ${amountMatch[0]}`);
+                        }
                     }
-                } else if (/^[\d,]+\.\d+$/.test(nextLine) && !foundAmount) {
-                    // Case 2: Amount line without $ - typical pattern like "4,672.58"
-                    currentListing.amount = '$' + nextLine;
-                    foundAmount = true;
+                    // Pattern 2: Decimal number that looks like currency (1234.56, 1,234.56)
+                    else if (/^[\d,]+\.\d{2}$/.test(nextLine)) {
+                        currentListing.amount = '$' + nextLine;
+                        foundAmount = true;
+                        console.log(`DEBUG: Found decimal amount: $${nextLine}`);
+                    }
+                    // Pattern 3: Large number without decimals that could be cents (123456 -> $1234.56)
+                    else if (/^\d{5,}$/.test(nextLine) && parseInt(nextLine) > 10000) {
+                        const dollars = Math.floor(parseInt(nextLine) / 100);
+                        const cents = parseInt(nextLine) % 100;
+                        currentListing.amount = `$${dollars.toLocaleString()}.${cents.toString().padStart(2, '0')}`;
+                        foundAmount = true;
+                        console.log(`DEBUG: Found large number amount: ${currentListing.amount}`);
+                    }
+                    // Pattern 4: Amount in parentheses or with other formatting
+                    else if (/[\d,]+\.?\d*/.test(nextLine) && nextLine.length < 15) {
+                        const numMatch = nextLine.match(/[\d,]+\.?\d*/);
+                        if (numMatch && parseFloat(numMatch[0].replace(/,/g, '')) > 100) {
+                            currentListing.amount = '$' + numMatch[0];
+                            foundAmount = true;
+                            console.log(`DEBUG: Found formatted amount: $${numMatch[0]}`);
+                        }
+                    }
                 }
                 
                 // Identify zip code (5 digits)
-                if (/^\d{5}$/.test(nextLine)) {
-                    currentListing.zipCode = nextLine;
+                if (/^\d{5}$/.test(nextLine) && !currentListing.zipCode) {
+                    // Check if the next line has "SAID" to confirm this is likely a zip code
+                    const followingLine = j + 1 < lines.length ? lines[j + 1] : '';
+                    if (/^\s*(?:said|SAID)(?:\s+property)?/i.test(followingLine) || 
+                        // Also accept standalone zip codes even without SAID
+                        followingLine.length === 0 || 
+                        /^[A-Z\s]+$/i.test(followingLine)) {
+                        currentListing.zipCode = nextLine;
+                        console.log(`DEBUG: Found zip code: ${nextLine}${followingLine ? ` (followed by: "${followingLine}")` : ''}`);
+                    }
+                }
+                
+                // Also check for zip codes embedded in text (like "31406, said property")
+                const zipInText = nextLine.match(/(\d{5})(?:\s*,?\s*(?:said|SAID)(?:\s+property)?(?:\s+being)?)/i);
+                if (zipInText && !currentListing.zipCode) {
+                    currentListing.zipCode = zipInText[1];
+                    console.log(`DEBUG: Found embedded zip code: ${zipInText[1]} in text: "${nextLine}"`);
+                }
+                
+                // Check for zip codes at the end of address lines
+                const zipAtEnd = nextLine.match(/(\d{5})\s*,?\s*$/);
+                if (zipAtEnd && !currentListing.zipCode) {
+                    currentListing.zipCode = zipAtEnd[1];
+                    console.log(`DEBUG: Found trailing zip code: ${zipAtEnd[1]} in text: "${nextLine}"`);
                 }
                 
                 j++;
@@ -819,6 +1208,45 @@ async function parseChathamPdf(pdfUrl, res, config) {
             // Parse owner and address from the collected lines
             if (allDataLines.length > 0) {
                 console.log(`DEBUG: Processing parcel ${fullParcelId} with data:`, allDataLines);
+                console.log(`DEBUG: Found amount for ${fullParcelId}:`, currentListing.amount || 'NO AMOUNT FOUND');
+                console.log(`DEBUG: Found zip code so far for ${fullParcelId}:`, currentListing.zipCode || 'NO ZIP CODE FOUND');
+                
+                // Additional comprehensive zip code search in all data before filtering
+                if (!currentListing.zipCode) {
+                    console.log(`DEBUG: Performing comprehensive zip code search in all data lines...`);
+                    for (let i = 0; i < allDataLines.length; i++) {
+                        const searchLine = allDataLines[i];
+                        const zipPatterns = [
+                            /(\d{5})(?:\s*,?\s*(?:said|SAID)\s+property\s+being)/i,  // Zip followed by "said property being"
+                            /(\d{5})(?:\s*,?\s*(?:said|SAID)\s+property)/i,  // Zip followed by "said property"
+                            /(\d{5})(?:\s*,?\s*(?:said|SAID))/i,  // Zip followed by "said"
+                            /(\d{5})\s*,?\s*$/,  // Zip at end of line
+                            /\b(\d{5})\b(?=\s*,?\s*(?:said|SAID))/i,  // Zip before "said" with lookahead
+                            /\b(\d{5})\b/,  // Any 5-digit number with word boundaries
+                        ];
+                        
+                        for (let pattern of zipPatterns) {
+                            const match = searchLine.match(pattern);
+                            if (match) {
+                                currentListing.zipCode = match[1];
+                                console.log(`DEBUG: Found zip code in comprehensive search: ${match[1]} from line: "${searchLine}"`);
+                                break;
+                            }
+                        }
+                        
+                        // Also check for cross-line patterns: zip code on one line, "SAID" on next line
+                        if (!currentListing.zipCode && /^\d{5}$/.test(searchLine.trim())) {
+                            const nextLine = i + 1 < allDataLines.length ? allDataLines[i + 1] : '';
+                            if (/^\s*(?:said|SAID)(?:\s+property)?/i.test(nextLine)) {
+                                currentListing.zipCode = searchLine.trim();
+                                console.log(`DEBUG: Found cross-line zip code: ${currentListing.zipCode} followed by "${nextLine}"`);
+                                break;
+                            }
+                        }
+                        
+                        if (currentListing.zipCode) break;
+                    }
+                }
                 
                 // Find the house number (first number that's not 5 digits)
                 let houseNumberIndex = -1;
@@ -828,10 +1256,25 @@ async function parseChathamPdf(pdfUrl, res, config) {
                     // Find house number (first number that's not a zip code)
                     if (/^\d+$/.test(allDataLines[k]) && !(/^\d{5}$/.test(allDataLines[k])) && houseNumberIndex === -1) {
                         houseNumberIndex = k;
+                        console.log(`DEBUG: Found standalone house number at index ${k}: ${allDataLines[k]}`);
                     }
-                    // Find zip code
+                    // Also look for house numbers at the start of lines (like "108 BLAINE CT 31405")
+                    else if (/^\d{1,4}\s+[A-Z\s]+/i.test(allDataLines[k]) && houseNumberIndex === -1) {
+                        // Check if this line contains a street address pattern
+                        if (/^\d{1,4}\s+[A-Z\s]+(?:ST|AVE|DR|CT|CIR|LN|RD|WAY|PL|BLVD|PKWY|HWY)/i.test(allDataLines[k])) {
+                            houseNumberIndex = k;
+                            console.log(`DEBUG: Found house number in address line at index ${k}: ${allDataLines[k]}`);
+                        }
+                    }
+                    
+                    // Find zip code - standalone or embedded
                     if (/^\d{5}$/.test(allDataLines[k])) {
                         zipIndex = k;
+                        console.log(`DEBUG: Found standalone zip at index ${k}: ${allDataLines[k]}`);
+                    } else if (allDataLines[k].match(/(\d{5})(?:\s*,?\s*(?:said|SAID)(?:\s+property)?(?:\s+being)?|$)/i)) {
+                        // Zip code embedded in text or at end of line
+                        zipIndex = k;
+                        console.log(`DEBUG: Found embedded zip at index ${k}: ${allDataLines[k]}`);
                     }
                 }
                 
@@ -852,9 +1295,35 @@ async function parseChathamPdf(pdfUrl, res, config) {
                         part.length > 0 && 
                         !part.includes('$') && 
                         !/^[\d,]+\.[\d,]+$/.test(part) && // Only filter decimal amounts like "4,672.58", not house numbers
-                        !/^\d{5}$/.test(part) // Not zip code
+                        !/^\d{5}$/.test(part) && // Not zip code
+                        // Filter out "said property" and similar legal language during parsing
+                        !/^said$/i.test(part) &&
+                        !/^property$/i.test(part) &&
+                        !/^being$/i.test(part) &&
+                        !/^formerly$/i.test(part) &&
+                        !part.toLowerCase().includes('said property')
                     );
-                    currentListing.address = addressParts.join(' ');
+                    
+                    // Clean the constructed address to remove any remaining legal language
+                    const cleaningResult = cleanAddressForGeocoding(addressParts.join(' '));
+                    currentListing.address = cleaningResult.cleaned;
+                    
+                    // Use extracted zip code from address cleaning if not found yet
+                    if (!currentListing.zipCode && cleaningResult.zipCode) {
+                        currentListing.zipCode = cleaningResult.zipCode;
+                        console.log(`DEBUG: Using zip code extracted during address cleaning: ${cleaningResult.zipCode}`);
+                    }
+                    
+                    // Final zip code extraction from the raw address parts if not found yet
+                    if (!currentListing.zipCode) {
+                        console.log(`DEBUG: No zip code found yet, checking raw address parts:`, addressParts);
+                        const fullRawAddress = addressParts.join(' ');
+                        const zipMatch = fullRawAddress.match(/\b(\d{5})\b/);
+                        if (zipMatch) {
+                            currentListing.zipCode = zipMatch[1];
+                            console.log(`DEBUG: Extracted zip code from full address: ${zipMatch[1]} from "${fullRawAddress}"`);
+                        }
+                    }
                 } else {
                     // Fallback: if no house number found, split roughly in half
                     const splitPoint = Math.floor(allDataLines.length / 2);
@@ -862,11 +1331,36 @@ async function parseChathamPdf(pdfUrl, res, config) {
                         part.length > 0 && !part.includes('$') && !/^[\d,]+\.[\d,]+$/.test(part)
                     );
                     const addressParts = allDataLines.slice(splitPoint).filter(part => 
-                        part.length > 0 && !part.includes('$') && !/^[\d,]+\.[\d,]+$/.test(part) && !/^\d{5}$/.test(part)
+                        part.length > 0 && !part.includes('$') && !/^[\d,]+\.[\d,]+$/.test(part) && !/^\d{5}$/.test(part) &&
+                        // Filter out "said property" and similar legal language during parsing
+                        !/^said$/i.test(part) &&
+                        !/^property$/i.test(part) &&
+                        !/^being$/i.test(part) &&
+                        !/^formerly$/i.test(part) &&
+                        !part.toLowerCase().includes('said property')
                     );
                     
                     currentListing.owner = ownerParts.slice(0, 4).join(' ');
-                    currentListing.address = addressParts.join(' ');
+                    // Clean the constructed address to remove any remaining legal language
+                    const cleaningResult = cleanAddressForGeocoding(addressParts.join(' '));
+                    currentListing.address = cleaningResult.cleaned;
+                    
+                    // Use extracted zip code from address cleaning if not found yet
+                    if (!currentListing.zipCode && cleaningResult.zipCode) {
+                        currentListing.zipCode = cleaningResult.zipCode;
+                        console.log(`DEBUG: Using zip code extracted during address cleaning (fallback): ${cleaningResult.zipCode}`);
+                    }
+                    
+                    // Final zip code extraction from the raw address parts if not found yet
+                    if (!currentListing.zipCode) {
+                        console.log(`DEBUG: No zip code found yet (fallback), checking raw address parts:`, addressParts);
+                        const fullRawAddress = addressParts.join(' ');
+                        const zipMatch = fullRawAddress.match(/\b(\d{5})\b/);
+                        if (zipMatch) {
+                            currentListing.zipCode = zipMatch[1];
+                            console.log(`DEBUG: Extracted zip code from full address (fallback): ${zipMatch[1]} from "${fullRawAddress}"`);
+                        }
+                    }
                 }
             }
             
@@ -875,9 +1369,25 @@ async function parseChathamPdf(pdfUrl, res, config) {
         }
     }
     
-    // Add the last listing
-    if (Object.keys(currentListing).length > 0) {
-        parsedListings.push(currentListing);
+    // Add the last listing (only if not already added)
+    if (Object.keys(currentListing).length > 0 && currentListing.parcelId) {
+        // Map parsed amount to taxAmount field for database storage
+        if (currentListing.amount && !currentListing.taxAmount) {
+            // Remove $ and convert to number, then back to string with $
+            const cleanAmount = currentListing.amount.replace(/[$,]/g, '');
+            if (!isNaN(parseFloat(cleanAmount))) {
+                currentListing.taxAmount = currentListing.amount;
+            }
+        }
+        
+        // Check if this listing was already added (avoid duplicates)
+        const isDuplicate = parsedListings.some(listing => listing.parcelId === currentListing.parcelId);
+        if (!isDuplicate) {
+            parsedListings.push(currentListing);
+            console.log(`DEBUG: Added final listing: ${currentListing.parcelId}`);
+        } else {
+            console.log(`DEBUG: Skipped duplicate final listing: ${currentListing.parcelId}`);
+        }
     }
 
     // Parse photo list and correlate with parcel IDs
@@ -952,13 +1462,43 @@ async function parseChathamPdf(pdfUrl, res, config) {
         if (photoMap[listing.parcelId]) {
             listing.photoData = photoMap[listing.parcelId];
             listing.hasPhotos = true;
-            // Copy amount from photoData if main parsing didn't capture it
-            if ((!listing.amount || listing.amount === '') && listing.photoData.bidAmount) {
+            // Use bidAmount from photoData as the primary tax amount source
+            if (listing.photoData.bidAmount) {
                 listing.amount = listing.photoData.bidAmount;
+                listing.taxAmount = listing.photoData.bidAmount;
+                console.log(`DEBUG: Using photo bidAmount as taxAmount for ${listing.parcelId}: ${listing.taxAmount}`);
             }
         } else {
             listing.photoData = null;
             listing.hasPhotos = false;
+        }
+    });
+    
+    // Extract images from photo PDF and map to properties
+    let imageMap = {};
+    if (config.photoListUrl && photoData) {
+        try {
+            // Fetch the photo PDF again for image extraction
+            console.log('🖼️  Fetching photo PDF for image extraction...');
+            const photoResponse = await fetch(config.photoListUrl);
+            if (photoResponse.ok) {
+                const photoBuffer = await photoResponse.buffer();
+                imageMap = await extractImagesFromPdf(photoBuffer, photoData.text, parsedListings);
+            }
+        } catch (error) {
+            console.error('❌ Image extraction failed:', error.message);
+        }
+    }
+    
+    // Add image data to listings
+    parsedListings.forEach(listing => {
+        if (imageMap[listing.parcelId]) {
+            listing.imageData = imageMap[listing.parcelId];
+            listing.hasImage = true;
+            console.log(`🖼️  Added image data for ${listing.parcelId}: ${listing.imageData.webPath}`);
+        } else {
+            listing.imageData = null;
+            listing.hasImage = false;
         }
     });
     
@@ -968,6 +1508,18 @@ async function parseChathamPdf(pdfUrl, res, config) {
     
     // Store the PDF file and properties in database
     console.log('💾 Storing properties in database...');
+    
+    // Debug: Check what amounts are in parsedListings before storage
+    console.log(`DEBUG: About to store ${parsedListings.length} properties`);
+    parsedListings.forEach((listing, index) => {
+        if (index < 5) { // Log first 5 properties for debugging
+            console.log(`DEBUG: Property ${index + 1} - ${listing.property}:`);
+            console.log(`  amount: ${listing.amount}`);
+            console.log(`  taxAmount: ${listing.taxAmount}`);
+            console.log(`  bidAmount: ${listing.bidAmount}`);
+        }
+    });
+    
     const pdfFileId = await db.storePdfFile(filename, fileCheck.currentHash);
     await db.storeProperties(pdfFileId, parsedListings);
     console.log(`✅ Stored ${parsedListings.length} properties in database`);
@@ -1045,6 +1597,7 @@ app.get('/api/cached-properties', async (req, res) => {
 
 // Get database statistics
 app.get('/api/database-stats', async (req, res) => {
+    console.log('📊 Database stats requested');
     try {
         const stats = await db.getGeocodingStats();
         
@@ -1060,21 +1613,38 @@ app.get('/api/database-stats', async (req, res) => {
     }
 });
 
+// Add endpoint to clear cache for testing
+app.post('/api/clear-cache', async (req, res) => {
+    console.log('🗑️ Cache clear requested');
+    try {
+        // Clear all data from the database to force fresh parsing
+        await db.clearAllData();
+        console.log('✅ Database cache cleared');
+        res.json({ message: 'Cache cleared successfully' });
+    } catch (error) {
+        console.error('Error clearing cache:', error);
+        res.status(500).json({ error: 'Failed to clear cache' });
+    }
+});
+
 // Force refresh - clears database and re-processes PDF
 app.post('/api/force-refresh/:county', async (req, res) => {
+    console.log(`🔄 Force refresh requested for county: ${req.params.county}`);
     try {
         const county = req.params.county;
         const config = COUNTY_CONFIGS[county];
         
         if (!config) {
+            console.log(`❌ County not found: ${county}`);
             return res.status(404).json({ error: 'County not found' });
         }
 
         console.log('🔄 Force refresh requested - will re-process PDF...');
+        console.log('Config:', config);
         
         // Re-process the PDF (the parseChathamPdf function will handle database updates)
         if (config.dataType === 'pdf') {
-            return await parseChathamPdf(config.dataUrl, res, config);
+            return await parseChathamPdf(config.url, res, config, true); // Pass true for forceRefresh
         } else {
             throw new Error(`Unsupported data type: ${config.dataType}`);
         }
