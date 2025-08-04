@@ -37,6 +37,8 @@
         .maintenance { background: #fff3cd; color: #856404; padding: 1rem; border-radius: 8px; margin: 1rem 0; }
         .raw-button { background: #17a2b8; color: white; border: none; padding: 0.3rem 0.6rem; border-radius: 3px; cursor: pointer; font-size: 0.8rem; }
         .raw-button:hover { background: #138496; }
+        .map-button { background: #28a745; color: white; border: none; padding: 0.3rem 0.6rem; border-radius: 3px; cursor: pointer; font-size: 0.8rem; margin-bottom: 5px; }
+        .map-button:hover { background: #218838; }
         .raw-data { background: #f8f9fa; padding: 0.5rem; margin-top: 0.5rem; border-radius: 4px; font-family: monospace; font-size: 0.8rem; max-height: 100px; overflow-y: auto; }
         .photo-preview { max-width: 200px; max-height: 150px; border: 1px solid #ddd; border-radius: 4px; margin: 0.5rem 0; }
         .photo-container { text-align: center; }
@@ -65,6 +67,58 @@
         .popup-content h4 { margin: 0 0 0.5rem 0; color: #764ba2; }
         .popup-content p { margin: 0.2rem 0; }
         .popup-content .amount { font-weight: bold; color: #dc3545; }
+        
+        /* PDF Section Styles */
+        .pdf-section { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            padding: 1.5rem; 
+            border-radius: 10px; 
+            margin: 1.5rem 0; 
+            color: white;
+        }
+        .pdf-section.hidden { display: none; }
+        .pdf-info h3 { 
+            margin: 0 0 1rem 0; 
+            color: white; 
+            font-size: 1.2rem;
+        }
+        .pdf-link-container { 
+            margin: 0.8rem 0; 
+            display: flex; 
+            align-items: center; 
+            gap: 1rem;
+        }
+        .pdf-download-btn { 
+            background: rgba(255,255,255,0.2); 
+            color: white; 
+            padding: 0.8rem 1.5rem; 
+            text-decoration: none; 
+            border-radius: 8px; 
+            font-weight: bold; 
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+        .pdf-download-btn:hover { 
+            background: rgba(255,255,255,0.3); 
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        .pdf-download-btn.photo-pdf { 
+            background: rgba(40,167,69,0.3); 
+            border-color: rgba(40,167,69,0.5);
+        }
+        .pdf-date { 
+            font-size: 0.9rem; 
+            opacity: 0.9; 
+            font-style: italic;
+        }
+        .pdf-stats { 
+            margin-top: 1rem; 
+            padding-top: 1rem; 
+            border-top: 1px solid rgba(255,255,255,0.3); 
+            font-size: 0.9rem; 
+            opacity: 0.9;
+        }
     </style>
 </head>
 <body>
@@ -78,6 +132,27 @@
                 <option value="dekalb">DeKalb County</option>
             </select>
             <button onclick="loadListings()">Load Listings</button>
+        </div>
+        
+        <!-- Current Tax Sale PDF Section -->
+        <div id="currentPdfSection" class="pdf-section hidden">
+            <div class="pdf-info">
+                <h3>📄 Current Tax Sale Documents</h3>
+                <div id="pdfLinks">
+                    <div class="pdf-link-container">
+                        <a id="mainPdfLink" href="#" target="_blank" class="pdf-download-btn">
+                            📋 Download Current Tax Sale List
+                        </a>
+                        <span id="pdfDate" class="pdf-date"></span>
+                    </div>
+                    <div id="photoPdfContainer" class="pdf-link-container hidden">
+                        <a id="photoPdfLink" href="#" target="_blank" class="pdf-download-btn photo-pdf">
+                            📸 Download Photo List
+                        </a>
+                    </div>
+                </div>
+                <div id="pdfStats" class="pdf-stats"></div>
+            </div>
         </div>
         
         <div id="statusContainer"></div>
@@ -121,8 +196,30 @@
                     }
                     select.appendChild(option);
                 });
+                
+                // Load current PDF links for default county
+                loadCurrentPdfLinks();
             } catch (error) {
                 console.error('Error loading counties:', error);
+            }
+        }
+        
+        // Load current PDF links without loading full listings
+        async function loadCurrentPdfLinks() {
+            const county = document.getElementById('countySelect').value;
+            
+            try {
+                const response = await fetch(`http://localhost:3001/api/pdf-links/${county}`);
+                const data = await response.json();
+                
+                if (response.ok && data.pdfUrl) {
+                    // Just update the PDF section, don't load full data
+                    updatePdfSection(data);
+                }
+            } catch (error) {
+                console.log('Could not load PDF links:', error.message);
+                // Not a critical error, just hide the PDF section
+                document.getElementById('currentPdfSection').classList.add('hidden');
             }
         }
 
@@ -162,6 +259,9 @@
                 
                 // Clear loading state
                 statusContainer.innerHTML = '';
+                
+                // Update PDF section
+                updatePdfSection(data);
                 
                 // Show statistics
                 if (data.metadata) {
@@ -233,6 +333,7 @@
                                 <td><strong>${listing.amount || 'N/A'}</strong></td>
                                 <td>${photoHTML}</td>
                                 <td>
+                                    <button class="map-button" onclick="viewOnSagisMap('${listing.parcelId}')">🗺️ View on Map</button><br>
                                     <button class="raw-button" onclick="toggleRawData(${index})">Show Raw</button>
                                     <div id="raw-${index}" class="raw-data" style="display:none;">
                                         <strong>All Lines:</strong><br>
@@ -261,6 +362,49 @@
                         <strong>Error:</strong> ${error.message}
                     </div>
                 `;
+            }
+        }
+        
+        // Update PDF section with current tax sale documents
+        function updatePdfSection(data) {
+            const pdfSection = document.getElementById('currentPdfSection');
+            const mainPdfLink = document.getElementById('mainPdfLink');
+            const photoPdfLink = document.getElementById('photoPdfLink');
+            const photoPdfContainer = document.getElementById('photoPdfContainer');
+            const pdfDate = document.getElementById('pdfDate');
+            const pdfStats = document.getElementById('pdfStats');
+            
+            if (data.pdfUrl) {
+                // Show the PDF section
+                pdfSection.classList.remove('hidden');
+                
+                // Update main PDF link
+                mainPdfLink.href = data.pdfUrl;
+                
+                // Update PDF date/info
+                const updatedDate = data.metadata?.lastUpdated || new Date().toLocaleDateString();
+                pdfDate.textContent = `Updated: ${updatedDate}`;
+                
+                // Update photo PDF if available
+                if (data.metadata?.photoListAvailable && data.photoListUrl) {
+                    photoPdfLink.href = data.photoListUrl;
+                    photoPdfContainer.classList.remove('hidden');
+                } else {
+                    photoPdfContainer.classList.add('hidden');
+                }
+                
+                // Update stats
+                let statsText = `📊 ${data.totalListings} properties in current list`;
+                if (data.metadata?.propertiesWithPhotos) {
+                    statsText += ` • ${data.metadata.propertiesWithPhotos} with photos`;
+                }
+                if (data.metadata?.taxSaleDate) {
+                    statsText += ` • Sale Date: ${data.metadata.taxSaleDate}`;
+                }
+                pdfStats.textContent = statsText;
+            } else {
+                // Hide the PDF section if no PDF available
+                pdfSection.classList.add('hidden');
             }
         }
         
@@ -702,10 +846,33 @@
             console.log(`Plotted ${mappedCount} properties on map`);
         }
         
+        // Function to open SAGIS map for a specific parcel
+        function viewOnSagisMap(parcelId) {
+            if (!parcelId) {
+                alert('Parcel ID not available');
+                return;
+            }
+            
+            // Clean the parcel ID (remove any extra characters or formatting)
+            const cleanParcelId = parcelId.toString().trim();
+            
+            // SAGIS map URL with parcel search
+            // This URL will open SAGIS and search for the specific parcel
+            const sagisUrl = `https://www.sagis.org/map/?search=${encodeURIComponent(cleanParcelId)}`;
+            
+            // Open in a new window/tab
+            window.open(sagisUrl, '_blank', 'width=1200,height=800,scrollbars=yes,resizable=yes');
+        }
+        
         // Initialize page
         window.addEventListener('load', () => {
             loadCounties();
             loadListings(); // Load default county listings
+            
+            // Add county change listener to reload PDF links
+            document.getElementById('countySelect').addEventListener('change', () => {
+                loadCurrentPdfLinks();
+            });
         });
     </script>
 </body>

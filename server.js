@@ -1,3 +1,4 @@
+// Tax Sale System with Dynamic URL Fetching - Deploy: Aug 4, 2025 (Sync Update)
 const express = require('express');
 const fetch = require('node-fetch');
 const pdfParse = require('pdf-parse');
@@ -6,6 +7,7 @@ const fs = require('fs').promises;
 const fsSync = require('fs');
 const pdf2pic = require('pdf2pic');
 const PropertyDatabase = require('./database');
+const cheerio = require('cheerio');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -403,15 +405,76 @@ app.use(express.static(path.join(__dirname, '.'), {
     index: false  // Prevent serving index.html automatically
 }));
 
+// Function to dynamically fetch current PDF URLs from the tax sale website
+async function fetchCurrentTaxSaleUrls() {
+    try {
+        console.log('🔄 Fetching current tax sale URLs from website...');
+        const response = await fetch('https://tax.chathamcountyga.gov/TaxSaleList');
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const html = await response.text();
+        const $ = cheerio.load(html);
+        
+        // Look for links containing specific text patterns
+        let taxSaleUrl = null;
+        let photoListUrl = null;
+        
+        console.log('🔍 Scanning webpage for PDF links...');
+        
+        // Find tax sale list link
+        $('a').each((i, element) => {
+            const linkText = $(element).text().trim();
+            const href = $(element).attr('href');
+            
+            if (href && href.includes('cms.chathamcountyga.gov/api/assets/taxcommissioner')) {
+                console.log(`Found CMS link: "${linkText}" -> ${href}`);
+                if (linkText.toLowerCase().includes('tax sale list') && !linkText.toLowerCase().includes('photo')) {
+                    taxSaleUrl = href;
+                    console.log(`✅ Found Tax Sale List URL: ${linkText} -> ${href}`);
+                } else if (linkText.toLowerCase().includes('tax sale photo list')) {
+                    photoListUrl = href;
+                    console.log(`✅ Found Tax Sale Photo List URL: ${linkText} -> ${href}`);
+                }
+            }
+        });
+        
+        if (!taxSaleUrl) {
+            console.log('❌ Could not find Tax Sale List URL on the webpage');
+            throw new Error('Could not find Tax Sale List URL on the webpage');
+        }
+        
+        console.log(`✅ Successfully fetched current URLs from tax sale website`);
+        console.log(`✅ Tax Sale URL: ${taxSaleUrl}`);
+        console.log(`✅ Photo URL: ${photoListUrl}`);
+        
+        return {
+            taxSaleUrl,
+            photoListUrl,
+            fetchedAt: new Date().toISOString()
+        };
+        
+    } catch (error) {
+        console.error('❌ Error fetching current tax sale URLs:', error.message);
+        // Return null so we can fall back to hardcoded URLs if needed
+        return null;
+    }
+}
+
 // County configurations
 const COUNTY_CONFIGS = {
     chatham: {
         name: 'Chatham County',
         state: 'GA',
         dataType: 'pdf',
-        url: 'https://cms.chathamcountyga.gov/api/assets/taxcommissioner/55d1026b-bc1f-4f42-be4d-12893bff13d9?download=0',
-        photoListUrl: 'https://cms.chathamcountyga.gov/api/assets/taxcommissioner/678679b0-4664-4f96-8a68-a28ae08a63d8?download=0',
-        parser: 'chathamPdfParser'
+        // Current URLs as of August 2025 - these will be fetched dynamically
+        url: 'https://cms.chathamcountyga.gov/api/assets/taxcommissioner/bbcf4bac-48f3-47fe-894c-18397e65ebff?download=0',
+        photoListUrl: 'https://cms.chathamcountyga.gov/api/assets/taxcommissioner/59c03060-15c8-4653-9c6c-0568b45814c9?download=0',
+        parser: 'chathamPdfParser',
+        dynamicUrls: true, // Flag to indicate we should fetch URLs dynamically
+        sourceWebsite: 'https://tax.chathamcountyga.gov/TaxSaleList'
     },
     dekalb: {
         name: 'DeKalb County',
@@ -438,6 +501,68 @@ app.get('/api/counties', (req, res) => {
     } catch (error) {
         console.error('Error in counties endpoint:', error);
         res.status(500).json({ error: 'Failed to load counties' });
+    }
+});
+
+// Endpoint to get current PDF URLs for a county without loading full data
+app.get('/api/pdf-links/:county', async (req, res) => {
+    const { county } = req.params;
+    console.log(`PDF links requested for county: ${county}`);
+    
+    try {
+        const config = COUNTY_CONFIGS[county];
+        if (!config) {
+            return res.status(404).json({ error: 'County not found' });
+        }
+
+        // Check if county is under maintenance
+        if (config.status === 'maintenance') {
+            return res.status(503).json({ 
+                error: 'County data temporarily unavailable',
+                message: `${config.name} tax sale data is currently being updated.`,
+                availableCounties: Object.keys(COUNTY_CONFIGS).filter(key => 
+                    COUNTY_CONFIGS[key].status !== 'maintenance'
+                )
+            });
+        }
+
+        let urls = {};
+        
+        // Get current URLs (use dynamic fetching if enabled)
+        if (config.dynamicUrls) {
+            console.log(`[DEBUG] Fetching dynamic URLs for ${county}`);
+            urls = await fetchCurrentTaxSaleUrls(config);
+        } else {
+            urls = {
+                taxSaleUrl: config.url,
+                photoListUrl: config.photoListUrl
+            };
+        }
+
+        const response = {
+            county: config.name,
+            pdfUrl: urls.taxSaleUrl,
+            photoListUrl: urls.photoListUrl,
+            metadata: {
+                lastUpdated: new Date().toISOString(),
+                photoListAvailable: !!urls.photoListUrl,
+                dynamicUrls: !!config.dynamicUrls
+            }
+        };
+
+        console.log(`[DEBUG] Returning PDF links for ${county}:`, {
+            pdfUrl: response.pdfUrl?.substring(0, 80) + '...',
+            photoListUrl: response.photoListUrl?.substring(0, 80) + '...'
+        });
+
+        res.json(response);
+        
+    } catch (error) {
+        console.error(`Error getting PDF links for ${county}:`, error);
+        res.status(500).json({ 
+            error: 'Failed to get PDF links',
+            details: error.message 
+        });
     }
 });
 
@@ -808,7 +933,8 @@ app.get('/api/tax-sale-listings', async (req, res) => {
 
 app.get('/api/tax-sale-listings/:county', async (req, res) => {
     const county = req.params.county || 'chatham'; // Default to Chatham County
-    console.log(`Tax sale listings requested for county: ${county}`);
+    const forceRefresh = req.query.forceRefresh === 'true'; // Check for forceRefresh query parameter
+    console.log(`Tax sale listings requested for county: ${county}${forceRefresh ? ' (force refresh)' : ''}`);
     
     // Disable caching
     res.set({
@@ -839,17 +965,41 @@ app.get('/api/tax-sale-listings/:county', async (req, res) => {
         });
     }
     
-    const dataUrl = config.url;
+    let dataUrl = config.url;
+    let currentConfig = { ...config };
+    
+    // For Chatham County, ALWAYS fetch current URLs dynamically
+    console.log(`🔍 DEBUG: Checking dynamic URLs for county: ${county}`);
+    console.log(`🔍 DEBUG: config.dynamicUrls = ${config.dynamicUrls}`);
+    console.log(`🔍 DEBUG: county === 'chatham' = ${county === 'chatham'}`);
+    
+    if (county === 'chatham') {
+        console.log('🔄 FORCING dynamic URL fetch for Chatham County...');
+        const currentUrls = await fetchCurrentTaxSaleUrls();
+        
+        if (currentUrls && currentUrls.taxSaleUrl) {
+            dataUrl = currentUrls.taxSaleUrl;
+            currentConfig.url = currentUrls.taxSaleUrl;
+            currentConfig.photoListUrl = currentUrls.photoListUrl || config.photoListUrl;
+            console.log(`✅ Using current tax sale URL: ${dataUrl}`);
+            console.log(`✅ Using current photo list URL: ${currentConfig.photoListUrl}`);
+        } else {
+            console.log(`⚠️  Could not fetch current URLs, using fallback URLs`);
+            console.log(`📌 Using fallback tax sale URL: ${dataUrl}`);
+        }
+    } else {
+        console.log(`🚫 NOT Chatham County - using static configuration`);
+    }
     
     try {
-        console.log(`Fetching ${config.name} tax sale data from:`, dataUrl);
+        console.log(`Fetching ${currentConfig.name} tax sale data from:`, dataUrl);
         
-        if (config.dataType === 'pdf') {
-            return await parseChathamPdf(dataUrl, res, config);
-        } else if (config.dataType === 'csv') {
-            return await parseDekalbCsv(dataUrl, res, config);
+        if (currentConfig.dataType === 'pdf') {
+            return await parseChathamPdf(dataUrl, res, currentConfig, forceRefresh);
+        } else if (currentConfig.dataType === 'csv') {
+            return await parseDekalbCsv(dataUrl, res, currentConfig);
         } else {
-            throw new Error(`Unsupported data type: ${config.dataType}`);
+            throw new Error(`Unsupported data type: ${currentConfig.dataType}`);
         }
     } catch (err) {
         console.error(`Error processing tax sale listings for ${county}:`, err);
@@ -857,7 +1007,7 @@ app.get('/api/tax-sale-listings/:county', async (req, res) => {
         
         res.status(500).json({ 
             error: err.message,
-            county: config.name,
+            county: currentConfig.name,
             details: process.env.NODE_ENV === 'development' ? err.stack : undefined
         });
     }

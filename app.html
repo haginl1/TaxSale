@@ -169,6 +169,31 @@
             transform: translateY(-3px);
         }
 
+        .header-link {
+            margin-top: 15px;
+        }
+
+        .btn-header {
+            color: rgba(255, 255, 255, 0.9);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-header:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .btn-header + .btn-header {
+            margin-left: 10px;
+        }
+
         .stats-section {
             background: rgba(255, 255, 255, 0.1);
             -webkit-backdrop-filter: blur(10px);
@@ -588,6 +613,20 @@
             border-radius: 12px;
         }
 
+        .property-map-view {
+            margin-bottom: 25px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .property-map-view iframe {
+            width: 100%;
+            height: 350px;
+            border: none;
+            border-radius: 12px;
+        }
+
         .property-details-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -951,6 +990,10 @@
                 height: 200px;
             }
 
+            .property-map-view iframe {
+                height: 200px;
+            }
+
             .property-street-view-loading {
                 height: 200px;
                 font-size: 0.9rem;
@@ -1038,6 +1081,14 @@
         <div class="header">
             <h1>🏠 Georgia Tax Sale Listings</h1>
             <p>Discover investment opportunities in Georgia's tax sale properties</p>
+            <div class="header-link">
+                <a href="https://cms.chathamcountyga.gov/api/assets/taxcommissioner/55d1026b-bc1f-4f42-be4d-12893bff13d9?download=0" target="_blank" rel="noopener" class="btn btn-header">
+                    📄 View Tax Sale PDF
+                </a>
+                <a href="https://cms.chathamcountyga.gov/api/assets/taxcommissioner/678679b0-4664-4f96-8a68-a28ae08a63d8?download=0" target="_blank" rel="noopener" class="btn btn-header">
+                    📸 View Photos PDF
+                </a>
+            </div>
         </div>
 
         <div class="search-section">
@@ -1148,13 +1199,52 @@
         // Get the base URL for API calls (works both locally and when deployed)
         const API_BASE = window.location.origin;
 
-        // Initialize map
+        // Initialize map with SAGIS/ArcGIS services
         function initializeMap() {
             if (!map) {
-                map = L.map('map').setView([32.5, -83.5], 7); // Georgia center
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '© OpenStreetMap contributors'
-                }).addTo(map);
+                // Center on Chatham County/Savannah area
+                map = L.map('map').setView([32.0835, -81.0998], 10); // Savannah/Chatham County center
+                
+                // Define base map layers
+                const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                    attribution: '© Esri, DigitalGlobe, GeoEye, Earthstar Geographics, CNES/Airbus DS, USDA, USGS, AeroGRID, IGN, © GIS User Community',
+                    maxZoom: 18
+                });
+                
+                const streetsLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+                    attribution: '© Esri, DeLorme, NAVTEQ',
+                    maxZoom: 18
+                });
+                
+                // Add Streets layer as default base map
+                streetsLayer.addTo(map);
+                
+                // Add SAGIS parcel layer overlay (if available)
+                try {
+                    // SAGIS parcel boundaries layer
+                    const sagisParcelLayer = L.tileLayer('https://gis.chathamcountyga.gov/arcgis/rest/services/ParcelViewer/MapServer/tile/{z}/{y}/{x}', {
+                        attribution: '© SAGIS, Chatham County GIS',
+                        opacity: 0.6,
+                        maxZoom: 18
+                    });
+                    
+                    // Add parcel boundaries by default
+                    sagisParcelLayer.addTo(map);
+                    
+                    // Add layer control to toggle between base maps and overlays
+                    const baseMaps = {
+                        "Streets": streetsLayer,
+                        "Satellite": satelliteLayer
+                    };
+                    
+                    const overlayMaps = {
+                        "Parcel Boundaries": sagisParcelLayer
+                    };
+                    
+                    L.control.layers(baseMaps, overlayMaps).addTo(map);
+                } catch (error) {
+                    console.log('SAGIS parcel layer not available, using standard basemap only');
+                }
             }
         }
 
@@ -2009,7 +2099,40 @@
             }
         }
 
-        // Google Maps helper functions
+        // SAGIS Maps helper functions
+        function openSAGISMap(lat, lng) {
+            if (lat && lng) {
+                // Use SAGIS Property Viewer with coordinates
+                const sagisUrl = `https://www.sagis.org/map/?lat=${lat}&lng=${lng}&zoom=18`;
+                console.log('Opening SAGIS Property Viewer for coordinates:', lat, lng);
+                console.log('SAGIS URL:', sagisUrl);
+                
+                const newWindow = window.open(sagisUrl, '_blank');
+                if (!newWindow || newWindow.closed || typeof newWindow.closed == 'undefined') {
+                    alert('Pop-up blocked. Please allow pop-ups for this site and try again.');
+                }
+            } else {
+                alert('Coordinates not available for this property.');
+            }
+        }
+
+        function openSAGISMapByAddress(address) {
+            if (address) {
+                // Use SAGIS Property Viewer with address search
+                const sagisUrl = `https://www.sagis.org/map/?search=${encodeURIComponent(address + ', Chatham County, GA')}`;
+                console.log('Opening SAGIS Property Viewer for address:', address);
+                console.log('SAGIS URL:', sagisUrl);
+                
+                const newWindow = window.open(sagisUrl, '_blank');
+                if (!newWindow || newWindow.closed || typeof newWindow.closed == 'undefined') {
+                    alert('Pop-up blocked. Please allow pop-ups for this site and try again.');
+                }
+            } else {
+                alert('Address not available for this property.');
+            }
+        }
+
+        // Google Street View functions (kept for Street View functionality)
         function openGoogleStreetView(lat, lng) {
             if (lat && lng) {
                 // Use Google Maps with place marker - users can then click Street View
@@ -2043,38 +2166,28 @@
         }
 
         function openGoogleMaps(lat, lng) {
-            if (lat && lng) {
-                const mapsUrl = `https://www.google.com/maps/place/${lat},${lng}`;
-                console.log('Opening Google Maps:', mapsUrl);
-                window.open(mapsUrl, '_blank');
-            } else {
-                alert('Coordinates not available for this property.');
-            }
+            // Redirect to SAGIS Property Viewer instead of Google Maps
+            openSAGISMap(lat, lng);
         }
 
         function openGoogleMapsByAddress(address) {
-            if (address) {
-                const mapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(address + ', Georgia')}`;
-                console.log('Opening Google Maps for address:', address);
-                window.open(mapsUrl, '_blank');
-            } else {
-                alert('Address not available for this property.');
-            }
+            // Redirect to SAGIS Property Viewer instead of Google Maps
+            openSAGISMapByAddress(address);
         }
 
         // Street View modal function (legacy)
         function openStreetView(lat, lng) {
             const streetViewContent = document.getElementById('streetViewContent');
             streetViewContent.innerHTML = `
-                <h3 style="margin-bottom: 20px; color: #667eea;">📍 Street View</h3>
+                <h3 style="margin-bottom: 20px; color: #667eea;">📍 Property Location</h3>
                 <div style="text-align: center; padding: 40px;">
-                    <p style="margin-bottom: 20px; color: #666;">Click the button below to view this location in Google Street View:</p>
-                    <a href="https://www.google.com/maps/@${lat},${lng},3a,75y,90t/data=!3m6!1e1" target="_blank" 
+                    <p style="margin-bottom: 20px; color: #666;">View this property location in SAGIS Property Viewer or Google Street View:</p>
+                    <a href="https://www.sagis.org/map/?lat=${lat}&lng=${lng}&zoom=18" target="_blank" 
                        style="display: inline-block; background: #667eea; color: white; padding: 15px 30px; border-radius: 8px; text-decoration: none; font-weight: bold; margin: 10px;">
-                        🌍 Open Google Street View
+                        � Open SAGIS Property Viewer
                     </a>
                     <br>
-                    <a href="https://www.google.com/maps/search/${lat},${lng}" target="_blank" 
+                    <a href="https://www.sagis.org/map/?lat=${lat}&lng=${lng}&zoom=18" target="_blank" 
                        style="display: inline-block; background: #f093fb; color: white; padding: 15px 30px; border-radius: 8px; text-decoration: none; font-weight: bold; margin: 10px;">
                         �️ Open in Google Maps
                     </a>
@@ -2093,32 +2206,35 @@
             const amount = property.taxAmount || property.bidAmount || 'N/A';
             const coordinates = property.coordinates || {};
             
-            // Create Street View URL for iframe
-            let streetViewHtml = '';
+            // Create SAGIS map URL for iframe with auto-accept parameters
+            let mapViewHtml = '';
             if (coordinates.lat && coordinates.lng) {
-                const fallbackUrl = `https://maps.google.com/maps?q=${coordinates.lat},${coordinates.lng}&layer=c&cbll=${coordinates.lat},${coordinates.lng}&cbp=11,0,0,0,0&output=embed`;
+                // Try SAGIS with auto-accept parameters first, fallback to direct ArcGIS if needed
+                const sagisUrl = `https://www.sagis.org/map/?lat=${coordinates.lat}&lng=${coordinates.lng}&zoom=18&agreed=true&autoaccept=true&embed=true&skipintro=true`;
                 
-                streetViewHtml = `
-                    <div class="property-street-view">
-                        <iframe src="${fallbackUrl}" 
+                mapViewHtml = `
+                    <div class="property-map-view">
+                        <iframe src="${sagisUrl}" 
                                 loading="lazy"
                                 allowfullscreen
                                 referrerpolicy="no-referrer-when-downgrade"
-                                title="Street View of ${property.address}">
+                                title="SAGIS Property Map of ${property.address}"
+                                onload="handleSagisIframeLoad(this)">
                         </iframe>
                     </div>
                 `;
             } else if (property.address) {
-                const encodedAddress = encodeURIComponent(property.address + ', Georgia, USA');
-                const fallbackUrl = `https://maps.google.com/maps?q=${encodedAddress}&layer=c&output=embed`;
+                const encodedAddress = encodeURIComponent(property.address + ', Chatham County, GA');
+                const sagisUrl = `https://www.sagis.org/map/?search=${encodedAddress}&agreed=true&autoaccept=true&embed=true&skipintro=true`;
                 
-                streetViewHtml = `
-                    <div class="property-street-view">
-                        <iframe src="${fallbackUrl}" 
+                mapViewHtml = `
+                    <div class="property-map-view">
+                        <iframe src="${sagisUrl}" 
                                 loading="lazy"
                                 allowfullscreen
                                 referrerpolicy="no-referrer-when-downgrade"
-                                title="Street View of ${property.address}">
+                                title="SAGIS Property Map of ${property.address}"
+                                onload="handleSagisIframeLoad(this)">
                         </iframe>
                     </div>
                 `;
@@ -2130,7 +2246,7 @@
                         🏠 ${property.address}
                     </h2>
                     
-                    ${streetViewHtml}
+                    ${mapViewHtml}
                     
                     <div class="property-info-card">
                         <div class="property-details-grid">
@@ -2166,6 +2282,37 @@
                 closePropertyModal();
             }
         });
+
+        // Handle SAGIS iframe load to auto-accept terms
+        function handleSagisIframeLoad(iframe) {
+            try {
+                // Note: Due to cross-origin restrictions, we cannot directly access iframe content
+                // The URL parameters should handle auto-acceptance, but if not, users will need to manually accept
+                console.log('SAGIS iframe loaded. If splash screen appears, please click "I Agree" to proceed.');
+                
+                // Alternative approach: Add a note to users about the splash screen
+                setTimeout(() => {
+                    const mapView = iframe.closest('.property-map-view');
+                    if (mapView && !mapView.querySelector('.sagis-note')) {
+                        const note = document.createElement('div');
+                        note.className = 'sagis-note';
+                        note.style.cssText = 'position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.8); color: white; padding: 8px 12px; border-radius: 6px; font-size: 12px; z-index: 1000; pointer-events: none;';
+                        note.innerHTML = '💡 Click "I Agree" if prompted to view the map';
+                        mapView.style.position = 'relative';
+                        mapView.appendChild(note);
+                        
+                        // Remove note after 5 seconds
+                        setTimeout(() => {
+                            if (note.parentNode) {
+                                note.parentNode.removeChild(note);
+                            }
+                        }, 5000);
+                    }
+                }, 1000);
+            } catch (error) {
+                console.log('Could not access SAGIS iframe content due to cross-origin restrictions');
+            }
+        }
 
         // Close modals with Escape key
         document.addEventListener('keydown', function(event) {
