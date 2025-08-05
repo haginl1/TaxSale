@@ -1,0 +1,3673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatham County Tax Sale Listings - Find Investment Properties | Official Tax Sale Platform</title>
+    <meta name="description" content="Discover profitable Chatham County tax sale properties with our comprehensive platform. View detailed listings from the official Chatham County Tax Commissioner, interactive Savannah area maps, and expert resources for successful tax sale investing.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        :root {
+            /* Professional Brand Colors */
+            --primary-blue: #1e3a8a;
+            --secondary-blue: #3b82f6;
+            --accent-green: #059669;
+            --success-green: #10b981;
+            --warning-amber: #f59e0b;
+            --danger-red: #dc2626;
+            
+            /* Neutral Colors */
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            
+            /* Typography */
+            --font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-size-xs: 0.75rem;
+            --font-size-sm: 0.875rem;
+            --font-size-base: 1rem;
+            --font-size-lg: 1.125rem;
+            --font-size-xl: 1.25rem;
+            --font-size-2xl: 1.5rem;
+            --font-size-3xl: 1.875rem;
+            --font-size-4xl: 2.25rem;
+            
+            /* Spacing */
+            --spacing-xs: 0.25rem;
+            --spacing-sm: 0.5rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+            --spacing-xl: 2rem;
+            --spacing-2xl: 3rem;
+            --spacing-3xl: 4rem;
+            
+            /* Border Radius */
+            --radius-sm: 0.375rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --radius-xl: 1rem;
+            
+            /* Shadows */
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            
+            /* Transitions */
+            --transition-fast: 0.15s ease;
+            --transition-base: 0.2s ease;
+            --transition-slow: 0.3s ease;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family);
+            line-height: 1.6;
+            color: var(--gray-800);
+            background-color: var(--gray-50);
+            font-size: var(--font-size-base);
+        }
+
+        /* Enhanced Typography */
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 700;
+            line-height: 1.2;
+            color: var(--gray-900);
+        }
+
+        h1 { font-size: var(--font-size-4xl); }
+        h2 { font-size: var(--font-size-3xl); }
+        h3 { font-size: var(--font-size-2xl); }
+        h4 { font-size: var(--font-size-xl); }
+
+        p {
+            color: var(--gray-700);
+            line-height: 1.7;
+        }
+
+        /* Professional Header with Enhanced Branding */
+        .header {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+            color: white;
+            padding: var(--spacing-md) 0;
+            box-shadow: var(--shadow-lg);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 3px solid var(--accent-green);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-md);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: var(--font-size-2xl);
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            text-decoration: none;
+            color: white;
+            transition: var(--transition-base);
+        }
+
+        .logo:hover {
+            transform: scale(1.02);
+            color: var(--gray-100);
+        }
+
+        .logo-icon {
+            font-size: var(--font-size-3xl);
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        }
+
+        .nav {
+            display: flex;
+            gap: var(--spacing-xl);
+            align-items: center;
+        }
+
+        .nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: var(--font-size-sm);
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+            transition: var(--transition-base);
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: var(--radius-md);
+            position: relative;
+        }
+
+        .nav a:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .nav a.active {
+            background: var(--accent-green);
+            color: white;
+        }
+
+        .contact-info {
+            font-size: var(--font-size-sm);
+            font-weight: 500;
+            opacity: 0.95;
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+        }
+
+        /* Enhanced Hero Section with Value Proposition */
+        .hero {
+            background: linear-gradient(135deg, 
+                rgba(30, 58, 138, 0.95) 0%, 
+                rgba(59, 130, 246, 0.9) 50%,
+                rgba(5, 150, 105, 0.85) 100%),
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600"><defs><pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse"><path d="M 50 0 L 0 0 0 50" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/></pattern></defs><rect width="1200" height="600" fill="url(%23grid)"/></svg>');
+            color: white;
+            padding: var(--spacing-3xl) 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 30% 70%, rgba(5, 150, 105, 0.3) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 30%, rgba(59, 130, 246, 0.3) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .hero-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-md);
+            position: relative;
+            z-index: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--spacing-xl);
+            align-items: center;
+        }
+
+        .hero-text {
+            text-align: left;
+        }
+
+        .hero-map {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: var(--spacing-md);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            /* Removed backdrop-filter to fix potential rendering issues */
+        }
+
+        .hero-map-container {
+            height: 400px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #f8f9fa;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+        }
+
+        .hero-map-title {
+            margin: 0 0 var(--spacing-md) 0;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .hero h1 {
+            font-size: var(--font-size-4xl);
+            font-weight: 800;
+            margin-bottom: var(--spacing-lg);
+            text-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
+            line-height: 1.1;
+            color: #FFFFFF;
+        }
+
+        .hero-subtitle {
+            font-size: var(--font-size-xl);
+            font-weight: 600;
+            color: #F0FDF4;
+            margin-bottom: var(--spacing-sm);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .hero p {
+            font-size: var(--font-size-lg);
+            margin-bottom: var(--spacing-xl);
+            opacity: 0.95;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
+            color: #F8FAFC;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: var(--spacing-md);
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .hero-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: var(--spacing-lg);
+            max-width: 600px;
+            margin: 0 auto;
+            margin-top: var(--spacing-xl);
+        }
+
+        .hero-stat {
+            text-align: center;
+            padding: var(--spacing-md);
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-lg);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .hero-stat-number {
+            font-size: var(--font-size-2xl);
+            font-weight: 800;
+            color: #D1FAE5;
+            display: block;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+        }
+
+        .hero-stat-label {
+            font-size: var(--font-size-sm);
+            opacity: 0.95;
+            font-weight: 600;
+            color: #F1F5F9;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Enhanced Filters Section with Professional Design */
+        .filters {
+            background: white;
+            padding: var(--spacing-xl) 0;
+            border-bottom: 1px solid var(--gray-200);
+            box-shadow: var(--shadow-md);
+            position: relative;
+        }
+
+        .filters::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-green), var(--secondary-blue), var(--accent-green));
+        }
+
+        .filters-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-md);
+        }
+
+        .filters-header {
+            text-align: center;
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .filters-title {
+            font-size: var(--font-size-2xl);
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .filters-subtitle {
+            color: var(--gray-600);
+            font-size: var(--font-size-base);
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: var(--spacing-lg);
+            align-items: end;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-sm);
+        }
+
+        .filter-group label {
+            font-weight: 600;
+            color: var(--gray-700);
+            font-size: var(--font-size-sm);
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+        }
+
+        .filter-icon {
+            font-size: var(--font-size-base);
+            color: var(--secondary-blue);
+        }
+
+        .filter-group select, .filter-group input {
+            padding: var(--spacing-md);
+            border: 2px solid var(--gray-300);
+            border-radius: var(--radius-lg);
+            font-size: var(--font-size-base);
+            font-weight: 500;
+            transition: all var(--transition-base);
+            background: white;
+            color: var(--gray-800);
+        }
+
+        .filter-group select:focus, .filter-group input:focus {
+            outline: none;
+            border-color: var(--secondary-blue);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .filter-group select:hover, .filter-group input:hover {
+            border-color: var(--gray-400);
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: var(--spacing-md);
+            justify-content: center;
+            flex-wrap: wrap;
+            padding-top: var(--spacing-lg);
+            border-top: 1px solid var(--gray-200);
+        }
+
+        .filter-actions .btn {
+            min-width: 140px;
+        }
+
+        /* Professional Button System */
+        .btn {
+            padding: var(--spacing-md) var(--spacing-xl);
+            background: var(--accent-green);
+            color: white;
+            border: none;
+            border-radius: var(--radius-lg);
+            font-weight: 600;
+            font-size: var(--font-size-base);
+            cursor: pointer;
+            transition: all var(--transition-base);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-sm);
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            background: var(--success-green);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--secondary-blue), var(--primary-blue));
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+        }
+
+        .btn-secondary {
+            background: var(--gray-600);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: var(--gray-700);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--secondary-blue);
+            border: 2px solid var(--secondary-blue);
+            box-shadow: none;
+        }
+
+        .btn-outline:hover {
+            background: var(--secondary-blue);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* Hero section outline button override for better visibility */
+        .hero .btn-outline {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .hero .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: white;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-small {
+            padding: var(--spacing-xs) var(--spacing-sm);
+            font-size: var(--font-size-xs);
+            flex: 1;
+        }
+
+        .btn-large {
+            padding: var(--spacing-lg) var(--spacing-2xl);
+            font-size: var(--font-size-lg);
+        }
+
+        .btn-icon {
+            font-size: var(--font-size-lg);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn:disabled:hover {
+            transform: none;
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Progress Section */
+        .progress-section {
+            background: white;
+            padding: 1.5rem 0;
+            border-bottom: 1px solid #e5e7eb;
+            display: none;
+        }
+
+        .progress-section.show {
+            display: block;
+        }
+
+        .progress-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .progress-container {
+            background: #f9fafb;
+            border-radius: 1rem;
+            padding: 2rem;
+            border: 1px solid #e5e7eb;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .progress-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .progress-percentage {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #059669;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: #e5e7eb;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #059669, #10b981);
+            border-radius: 6px;
+            transition: width 0.3s ease;
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .progress-details {
+            font-size: 0.9rem;
+            color: #6b7280;
+        }
+
+        /* Minimized KPI Stats Section */
+        .stats {
+            background: white;
+            padding: var(--spacing-lg) 0;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .stats-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-md);
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: var(--spacing-md);
+        }
+
+        /* Enhanced Statistical Dashboard */
+        .dashboard {
+            background: linear-gradient(135deg, var(--gray-50), white);
+            border-bottom: 1px solid var(--border-color);
+            padding: var(--spacing-xl) 0;
+        }
+
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-lg);
+        }
+
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .analytics-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 350px;
+            gap: var(--spacing-lg);
+        }
+
+        /* Enhanced KPI Cards */
+        .kpi-card {
+            background: white;
+            padding: var(--spacing-xl);
+            border-radius: var(--radius-xl);
+            border: 2px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+            transition: all var(--transition-base);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        }
+
+        .kpi-card.primary::before { background: linear-gradient(90deg, var(--primary-color), #4F46E5); }
+        .kpi-card.secondary::before { background: linear-gradient(90deg, var(--secondary-color), #06B6D4); }
+        .kpi-card.accent::before { background: linear-gradient(90deg, var(--accent-color), #10B981); }
+        .kpi-card.value::before { background: linear-gradient(90deg, #F59E0B, #EF4444); }
+
+        .kpi-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl);
+            border-color: var(--primary-color);
+        }
+
+        .kpi-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .kpi-icon {
+            font-size: 2rem;
+            opacity: 0.8;
+        }
+
+        .kpi-trend {
+            font-size: var(--font-size-xs);
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: var(--radius-sm);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .kpi-trend.positive {
+            background: #DCFCE7;
+            color: #166534;
+        }
+
+        .kpi-trend.negative {
+            background: #FEE2E2;
+            color: #991B1B;
+        }
+
+        .kpi-trend.stable {
+            background: var(--gray-100);
+            color: var(--gray-600);
+        }
+
+        .kpi-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            margin-bottom: var(--spacing-xs);
+            display: block;
+            line-height: 1;
+        }
+
+        .kpi-label {
+            color: var(--text-color);
+            font-size: var(--font-size-base);
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .kpi-sublabel {
+            color: var(--gray-500);
+            font-size: var(--font-size-sm);
+            font-weight: 500;
+        }
+
+        /* Analytics Cards */
+        .analytics-card {
+            background: white;
+            border-radius: var(--radius-xl);
+            border: 2px solid var(--border-color);
+            padding: var(--spacing-xl);
+            box-shadow: var(--shadow-sm);
+            transition: all var(--transition-base);
+        }
+
+        .analytics-card:hover {
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary-color);
+        }
+
+        .analytics-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-lg);
+            padding-bottom: var(--spacing-md);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .analytics-header h3 {
+            margin: 0;
+            font-size: var(--font-size-lg);
+            font-weight: 700;
+            color: var(--text-color);
+        }
+
+        .analytics-actions {
+            display: flex;
+            gap: var(--spacing-sm);
+        }
+
+        .analytics-btn {
+            background: var(--gray-100);
+            border: none;
+            border-radius: var(--radius-md);
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            font-size: var(--font-size-sm);
+        }
+
+        .analytics-btn:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        /* Value Distribution */
+        .value-ranges {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-md);
+        }
+
+        .value-range {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+        }
+
+        .range-label {
+            min-width: 100px;
+            font-size: var(--font-size-sm);
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .range-bar {
+            flex: 1;
+            height: 20px;
+            background: var(--gray-100);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .range-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            border-radius: var(--radius-md);
+            transition: width 0.8s ease;
+            position: relative;
+        }
+
+        .range-fill.secondary {
+            background: linear-gradient(90deg, var(--secondary-color), #06B6D4);
+        }
+
+        .range-fill.accent {
+            background: linear-gradient(90deg, var(--accent-color), #10B981);
+        }
+
+        .range-fill.value {
+            background: linear-gradient(90deg, #F59E0B, #EF4444);
+        }
+
+        .range-count {
+            min-width: 40px;
+            text-align: right;
+            font-weight: 600;
+            color: var(--text-color);
+            font-size: var(--font-size-sm);
+        }
+
+        /* Activity Feed */
+        .activity-feed {
+            min-height: 300px;
+        }
+
+        .activity-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-md);
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            padding: var(--spacing-md);
+            background: var(--gray-50);
+            border-radius: var(--radius-md);
+            border-left: 4px solid var(--primary-color);
+            transition: all var(--transition-base);
+        }
+
+        .activity-item:hover {
+            background: var(--gray-100);
+            transform: translateX(4px);
+        }
+
+        .activity-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: var(--font-size-sm);
+            color: white;
+        }
+
+        .activity-icon.new {
+            background: var(--accent-color);
+        }
+
+        .activity-icon.update {
+            background: var(--secondary-color);
+        }
+
+        .activity-icon.geocode {
+            background: var(--primary-color);
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-text {
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 2px;
+        }
+
+        .activity-time {
+            font-size: var(--font-size-xs);
+            color: var(--gray-500);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .analytics-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .kpi-row {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .kpi-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .dashboard-container {
+                padding: 0 var(--spacing-md);
+            }
+        }
+
+        /* Map Section */
+        .map-section {
+            background: white;
+            padding: var(--spacing-2xl) 0;
+            border-bottom: 1px solid var(--gray-200);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .map-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-md);
+        }
+
+        .map-header {
+            text-align: center;
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .map-title {
+            font-size: var(--font-size-2xl);
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .map-subtitle {
+            color: var(--gray-600);
+            font-size: var(--font-size-base);
+        }
+
+        .map-container-large {
+            width: 100%;
+            height: 400px;
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            margin-bottom: var(--spacing-lg);
+            border: 2px solid var(--gray-200);
+            box-shadow: var(--shadow-md);
+            position: relative;
+        }
+
+        .map-container-large:hover {
+            border-color: var(--secondary-blue);
+            box-shadow: var(--shadow-lg);
+        }
+
+        #hero-map {
+            width: 100%;
+            height: 100%;
+            min-height: 300px;
+            border-radius: 8px;
+            display: block;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Leaflet popup styling for better readability */
+        .leaflet-popup-content-wrapper {
+            border-radius: 8px !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+            border: 1px solid #e5e7eb !important;
+        }
+
+        .leaflet-popup-content {
+            margin: 16px 20px !important;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+            line-height: 1.5 !important;
+        }
+
+        .leaflet-popup-tip {
+            border-top-color: #e5e7eb !important;
+        }
+
+        .leaflet-container a.leaflet-popup-close-button {
+            color: #6b7280 !important;
+            font-size: 18px !important;
+            font-weight: bold !important;
+            padding: 4px 8px !important;
+        }
+
+        .leaflet-container a.leaflet-popup-close-button:hover {
+            color: #374151 !important;
+        }
+
+        /* Mobile responsive popup styling */
+        @media (max-width: 768px) {
+            .leaflet-popup-content-wrapper {
+                max-width: 280px !important;
+            }
+            
+            .leaflet-popup-content {
+                margin: 12px 16px !important;
+                font-size: 13px !important;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .map-container-large {
+                height: 300px;
+            }
+            
+            .map-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .map-actions .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        /* Enhanced Property Cards with Better Information Architecture */
+        .property-card {
+            background: white;
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+            transition: all var(--transition-slow);
+            cursor: pointer;
+            border: 2px solid transparent;
+            position: relative;
+        }
+
+        .property-card:hover {
+            box-shadow: var(--shadow-xl);
+            transform: translateY(-4px);
+            border-color: var(--secondary-blue);
+        }
+
+        .property-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-green), var(--secondary-blue));
+            opacity: 0;
+            transition: opacity var(--transition-base);
+        }
+
+        .property-card:hover::before {
+            opacity: 1;
+        }
+
+        .property-image {
+            width: 100%;
+            height: 160px;
+            background: linear-gradient(45deg, var(--gray-100), var(--gray-200));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gray-500);
+            font-size: var(--font-size-base);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .property-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform var(--transition-slow);
+        }
+
+        .property-card:hover .property-image img {
+            transform: scale(1.05);
+        }
+
+        .image-badge {
+            position: absolute;
+            top: var(--spacing-md);
+            right: var(--spacing-md);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: var(--radius-md);
+            font-size: var(--font-size-xs);
+            font-weight: 600;
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+        }
+
+        .status-badge {
+            position: absolute;
+            top: var(--spacing-md);
+            left: var(--spacing-md);
+            padding: var(--spacing-xs) var(--spacing-md);
+            border-radius: var(--radius-xl);
+            font-size: var(--font-size-xs);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .status-new {
+            background: linear-gradient(135deg, var(--accent-green), var(--success-green));
+            color: white;
+        }
+
+        .status-mapped {
+            background: linear-gradient(135deg, var(--secondary-blue), var(--primary-blue));
+            color: white;
+        }
+
+        .status-ending {
+            background: linear-gradient(135deg, var(--warning-amber), #f97316);
+            color: white;
+        }
+
+        .status-high-value {
+            background: linear-gradient(135deg, #7c3aed, #a855f7);
+            color: white;
+        }
+
+        .status-map {
+            background: linear-gradient(135deg, #059669, #10b981);
+            color: white;
+        }
+
+        .property-content {
+            padding: var(--spacing-md);
+        }
+
+        .property-header {
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .property-address {
+            font-size: var(--font-size-lg);
+            font-weight: 700;
+            margin-bottom: var(--spacing-sm);
+            color: var(--gray-900);
+            line-height: 1.3;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .property-county {
+            font-size: var(--font-size-sm);
+            color: var(--gray-600);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .property-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-md);
+            padding: var(--spacing-sm);
+            background: var(--gray-50);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--gray-200);
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .detail-label {
+            font-size: var(--font-size-xs);
+            color: var(--gray-600);
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+        }
+
+        .detail-value {
+            font-weight: 700;
+            color: var(--gray-900);
+            font-size: var(--font-size-sm);
+        }
+
+        .price {
+            color: var(--accent-green);
+            font-size: var(--font-size-xl);
+            font-weight: 800;
+        }
+
+        .property-actions {
+            display: flex;
+            gap: var(--spacing-xs);
+            margin-top: var(--spacing-sm);
+        }
+
+        .property-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: var(--spacing-sm);
+            padding-top: var(--spacing-sm);
+            border-top: 1px solid var(--gray-200);
+            font-size: var(--font-size-xs);
+            color: var(--gray-500);
+        }
+
+        .property-id {
+            font-family: 'Monaco', 'Menlo', monospace;
+            background: var(--gray-100);
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: var(--radius-sm);
+        }
+
+        .property-features {
+            display: flex;
+            gap: var(--spacing-xs);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .feature-tag {
+            background: var(--gray-100);
+            color: var(--gray-700);
+            padding: 2px var(--spacing-xs);
+            border-radius: var(--radius-sm);
+            font-size: var(--font-size-xs);
+            font-weight: 600;
+        }
+
+        .feature-tag.photo {
+            background: var(--secondary-blue);
+            color: white;
+        }
+
+        .feature-tag.map {
+            background: #059669;
+            color: white;
+        }
+
+        .feature-tag.mapped {
+            background: var(--accent-green);
+            color: white;
+        }
+
+        /* Enhanced Property Grid */
+        .property-listings {
+            position: relative;
+        }
+
+        .property-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: var(--spacing-lg);
+        }
+
+        .property-grid.loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .no-results {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: var(--spacing-3xl);
+            color: var(--gray-500);
+        }
+
+        .no-results-icon {
+            font-size: 4rem;
+            margin-bottom: var(--spacing-lg);
+            opacity: 0.5;
+        }
+
+        .no-results h3 {
+            margin-bottom: var(--spacing-sm);
+            color: var(--gray-700);
+        }
+
+        .no-results p {
+            color: var(--gray-500);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .sidebar-section {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+        }
+
+        .sidebar-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .map-container {
+            width: 100%;
+            height: 250px;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            margin-bottom: 1rem;
+            border: 1px solid #e5e7eb;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+        .quick-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .quick-stat {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            background: #f9fafb;
+            border-radius: 0.5rem;
+            border: 1px solid #e5e7eb;
+        }
+
+        .resources-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .resource-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .resource-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .resource-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15);
+            border-color: var(--primary-color);
+        }
+
+        .resource-item:hover::before {
+            transform: scaleY(1);
+        }
+
+        .resource-item.featured {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+        }
+
+        .resource-item.featured::before {
+            display: none;
+        }
+
+        .resource-item.featured:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(59, 130, 246, 0.3);
+        }
+
+        .resource-icon {
+            font-size: 24px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            flex-shrink: 0;
+        }
+
+        .resource-item:not(.featured) .resource-icon {
+            background: var(--accent-color);
+        }
+
+        .resource-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .resource-title {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .resource-desc {
+            font-size: 12px;
+            opacity: 0.8;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .resource-badge {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .resource-item:not(.featured) .resource-badge {
+            background: var(--primary-color);
+        }
+
+        /* Bottom Section */
+        .bottom-section {
+            background: white;
+            padding: var(--spacing-2xl) 0;
+            border-top: 1px solid var(--gray-200);
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .bottom-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-md);
+        }
+
+        .bottom-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--spacing-2xl);
+        }
+
+        .bottom-card {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xl);
+            border: 2px solid var(--gray-200);
+            box-shadow: var(--shadow-md);
+            transition: all var(--transition-base);
+        }
+
+        .bottom-card:hover {
+            border-color: var(--secondary-blue);
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+
+        .bottom-card-header {
+            margin-bottom: var(--spacing-lg);
+            text-align: center;
+        }
+
+        .bottom-card-title {
+            font-size: var(--font-size-xl);
+            font-weight: 700;
+            color: var(--gray-900);
+            margin: 0;
+        }
+
+        /* Quick Stats Bottom */
+        .quick-stats-bottom {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: var(--spacing-lg);
+        }
+
+        .quick-stat-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-lg);
+            background: var(--gray-50);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--gray-200);
+            transition: all var(--transition-base);
+        }
+
+        .quick-stat-bottom:hover {
+            background: var(--gray-100);
+            border-color: var(--secondary-blue);
+        }
+
+        .stat-label {
+            font-size: var(--font-size-base);
+            color: var(--gray-700);
+            font-weight: 600;
+        }
+
+        .stat-value {
+            font-size: var(--font-size-lg);
+            color: var(--accent-green);
+            font-weight: 800;
+        }
+
+        /* Resources Bottom */
+        .resources-bottom {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: var(--spacing-sm);
+        }
+
+        .resource-item-bottom {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-sm);
+            background: white;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-lg);
+            text-decoration: none;
+            color: inherit;
+            transition: all var(--transition-base);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .resource-item-bottom::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+            transform: scaleY(0);
+            transition: transform var(--transition-base);
+        }
+
+        .resource-item-bottom:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--secondary-blue);
+        }
+
+        .resource-item-bottom:hover::before {
+            transform: scaleY(1);
+        }
+
+        .resource-item-bottom.featured {
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+            color: white;
+            border: none;
+        }
+
+        .resource-item-bottom.featured::before {
+            display: none;
+        }
+
+        .resource-item-bottom.featured:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .resource-icon-bottom {
+            font-size: 16px;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-md);
+            flex-shrink: 0;
+        }
+
+        .resource-item-bottom:not(.featured) .resource-icon-bottom {
+            background: var(--accent-green);
+            color: white;
+        }
+
+        .resource-content-bottom {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .resource-title-bottom {
+            font-weight: 600;
+            font-size: var(--font-size-xs);
+            margin-bottom: 2px;
+            line-height: 1.2;
+        }
+
+        .resource-desc-bottom {
+            font-size: 11px;
+            opacity: 0.8;
+            line-height: 1.3;
+        }
+
+        .resource-meta-bottom {
+            margin-top: 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+        }
+
+        .upload-info, .file-info {
+            font-size: 10px;
+            opacity: 0.7;
+            font-weight: 500;
+        }
+
+        .upload-info {
+            color: var(--gray-600);
+        }
+
+        .file-info {
+            color: var(--gray-500);
+        }
+
+        .resource-item-bottom.featured .upload-info,
+        .resource-item-bottom.featured .file-info {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .resource-badge-bottom {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 2px 6px;
+            border-radius: var(--radius-sm);
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .resource-item-bottom:not(.featured) .resource-badge-bottom {
+            background: var(--primary-blue);
+        }
+
+        @media (max-width: 768px) {
+            .bottom-row {
+                grid-template-columns: 1fr;
+                gap: var(--spacing-xl);
+            }
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(5px);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 0;
+            width: 85%;
+            max-width: 600px;
+            border-radius: 0.75rem;
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.25);
+            animation: slideIn 0.3s ease-out;
+            overflow: hidden;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+            color: white;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            font-size: 1.3rem;
+            cursor: pointer;
+            padding: 0.4rem;
+            border-radius: 0.375rem;
+            transition: all 0.2s;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .modal-body {
+            padding: 1.25rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .nav {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 1rem;
+            }
+
+            .contact-info {
+                display: none;
+            }
+
+            .hero-content {
+                grid-template-columns: 1fr;
+                gap: var(--spacing-lg);
+                text-align: center;
+            }
+
+            .hero-text {
+                text-align: center;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero-map-container {
+                height: 300px;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+                padding: 1rem;
+            }
+
+            .filter-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-content {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .property-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .hero-actions .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-content {
+                grid-template-columns: 1fr;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .property-details {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                margin: 8% auto;
+                width: 95%;
+                max-height: 80vh;
+            }
+        }
+
+        /* Utility Classes */
+        .hidden {
+            display: none !important;
+        }
+
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { 
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to { 
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="#" class="logo">
+                <span class="logo-icon">🏛️</span>
+                <span>Georgia Tax Sales</span>
+            </a>
+            <nav class="nav">
+                <a href="#" onclick="scrollToSection('listings')" class="active">Listings</a>
+                <a href="#" onclick="scrollToSection('resources')">Resources</a>
+                <a href="#" onclick="showAbout()">About</a>
+            </nav>
+            <div class="contact-info">
+                <div class="contact-item">
+                    <span>📞</span>
+                    <span>(555) 123-4567</span>
+                </div>
+                <div class="contact-item">
+                    <span>✉️</span>
+                    <span>info@gataxsales.com</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-text">
+                <div class="hero-subtitle">Chatham County Tax Sale Platform</div>
+                <h1>Find Chatham County Tax Sale Properties</h1>
+                <p>Discover profitable investment opportunities in Chatham County, Georgia with our comprehensive platform featuring detailed listings from the official Chatham County Tax Commissioner, interactive maps, and expert resources for successful tax sale investing in Savannah and surrounding areas.</p>
+                <div class="hero-actions">
+                    <button class="btn btn-primary btn-large" onclick="loadListings()">
+                        <span class="btn-icon">🔍</span>
+                        Start Searching
+                    </button>
+                    <button class="btn btn-outline btn-large" onclick="openTaxSalePdf()">
+                        <span class="btn-icon">📄</span>
+                        View Official PDF
+                    </button>
+                </div>
+                <div class="hero-stats" id="hero-stats">
+                    <div class="hero-stat">
+                        <span class="hero-stat-number" id="hero-total">0</span>
+                        <span class="hero-stat-label">Active Properties</span>
+                    </div>
+                    <div class="hero-stat">
+                        <span class="hero-stat-number" id="hero-counties">0</span>
+                        <span class="hero-stat-label">Counties</span>
+                    </div>
+                    <div class="hero-stat">
+                        <span class="hero-stat-number" id="hero-value">$0</span>
+                        <span class="hero-stat-label">Total Value</span>
+                    </div>
+                    <div class="hero-stat">
+                        <span class="hero-stat-number" id="hero-success">0%</span>
+                        <span class="hero-stat-label">Geo Success Rate</span>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-map">
+                <h3 class="hero-map-title">📍 Property Locations</h3>
+                <div class="hero-map-container">
+                    <div id="hero-map">
+                        <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #666; font-size: 1.1rem;">
+                            🗺️ Loading interactive map...
+                        </div>
+                    </div>
+                    <div id="hero-map-error" style="display: none; padding: 2rem; text-align: center; color: #666;">
+                        <div style="font-size: 2rem; margin-bottom: 1rem;">⚠️</div>
+                        <div>Map failed to load</div>
+                        <div style="font-size: 0.9rem; margin-top: 0.5rem;">Check browser console for details</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Filters -->
+    <section class="filters" id="filters">
+        <div class="filters-content">
+            <div class="filters-header">
+                <h2 class="filters-title">Advanced Property Search</h2>
+                <p class="filters-subtitle">Use our comprehensive filters to find the perfect investment opportunities</p>
+            </div>
+            <div class="filter-grid">
+                <div class="filter-group">
+                    <label for="county-select">
+                        <span class="filter-icon">🏛️</span>
+                        County
+                    </label>
+                    <select id="county-select">
+                        <option value="">All Counties</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="sort-select">
+                        <span class="filter-icon">📊</span>
+                        Sort By
+                    </label>
+                    <select id="sort-select">
+                        <option value="address">Address (A-Z)</option>
+                        <option value="amount">Amount Due (High to Low)</option>
+                        <option value="parcelId">Parcel ID</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="search-input">
+                        <span class="filter-icon">🔍</span>
+                        Search
+                    </label>
+                    <input type="text" id="search-input" placeholder="Address, Parcel ID, or keyword">
+                </div>
+                <div class="filter-group">
+                    <label for="zip-filter">
+                        <span class="filter-icon">📮</span>
+                        Zip Code
+                    </label>
+                    <select id="zip-filter">
+                        <option value="">All Zip Codes</option>
+                        <!-- Zip codes will be populated dynamically -->
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="amount-filter">
+                        <span class="filter-icon">💰</span>
+                        Amount Range
+                    </label>
+                    <select id="amount-filter">
+                        <option value="">Any Amount</option>
+                        <option value="0-5000">Under $5,000</option>
+                        <option value="5000-15000">$5,000 - $15,000</option>
+                        <option value="15000-50000">$15,000 - $50,000</option>
+                        <option value="50000+">Over $50,000</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="status-filter">
+                        <span class="filter-icon">📍</span>
+                        Status
+                    </label>
+                    <select id="status-filter">
+                        <option value="">All Properties</option>
+                        <option value="mapped">Mapped Properties</option>
+                        <option value="photo">With Photos</option>
+                        <option value="unmapped">Unmapped</option>
+                    </select>
+                </div>
+            </div>
+            <div class="filter-actions">
+                <button class="btn btn-primary" onclick="applyFilters()">
+                    <span class="btn-icon">✨</span>
+                    Apply Filters
+                </button>
+                <button class="btn btn-outline" onclick="clearFilters()">
+                    <span class="btn-icon">🔄</span>
+                    Clear All
+                </button>
+                <button class="btn btn-secondary" onclick="exportResults()">
+                    <span class="btn-icon">📥</span>
+                    Export Results
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Progress Section -->
+    <section class="progress-section" id="progress-section">
+        <div class="progress-content">
+            <div class="progress-container">
+                <div class="progress-header">
+                    <div class="progress-title">Processing Tax Sale Data...</div>
+                    <div class="progress-percentage" id="progress-percentage">0.00%</div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                </div>
+                <div class="progress-details" id="progress-details">
+                    Initializing data processing...
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Property Listings -->
+        <div class="property-listings" id="listings">
+            <div class="property-grid" id="property-grid">
+                <!-- Properties will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <!-- Sidebar content removed - Quick Stats and Resources moved to bottom -->
+        </div>
+    </div>
+
+    <!-- Bottom Section - Quick Stats and Resources -->
+    <section class="bottom-section" id="resources">
+        <div class="bottom-content">
+            <div class="bottom-row">
+                <!-- Quick Stats -->
+                <div class="bottom-card">
+                    <div class="bottom-card-header">
+                        <h3 class="bottom-card-title">📊 Quick Stats</h3>
+                    </div>
+                    <div class="quick-stats-bottom">
+                        <div class="quick-stat-bottom">
+                            <span class="stat-label">Avg. Amount Due</span>
+                            <strong class="stat-value" id="avg-amount">$0</strong>
+                        </div>
+                        <div class="quick-stat-bottom">
+                            <span class="stat-label">Properties with Photos</span>
+                            <strong class="stat-value" id="photos-count">0</strong>
+                        </div>
+                        <div class="quick-stat-bottom">
+                            <span class="stat-label">Counties Available</span>
+                            <strong class="stat-value" id="counties-count">0</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resources -->
+                <div class="bottom-card">
+                    <div class="bottom-card-header">
+                        <h3 class="bottom-card-title">📚 Resources & Documents</h3>
+                    </div>
+                    <div class="resources-bottom">
+                        <a href="#" onclick="downloadPDF()" class="resource-item-bottom featured">
+                            <div class="resource-icon-bottom">📄</div>
+                            <div class="resource-content-bottom">
+                                <div class="resource-title-bottom">Official Tax Sale List PDF</div>
+                                <div class="resource-desc-bottom">August 2025 Chatham County Tax Sale List</div>
+                                <div class="resource-meta-bottom">
+                                    <span class="upload-info">📅 Uploaded: Aug 4, 2025 at 9:30 AM</span>
+                                </div>
+                            </div>
+                            <div class="resource-badge-bottom">PDF</div>
+                        </a>
+                        <a href="#" onclick="showResource('guide')" class="resource-item-bottom">
+                            <div class="resource-icon-bottom">📖</div>
+                            <div class="resource-content-bottom">
+                                <div class="resource-title-bottom">Tax Sale Investment Guide</div>
+                                <div class="resource-desc-bottom">Complete guide for tax sale investing</div>
+                                <div class="resource-meta-bottom">
+                                    <span class="upload-info">📅 Updated: Jul 28, 2025 at 2:15 PM</span>
+                                </div>
+                            </div>
+                        </a>
+                        <a href="#" onclick="showResource('tips')" class="resource-item-bottom">
+                            <div class="resource-icon-bottom">💡</div>
+                            <div class="resource-content-bottom">
+                                <div class="resource-title-bottom">Expert Bidding Strategies</div>
+                                <div class="resource-desc-bottom">Professional tips and tactics</div>
+                                <div class="resource-meta-bottom">
+                                    <span class="upload-info">📅 Updated: Jul 15, 2025 at 4:45 PM</span>
+                                </div>
+                            </div>
+                        </a>
+                        <a href="#" onclick="showResource('legal')" class="resource-item-bottom">
+                            <div class="resource-icon-bottom">⚖️</div>
+                            <div class="resource-content-bottom">
+                                <div class="resource-title-bottom">Legal Requirements & Procedures</div>
+                                <div class="resource-desc-bottom">Know your legal obligations</div>
+                                <div class="resource-meta-bottom">
+                                    <span class="upload-info">📅 Updated: Jun 30, 2025 at 11:20 AM</span>
+                                </div>
+                            </div>
+                        </a>
+                        <a href="#" onclick="showResource('financing')" class="resource-item-bottom">
+                            <div class="resource-icon-bottom">💰</div>
+                            <div class="resource-content-bottom">
+                                <div class="resource-title-bottom">Financing & Funding Options</div>
+                                <div class="resource-desc-bottom">Capital strategies for investors</div>
+                                <div class="resource-meta-bottom">
+                                    <span class="upload-info">📅 Updated: Jul 20, 2025 at 1:30 PM</span>
+                                </div>
+                            </div>
+                        </a>
+                        <a href="#" onclick="downloadPhotoListPDF()" class="resource-item-bottom">
+                            <div class="resource-icon-bottom">📷</div>
+                            <div class="resource-content-bottom">
+                                <div class="resource-title-bottom">Tax Sale Property Photos PDF</div>
+                                <div class="resource-desc-bottom">Visual property guide for August 2025 sale</div>
+                                <div class="resource-meta-bottom">
+                                    <span class="upload-info">📅 Uploaded: Aug 3, 2025 at 6:15 PM</span>
+                                </div>
+                            </div>
+                            <div class="resource-badge-bottom">PDF</div>
+                        </a>
+                        <a href="#" onclick="goToChathamTaxSaleWebsite()" class="resource-item-bottom">
+                            <div class="resource-icon-bottom">🌐</div>
+                            <div class="resource-content-bottom">
+                                <div class="resource-title-bottom">Official Tax Sale Website</div>
+                                <div class="resource-desc-bottom">Chatham County Tax Commissioner</div>
+                                <div class="resource-meta-bottom">
+                                    <span class="upload-info">🔗 Link verified: Aug 4, 2025 at 8:00 AM</span>
+                                </div>
+                            </div>
+                            <div class="resource-badge-bottom">WEB</div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Property Detail Modal -->
+    <div id="property-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Property Details</h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- Property details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Global variables
+        let heroMap;
+        let properties = [];
+        let filteredProperties = [];
+        let allCounties = [];
+        let currentSort = 'address';
+        let currentFilter = '';
+        let currentSearchTerm = '';
+
+        // Helper function to clean and parse amounts (removes $ and commas)
+        function parseAmount(amountStr) {
+            if (!amountStr) return 0;
+            const cleaned = amountStr.toString().replace(/[$,]/g, '');
+            return parseFloat(cleaned) || 0;
+        }
+
+        // Helper function to extract zip code from property data
+        function extractZipFromProperty(property) {
+            // First, try to use the zipCode field that's already parsed by the server
+            if (property.zipCode) {
+                return property.zipCode;
+            }
+            
+            // Fallback: try to extract from address if zipCode field is not available
+            if (property.address) {
+                const zipMatch = property.address.match(/\b(\d{5})\b/);
+                return zipMatch ? zipMatch[1] : null;
+            }
+            
+            return null;
+        }
+
+        // Populate zip code filter dropdown
+        function populateZipCodeFilter() {
+            const zipSelect = document.getElementById('zip-filter');
+            const zipCodes = new Set();
+            
+            // Extract unique zip codes from all properties
+            properties.forEach(property => {
+                const zip = extractZipFromProperty(property);
+                if (zip) {
+                    zipCodes.add(zip);
+                }
+            });
+            
+            // Clear existing options except the first one
+            while (zipSelect.children.length > 1) {
+                zipSelect.removeChild(zipSelect.lastChild);
+            }
+            
+            // Add zip code options in sorted order
+            Array.from(zipCodes).sort().forEach(zip => {
+                const option = document.createElement('option');
+                option.value = zip;
+                option.textContent = zip;
+                zipSelect.appendChild(option);
+            });
+            
+            console.log(`Populated ${zipCodes.size} unique zip codes in filter:`, Array.from(zipCodes).sort());
+        }
+
+        // Function to open the official tax sale PDF
+        async function openTaxSalePdf() {
+            const button = event.target.closest('button');
+            const originalText = button.innerHTML;
+            
+            try {
+                // Show loading state
+                button.innerHTML = '<span class="btn-icon">⏳</span>Loading PDF...';
+                button.disabled = true;
+                
+                showNotification('Fetching official tax sale PDF link...', 'info');
+                
+                const response = await fetch('/api/pdf-links/chatham');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.pdfUrl) {
+                    showNotification('Opening official Chatham County tax sale PDF...', 'success');
+                    window.open(data.pdfUrl, '_blank');
+                } else {
+                    throw new Error('PDF URL not available');
+                }
+            } catch (error) {
+                console.error('Error fetching PDF link:', error);
+                showNotification('Unable to open PDF. Please try again later.', 'error');
+            } finally {
+                // Restore button state
+                button.innerHTML = originalText;
+                button.disabled = false;
+            }
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing application...');
+            
+            // Initialize hero map with a slight delay to ensure DOM is ready
+            setTimeout(() => {
+                initializeHeroMap();
+            }, 100);
+            
+            loadCounties();
+            loadListings();
+        });
+
+        // Initialize Hero Map
+        let heroMapRetryCount = 0;
+        const maxHeroMapRetries = 5;
+        
+        function showHeroMapError() {
+            const heroMap = document.getElementById('hero-map');
+            const heroMapError = document.getElementById('hero-map-error');
+            if (heroMap) heroMap.style.display = 'none';
+            if (heroMapError) heroMapError.style.display = 'block';
+        }
+        
+        function initializeHeroMap() {
+            console.log('=== INITIALIZING HERO MAP (Attempt ' + (heroMapRetryCount + 1) + '/' + maxHeroMapRetries + ') ===');
+            console.log('Leaflet available?', typeof L !== 'undefined');
+            console.log('Document ready state:', document.readyState);
+            
+            try {
+                const heroMapElement = document.getElementById('hero-map');
+                console.log('Hero map element found:', !!heroMapElement);
+                
+                if (!heroMapElement) {
+                    console.error('Hero map element not found! DOM might not be ready.');
+                    heroMapRetryCount++;
+                    if (heroMapRetryCount < maxHeroMapRetries) {
+                        setTimeout(initializeHeroMap, 500);
+                    } else {
+                        console.error('Max retries reached for hero map initialization');
+                        showHeroMapError();
+                    }
+                    return;
+                }
+
+                // Clear loading message
+                heroMapElement.innerHTML = '';
+                console.log('Loading message cleared');
+
+                // Check if the element has dimensions
+                const rect = heroMapElement.getBoundingClientRect();
+                console.log('Hero map element dimensions:', rect);
+                console.log('Parent element:', heroMapElement.parentElement);
+                console.log('Parent dimensions:', heroMapElement.parentElement ? heroMapElement.parentElement.getBoundingClientRect() : 'No parent');
+                
+                if (rect.width === 0 || rect.height === 0) {
+                    console.warn('Hero map element has zero dimensions! Parent CSS or layout issue.');
+                    heroMapRetryCount++;
+                    if (heroMapRetryCount < maxHeroMapRetries) {
+                        setTimeout(initializeHeroMap, 500);
+                    } else {
+                        console.error('Max retries reached - map container has no dimensions');
+                        showHeroMapError();
+                    }
+                    return;
+                }
+
+                console.log('Creating Leaflet map...');
+                heroMap = L.map('hero-map', {
+                    zoomControl: true,
+                    scrollWheelZoom: true
+                }).setView([32.0835, -81.0998], 10); // Chatham County center
+                
+                console.log('Hero map created successfully:', heroMap);
+                
+                console.log('Adding tile layer...');
+                const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors',
+                    maxZoom: 19
+                });
+                
+                tileLayer.addTo(heroMap);
+                console.log('Tile layer added to hero map');
+                
+                // Listen for tile loading events
+                tileLayer.on('loading', function() {
+                    console.log('Hero map tiles are loading...');
+                });
+                
+                tileLayer.on('load', function() {
+                    console.log('Hero map tiles loaded successfully!');
+                });
+                
+                tileLayer.on('tileerror', function(e) {
+                    console.error('Hero map tile error:', e);
+                });
+                
+                // Force map to invalidate size after delays
+                setTimeout(() => {
+                    if (heroMap) {
+                        console.log('First invalidateSize call...');
+                        heroMap.invalidateSize();
+                    }
+                }, 100);
+                
+                setTimeout(() => {
+                    if (heroMap) {
+                        console.log('Second invalidateSize call...');
+                        heroMap.invalidateSize();
+                    }
+                }, 500);
+                
+                console.log('=== HERO MAP INITIALIZATION COMPLETE ===');
+                
+            } catch (error) {
+                console.error('ERROR initializing hero map:', error);
+                console.error('Error stack:', error.stack);
+                heroMapRetryCount++;
+                if (heroMapRetryCount < maxHeroMapRetries) {
+                    setTimeout(initializeHeroMap, 1000);
+                } else {
+                    console.error('Max retries reached due to errors');
+                    showHeroMapError();
+                }
+            }
+        }
+
+        // Load available counties
+        async function loadCounties() {
+            try {
+                const response = await fetch('/api/counties');
+                const counties = await response.json();
+                allCounties = counties;
+                
+                const countySelect = document.getElementById('county-select');
+                counties.forEach(county => {
+                    const option = document.createElement('option');
+                    option.value = county;
+                    option.textContent = county.charAt(0).toUpperCase() + county.slice(1) + ' County';
+                    countySelect.appendChild(option);
+                });
+                
+                updateStats();
+            } catch (error) {
+                console.error('Error loading counties from server:', error);
+                console.log('Loading sample counties instead...');
+                
+                // Load sample counties as fallback
+                allCounties = ['chatham'];
+                
+                const countySelect = document.getElementById('county-select');
+                allCounties.forEach(county => {
+                    const option = document.createElement('option');
+                    option.value = county;
+                    option.textContent = county.charAt(0).toUpperCase() + county.slice(1) + ' County';
+                    countySelect.appendChild(option);
+                });
+                
+                updateStats();
+            }
+        }
+
+        // Load property listings
+        async function loadListings() {
+            const progressSection = document.getElementById('progress-section');
+            const progressFill = document.getElementById('progress-fill');
+            const progressPercentage = document.getElementById('progress-percentage');
+            const progressDetails = document.getElementById('progress-details');
+            
+            progressSection.classList.add('show');
+            
+            try {
+                const selectedCounty = document.getElementById('county-select').value;
+                const url = selectedCounty ? `/api/tax-sale-listings/${selectedCounty}` : '/api/tax-sale-listings';
+                
+                console.log('Fetching tax sale data from:', url);
+                progressDetails.textContent = 'Connecting to Chatham County server...';
+                
+                // Try to fetch from server first
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                // Check if it's streaming JSON response or regular JSON
+                const contentType = response.headers.get('content-type');
+                
+                if (contentType && contentType.includes('application/json')) {
+                    // Regular JSON response
+                    progressDetails.textContent = 'Processing tax sale data...';
+                    const data = await response.json();
+                    
+                    if (data.parsedListings) {
+                        console.log('Raw data from server:', data.parsedListings.slice(0, 3));
+                        
+                        // Transform server data to match our format
+                        properties = data.parsedListings.map((listing, index) => {
+                            // Debug the first few listings to see what amounts are coming through
+                            if (index < 3) {
+                                console.log(`DEBUG: Property ${index + 1} amount data:`, {
+                                    taxAmount: listing.taxAmount,
+                                    amount: listing.amount,
+                                    bidAmount: listing.bidAmount,
+                                    address: listing.address,
+                                    finalAmountDue: listing.taxAmount || listing.amount || '0'
+                                });
+                            }
+                            
+                            return {
+                                address: listing.property || listing.address || 'Address not available',
+                                county: 'chatham',
+                                parcelId: listing.parcelId || listing.parcel_id || 'N/A',
+                                zipCode: listing.zipCode || null,
+                                amountDue: listing.taxAmount || listing.amount || '0',
+                                photoUrl: listing.photoUrl || null,
+                                hasCoordinates: !!(listing.latitude && listing.longitude),
+                                latitude: listing.latitude || null,
+                                longitude: listing.longitude || null,
+                                rawData: listing.rawData || listing
+                            };
+                        });
+                        
+                        console.log('Transformed properties (first 3):', properties.slice(0, 3));
+                        
+                        filteredProperties = [...properties];
+                        
+                        progressSection.classList.remove('show');
+                        displayProperties();
+                        updateMapMarkers();
+                        updateStats();
+                        updateQuickStats();
+                        populateZipCodeFilter();
+                        
+                        showNotification(`Loaded ${properties.length} properties from Chatham County!`, 'success');
+                        return;
+                    }
+                } else {
+                    // Streaming response
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder();
+                    let buffer = '';
+                    
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        
+                        if (done) break;
+                        
+                        buffer += decoder.decode(value, { stream: true });
+                        const lines = buffer.split('\n');
+                        buffer = lines.pop(); // Keep incomplete line in buffer
+                        
+                        for (const line of lines) {
+                            if (line.trim()) {
+                                try {
+                                    const data = JSON.parse(line);
+                                    
+                                    if (data.type === 'progress') {
+                                        const percentage = data.percentage.toFixed(2);
+                                        progressFill.style.width = `${percentage}%`;
+                                        progressPercentage.textContent = `${percentage}%`;
+                                        progressDetails.textContent = data.message;
+                                    } else if (data.type === 'complete') {
+                                        properties = data.properties || [];
+                                        filteredProperties = [...properties];
+                                        
+                                        progressSection.classList.remove('show');
+                                        displayProperties();
+                                        
+                                        // Add delay before updating map markers to ensure map is ready
+                                        setTimeout(() => {
+                                            updateMapMarkers();
+                                        }, 500);
+                                        
+                                        updateStats();
+                                        updateQuickStats();
+                                        populateZipCodeFilter();
+                                        
+                                        showNotification(`Loaded ${properties.length} properties from Chatham County!`, 'success');
+                                        return;
+                                    }
+                                } catch (e) {
+                                    console.warn('Error parsing JSON line:', e);
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                throw new Error('No valid data received from server');
+                
+            } catch (error) {
+                console.error('Error loading listings from Chatham County server:', error);
+                console.log('Loading sample data instead...');
+                
+                // Fallback to sample data if server is not available
+                loadSampleData();
+            }
+        }
+
+        // Load sample data as fallback
+        function loadSampleData() {
+            const progressSection = document.getElementById('progress-section');
+            const progressFill = document.getElementById('progress-fill');
+            const progressPercentage = document.getElementById('progress-percentage');
+            const progressDetails = document.getElementById('progress-details');
+            
+            progressDetails.textContent = 'Loading sample data...';
+            
+            // Simulate loading progress
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += 20;
+                progressFill.style.width = `${progress}%`;
+                progressPercentage.textContent = `${progress}%`;
+                
+                if (progress >= 100) {
+                    clearInterval(progressInterval);
+                    
+                    // Sample property data with real Chatham County examples
+                    properties = [
+                        {
+                            address: '1234 Bull Street, Savannah, GA 31401',
+                            county: 'chatham',
+                            parcelId: '2-0045-12-001',
+                            zipCode: '31401',
+                            amountDue: '4672.58',
+                            photoUrl: null,
+                            hasCoordinates: true,
+                            latitude: 32.0835,
+                            longitude: -81.0998,
+                            rawData: { 
+                                source: 'Sample Chatham County Data',
+                                type: 'Residential',
+                                yearBuilt: '1890',
+                                district: 'Historic District'
+                            }
+                        },
+                        {
+                            address: '5678 Whitmarsh Way, Savannah, GA 31406',
+                            county: 'chatham',
+                            parcelId: '3-0123-45-002',
+                            zipCode: '31406',
+                            amountDue: '12350.00',
+                            photoUrl: 'https://via.placeholder.com/300x200/4CAF50/FFFFFF?text=Chatham+County+Property',
+                            hasCoordinates: true,
+                            latitude: 32.0249,
+                            longitude: -80.9408,
+                            rawData: { 
+                                source: 'Sample Chatham County Data',
+                                type: 'Residential',
+                                yearBuilt: '1985',
+                                district: 'Whitmarsh Island'
+                            }
+                        },
+                        {
+                            address: '9101 Abercorn Street, Savannah, GA 31406',
+                            county: 'chatham',
+                            parcelId: '4-0987-65-003',
+                            zipCode: '31406',
+                            amountDue: '28750.00',
+                            photoUrl: 'https://via.placeholder.com/300x200/2196F3/FFFFFF?text=Commercial+Property',
+                            hasCoordinates: true,
+                            latitude: 32.0123,
+                            longitude: -81.1234,
+                            rawData: { 
+                                source: 'Sample Chatham County Data',
+                                type: 'Commercial',
+                                yearBuilt: '1995',
+                                district: 'Southside'
+                            }
+                        },
+                        {
+                            address: '2468 Victory Drive, Savannah, GA 31404',
+                            county: 'chatham',
+                            parcelId: '1-0246-80-004',
+                            zipCode: '31404',
+                            amountDue: '7850.00',
+                            photoUrl: null,
+                            hasCoordinates: false,
+                            latitude: null,
+                            longitude: null,
+                            rawData: { 
+                                source: 'Sample Chatham County Data',
+                                type: 'Vacant Lot',
+                                yearBuilt: null,
+                                district: 'Midtown'
+                            }
+                        },
+                        {
+                            address: '1357 East Bay Street, Savannah, GA 31401',
+                            county: 'chatham',
+                            parcelId: '2-1357-90-005',
+                            zipCode: '31401',
+                            amountDue: '18925.00',
+                            photoUrl: 'https://via.placeholder.com/300x200/FF9800/FFFFFF?text=Historic+Bay+Street',
+                            hasCoordinates: true,
+                            latitude: 32.0809,
+                            longitude: -81.0912,
+                            rawData: { 
+                                source: 'Sample Chatham County Data',
+                                type: 'Historic Commercial',
+                                yearBuilt: '1875',
+                                district: 'River Street Historic District'
+                            }
+                        },
+                        {
+                            address: '8642 Tybee Road, Savannah, GA 31410',
+                            county: 'chatham',
+                            parcelId: '5-8642-31-006',
+                            zipCode: '31410',
+                            amountDue: '15200.00',
+                            photoUrl: null,
+                            hasCoordinates: true,
+                            latitude: 32.0002,
+                            longitude: -80.8765,
+                            rawData: { 
+                                source: 'Sample Chatham County Data',
+                                type: 'Residential',
+                                yearBuilt: '1978',
+                                district: 'Islands'
+                            }
+                        }
+                    ];
+                    
+                    filteredProperties = [...properties];
+                    
+                    progressSection.classList.remove('show');
+                    displayProperties();
+                    
+                    // Add delay before updating map markers to ensure map is ready
+                    setTimeout(() => {
+                        updateMapMarkers();
+                    }, 500);
+                    
+                    updateStats();
+                    updateQuickStats();
+                    populateZipCodeFilter();
+                    
+                    showNotification('Sample data loaded successfully!', 'success');
+                }
+            }, 300);
+        }
+
+        // Display properties in grid
+        function displayProperties() {
+            console.log('🏠 displayProperties called with', filteredProperties.length, 'properties');
+            
+            const propertyGrid = document.getElementById('property-grid');
+            console.log('Property grid element found:', !!propertyGrid);
+            
+            propertyGrid.innerHTML = '';
+            
+            if (filteredProperties.length === 0) {
+                console.log('No properties to display, showing empty state');
+                propertyGrid.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 3rem; color: #6b7280;">
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">🏠</div>
+                        <h3 style="margin-bottom: 0.5rem; color: #1f2937;">No properties found</h3>
+                        <p>Try adjusting your filters or search terms.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            console.log('Creating property cards...');
+            filteredProperties.forEach((property, index) => {
+                console.log(`Creating card ${index + 1}:`, property.address);
+                const card = createPropertyCard(property);
+                propertyGrid.appendChild(card);
+            });
+            console.log('✅ Property cards created and added to grid');
+        }
+
+        // Create enhanced property card element
+        // Free alternatives for property images without API keys
+        function getMapImageUrl(address, zipCode) {
+            // Temporarily disable map images due to service issues
+            // The staticmap.openstreetmap.de service is currently unreliable
+            return null;
+            
+            /* 
+            // Original implementation - commented out due to service issues
+            if (!address || address === 'Address not available') {
+                return null;
+            }
+            
+            // Construct full address with Savannah, GA and zip code
+            let fullAddress = address;
+            if (zipCode) {
+                fullAddress += `, ${zipCode}`;
+            }
+            fullAddress += ', Savannah, GA';
+            
+            const encodedAddress = encodeURIComponent(fullAddress);
+            
+            // Option 1: OpenStreetMap static map (completely free)
+            return `https://staticmap.openstreetmap.de/staticmap.php?center=${encodedAddress}&zoom=17&size=400x300&maptype=mapnik&markers=${encodedAddress}`;
+            */
+        }
+
+        // Alternative: Use MapTiler for satellite imagery (free tier available)
+        function getSatelliteImageUrl(address, zipCode) {
+            if (!address || address === 'Address not available') {
+                return null;
+            }
+            
+            let fullAddress = address;
+            if (zipCode) {
+                fullAddress += `, ${zipCode}`;
+            }
+            fullAddress += ', Savannah, GA';
+            
+            // For now, return null to use placeholder - can be enhanced with free satellite services
+            return null;
+        }
+
+        // Generate a placeholder image with property info
+        function getPropertyPlaceholder(property) {
+            const address = (property.address || 'Address not available').replace(/[^\x00-\x7F]/g, ''); // Remove non-ASCII characters
+            const amount = parseAmount(property.amountDue);
+            
+            // Create a data URL for an SVG placeholder with property info
+            const svgContent = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+                    <defs>
+                        <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                            <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(59,130,246,0.1)" stroke-width="1"/>
+                        </pattern>
+                    </defs>
+                    <rect width="400" height="300" fill="#f8fafc"/>
+                    <rect width="400" height="300" fill="url(#grid)"/>
+                    <circle cx="200" cy="120" r="40" fill="#3b82f6" opacity="0.8"/>
+                    <text x="200" y="130" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="18" font-weight="bold">HOME</text>
+                    <text x="200" y="180" text-anchor="middle" fill="#1e40af" font-family="Arial, sans-serif" font-size="12" font-weight="600">${address.length > 30 ? address.substring(0, 30) + '...' : address}</text>
+                    <text x="200" y="200" text-anchor="middle" fill="#059669" font-family="Arial, sans-serif" font-size="14" font-weight="bold">$${amount.toLocaleString()}</text>
+                    <text x="200" y="220" text-anchor="middle" fill="#6b7280" font-family="Arial, sans-serif" font-size="10">Tax Sale Property</text>
+                </svg>
+            `;
+            
+            // Use encodeURIComponent instead of btoa to avoid encoding issues with special characters
+            return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgContent)}`;
+        }
+
+        function createPropertyCard(property) {
+            const card = document.createElement('div');
+            card.className = 'property-card';
+            card.onclick = () => showPropertyDetails(property);
+            
+            const hasOfficialPhoto = property.photoUrl && property.photoUrl !== 'No photo available';
+            const mapImageUrl = getMapImageUrl(property.address, property.zipCode);
+            const hasValidAddress = property.address && property.address !== 'Address not available';
+            
+            let photoContent = '';
+            let imageType = 'none'; // Track what type of image we're showing
+            
+            if (hasOfficialPhoto) {
+                // Use official photo first
+                imageType = 'official';
+                photoContent = `<img src="${property.photoUrl}" alt="Property photo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                               <div style="display: none; width: 100%; height: 100%; align-items: center; justify-content: center; color: var(--gray-500);">🏠 Photo unavailable</div>`;
+            } else if (hasValidAddress && mapImageUrl) {
+                // Use OpenStreetMap if no official photo but valid address
+                imageType = 'map';
+                const placeholderUrl = getPropertyPlaceholder(property);
+                photoContent = `<img src="${mapImageUrl}" alt="Property location map" title="Map view of ${property.address}" 
+                                     onerror="this.src='${placeholderUrl}'; this.title='Property information'; this.onerror=null;">`;
+            } else {
+                // Use property placeholder with info
+                imageType = 'placeholder';
+                const placeholderUrl = getPropertyPlaceholder(property);
+                photoContent = `<img src="${placeholderUrl}" alt="Property information" title="Tax sale property">`;
+            }
+            
+            // Clean and parse the amount - remove $ and commas before parsing
+            const amount = parseAmount(property.amountDue);
+            let statusBadge = '';
+            
+            if (property.hasCoordinates) {
+                statusBadge = '<div class="status-badge status-mapped">📍 Mapped</div>';
+            } else if (amount > 50000) {
+                statusBadge = '<div class="status-badge status-high-value">💎 High Value</div>';
+            } else if (hasOfficialPhoto) {
+                statusBadge = '<div class="status-badge status-new">📷 Photo</div>';
+            } else if (imageType === 'map') {
+                statusBadge = '<div class="status-badge status-map">🗺️ Map</div>';
+            }
+            
+            const features = [];
+            if (hasOfficialPhoto) {
+                features.push('<span class="feature-tag photo">📷 Official Photo</span>');
+            } else if (imageType === 'map') {
+                features.push('<span class="feature-tag map">🗺️ Map View</span>');
+            }
+            if (property.hasCoordinates) features.push('<span class="feature-tag mapped">📍 Mapped</span>');
+            
+            card.innerHTML = `
+                <div class="property-image">
+                    ${statusBadge}
+                    ${hasOfficialPhoto ? '<div class="image-badge"><span>📷</span> Official Photo</div>' : 
+                      imageType === 'map' ? '<div class="image-badge"><span>🗺️</span> Map View</div>' : ''}
+                    ${photoContent}
+                </div>
+                <div class="property-content">
+                    <div class="property-header">
+                        <div class="property-address">${property.address || 'Address not available'}</div>
+                        <div class="property-county">${property.county ? property.county.charAt(0).toUpperCase() + property.county.slice(1) + ' County' : 'County N/A'}</div>
+                    </div>
+                    
+                    ${features.length > 0 ? `<div class="property-features">${features.join('')}</div>` : ''}
+                    
+                    <div class="property-details">
+                        <div class="detail-item">
+                            <div class="detail-label">💰 Amount</div>
+                            <div class="detail-value price">$${amount.toLocaleString()}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">🏷️ Parcel</div>
+                            <div class="detail-value">${property.parcelId || 'N/A'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">📍 Status</div>
+                            <div class="detail-value">${property.hasCoordinates ? 'Mapped' : 'Pending'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">📊 Value</div>
+                            <div class="detail-value">${amount > 25000 ? 'High' : 'Standard'}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="property-actions">
+                        <button class="btn btn-primary btn-small" onclick="event.stopPropagation(); showPropertyDetails(${JSON.stringify(property).replace(/"/g, '&quot;')})">
+                            <span class="btn-icon">👁️</span>
+                            Details
+                        </button>
+                        <button class="btn btn-outline btn-small" onclick="event.stopPropagation(); viewOnMap(${property.latitude || 0}, ${property.longitude || 0})">
+                            <span class="btn-icon">🗺️</span>
+                            Map
+                        </button>
+                    </div>
+                    
+                    <div class="property-meta">
+                        <span class="property-id">ID: ${property.parcelId || 'N/A'}</span>
+                        <span>${property.hasCoordinates ? '✅ Verified Location' : '⚠️ Location Pending'}</span>
+                    </div>
+                </div>
+            `;
+            
+            return card;
+        }
+
+        // Show property details in modal
+        function showPropertyDetails(property) {
+            const modal = document.getElementById('property-modal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalBody = document.getElementById('modal-body');
+            
+            modalTitle.textContent = property.address || 'Property Details';
+            
+            const hasOfficialPhoto = property.photoUrl && property.photoUrl !== 'No photo available';
+            const mapImageUrl = getMapImageUrl(property.address, property.zipCode);
+            const hasValidAddress = property.address && property.address !== 'Address not available';
+            
+            let photoSection = '';
+            
+            if (hasOfficialPhoto) {
+                photoSection = `
+                    <div style="margin-bottom: 1rem;">
+                        <div style="position: relative;">
+                            <img src="${property.photoUrl}" alt="Property photo" style="width: 100%; max-height: 200px; object-fit: cover; border-radius: 0.5rem; border: 1px solid #e5e7eb;">
+                            <div style="position: absolute; top: 0.5rem; left: 0.5rem; background: rgba(0,0,0,0.7); color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 500;">📷 Official Photo</div>
+                        </div>
+                    </div>
+                `;
+            } else if (hasValidAddress && mapImageUrl) {
+                const placeholderUrl = getPropertyPlaceholder(property);
+                photoSection = `
+                    <div style="margin-bottom: 1rem;">
+                        <div style="position: relative;">
+                            <img src="${mapImageUrl}" alt="Property location map" title="Map view of ${property.address}" 
+                                 style="width: 100%; max-height: 200px; object-fit: cover; border-radius: 0.5rem; border: 1px solid #e5e7eb;"
+                                 onerror="this.src='${placeholderUrl}'; this.title='Property information'; this.nextElementSibling.innerHTML='🏠 Property Info';">
+                            <div style="position: absolute; top: 0.5rem; left: 0.5rem; background: rgba(5,150,105,0.8); color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 500;">🗺️ Map View</div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                const placeholderUrl = getPropertyPlaceholder(property);
+                photoSection = `
+                    <div style="margin-bottom: 1rem;">
+                        <div style="position: relative;">
+                            <img src="${placeholderUrl}" alt="Property information" style="width: 100%; max-height: 200px; object-fit: cover; border-radius: 0.5rem; border: 1px solid #e5e7eb;">
+                            <div style="position: absolute; top: 0.5rem; left: 0.5rem; background: rgba(107,114,128,0.8); color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 500;">🏠 Property Info</div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            const hasImage = hasOfficialPhoto || (hasValidAddress && mapImageUrl);
+            
+            modalBody.innerHTML = `
+                ${photoSection}
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+                    <div class="detail-item">
+                        <div class="detail-label">Parcel</div>
+                        <div class="detail-value">${property.parcelId || 'N/A'}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Amount</div>
+                        <div class="detail-value price">$${parseAmount(property.amountDue).toLocaleString()}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">County</div>
+                        <div class="detail-value">${property.county ? property.county.charAt(0).toUpperCase() + property.county.slice(1) : 'N/A'}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Status</div>
+                        <div class="detail-value">${property.hasCoordinates ? '📍 Mapped' : '❌ Pending'}</div>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center;">
+                    ${property.hasCoordinates ? `
+                        <button class="btn btn-small" onclick="viewOnMap(${property.latitude}, ${property.longitude})">📍 Map</button>
+                        <button class="btn btn-small btn-secondary" onclick="openStreetView(${property.latitude}, ${property.longitude})">🗺️ Street View</button>
+                    ` : ''}
+                    ${hasOfficialPhoto ? `
+                        <button class="btn btn-small btn-secondary" onclick="window.open('${property.photoUrl}', '_blank')">🖼️ Full Photo</button>
+                    ` : hasValidAddress && mapImageUrl ? `
+                        <button class="btn btn-small btn-secondary" onclick="window.open('${mapImageUrl}', '_blank')">🗺️ Open Map</button>
+                    ` : ''}
+                </div>
+                
+                ${property.rawData ? `
+                    <div style="margin-top: 1rem; text-align: center;">
+                        <button class="btn btn-small btn-secondary" onclick="toggleRawData()" id="raw-data-btn">📄 Raw Data</button>
+                        <div id="raw-data" style="display: none; margin-top: 0.75rem; background: #f9fafb; padding: 0.75rem; border-radius: 0.5rem; font-family: monospace; font-size: 0.75rem; max-height: 150px; overflow-y: auto; border: 1px solid #e5e7eb; text-align: left;">
+                            ${JSON.stringify(property.rawData, null, 2)}
+                        </div>
+                    </div>
+                ` : ''}
+            `;
+            
+            modal.style.display = 'block';
+        }
+
+        // Update map markers
+        function updateMapMarkers() {
+            console.log('🗺️ updateMapMarkers called');
+            console.log('heroMap exists:', !!heroMap);
+            console.log('filteredProperties length:', filteredProperties.length);
+            
+            if (!heroMap) {
+                console.warn('Hero map not initialized yet, retrying in 1 second...');
+                setTimeout(() => {
+                    updateMapMarkers();
+                }, 1000);
+                return;
+            }
+            
+            // Clear existing markers from hero map
+            heroMap.eachLayer(layer => {
+                if (layer instanceof L.Marker) {
+                    heroMap.removeLayer(layer);
+                }
+            });
+            
+            console.log('Cleared existing markers');
+            
+            // Count properties with coordinates
+            const propertiesWithCoords = filteredProperties.filter(p => p.hasCoordinates && p.latitude && p.longitude);
+            console.log('Properties with coordinates:', propertiesWithCoords.length);
+            
+            // Add markers for geocoded properties to hero map
+            filteredProperties.forEach((property, index) => {
+                if (property.hasCoordinates && property.latitude && property.longitude) {
+                    console.log(`Adding marker ${index + 1}:`, {
+                        address: property.address,
+                        lat: property.latitude,
+                        lng: property.longitude
+                    });
+                    
+                    const popupContent = `
+                        <div style="min-width: 250px; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; font-size: 14px; line-height: 1.5; color: #374151;">
+                            <h4 style="margin: 0 0 0.75rem 0; color: #1e3a8a; font-size: 16px; font-weight: 600; line-height: 1.25;">${property.address || 'Unknown Address'}</h4>
+                            <div style="margin-bottom: 0.5rem;">
+                                <p style="margin: 0 0 0.4rem 0; font-size: 14px; color: #374151;"><strong style="color: #1f2937;">Amount Due:</strong> <span style="color: #059669; font-weight: 600;">$${parseAmount(property.amountDue).toLocaleString()}</span></p>
+                                <p style="margin: 0 0 0.4rem 0; font-size: 14px; color: #374151;"><strong style="color: #1f2937;">Parcel ID:</strong> <span style="font-family: monospace; background: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-size: 13px;">${property.parcelId || 'N/A'}</span></p>
+                                <p style="margin: 0 0 0.4rem 0; font-size: 14px; color: #374151;"><strong style="color: #1f2937;">County:</strong> ${property.county ? property.county.charAt(0).toUpperCase() + property.county.slice(1) : 'N/A'}</p>
+                            </div>
+                            <div style="margin-top: 0.75rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                <button onclick="showPropertyDetails(${JSON.stringify(property).replace(/"/g, '&quot;')})" style="background: #3b82f6; color: white; border: none; padding: 0.5rem 0.75rem; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; transition: background-color 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.1);" onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">👁️ View Details</button>
+                                ${property.hasCoordinates ? `<button onclick="openStreetView(${property.latitude}, ${property.longitude})" style="background: #059669; color: white; border: none; padding: 0.5rem 0.75rem; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; transition: background-color 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.1);" onmouseover="this.style.background='#047857'" onmouseout="this.style.background='#059669'">🗺️ Street View</button>` : ''}
+                            </div>
+                        </div>
+                    `;
+
+                    // Add marker to hero map
+                    const marker = L.marker([property.latitude, property.longitude])
+                        .bindPopup(popupContent)
+                        .addTo(heroMap);
+                    
+                    console.log('Marker added successfully:', marker);
+                }
+            });
+            
+            // Fit hero map to show all markers
+            if (filteredProperties.some(p => p.hasCoordinates)) {
+                console.log('Fitting map bounds to show all markers');
+                const group = new L.featureGroup(
+                    filteredProperties
+                        .filter(p => p.hasCoordinates && p.latitude && p.longitude)
+                        .map(p => L.marker([p.latitude, p.longitude]))
+                );
+                heroMap.fitBounds(group.getBounds().pad(0.1));
+                console.log('Map bounds fitted');
+            } else {
+                console.log('No properties with coordinates found for map bounds');
+            }
+        }
+
+        // Update statistics with enhanced dashboard display
+        function updateStats() {
+            const totalProperties = properties.length;
+            const geocodedProperties = properties.filter(p => p.hasCoordinates).length;
+            const successRate = totalProperties > 0 ? ((geocodedProperties / totalProperties) * 100).toFixed(1) : 0;
+            const totalValue = properties.reduce((sum, p) => sum + parseAmount(p.amountDue), 0);
+            
+            // Update hero stats (no KPI cards remain)
+            document.getElementById('hero-total').textContent = totalProperties.toLocaleString();
+            document.getElementById('hero-counties').textContent = allCounties.length.toString();
+            document.getElementById('hero-value').textContent = `$${(totalValue / 1000000).toFixed(1)}M`;
+            document.getElementById('hero-success').textContent = `${successRate}%`;
+
+            // Update value ranges
+            updateValueDistribution();
+            
+            // Update activity feed (simulate recent activity)
+            updateActivityFeed();
+        }
+
+        // Update value distribution analytics
+        function updateValueDistribution() {
+            const valueRanges = {
+                'under-50k': 0,
+                '50k-100k': 0,
+                '100k-250k': 0,
+                'over-250k': 0
+            };
+
+            properties.forEach(prop => {
+                const amount = parseAmount(prop.amountDue);
+                if (amount < 50000) valueRanges['under-50k']++;
+                else if (amount < 100000) valueRanges['50k-100k']++;
+                else if (amount < 250000) valueRanges['100k-250k']++;
+                else valueRanges['over-250k']++;
+            });
+
+            // Update counts
+            Object.entries(valueRanges).forEach(([range, count]) => {
+                const element = document.getElementById(`${range}-count`);
+                if (element) element.textContent = count.toString();
+            });
+
+            // Update bar widths dynamically
+            const total = properties.length || 1;
+            Object.entries(valueRanges).forEach(([range, count]) => {
+                const percentage = (count / total) * 100;
+                const bar = document.querySelector(`[data-range="${range}"]`);
+                if (bar) {
+                    bar.style.width = `${Math.max(percentage, 5)}%`;
+                }
+            });
+        }
+
+        // Update activity feed with simulated recent activity
+        function updateActivityFeed() {
+            const now = new Date();
+            const activities = [
+                {
+                    icon: 'new',
+                    text: `${properties.length} properties loaded`,
+                    time: 'Just now'
+                },
+                {
+                    icon: 'update',
+                    text: `Location data refreshed`,
+                    time: '2 minutes ago'
+                },
+                {
+                    icon: 'geocode',
+                    text: `Property data processing complete`,
+                    time: '5 minutes ago'
+                }
+            ];
+
+            const activityList = document.querySelector('.activity-list');
+            if (activityList) {
+                activityList.innerHTML = activities.map(activity => `
+                    <div class="activity-item">
+                        <div class="activity-icon ${activity.icon}">${activity.icon === 'new' ? '+' : activity.icon === 'update' ? '📍' : '🗺️'}</div>
+                        <div class="activity-content">
+                            <div class="activity-text">${activity.text}</div>
+                            <div class="activity-time">${activity.time}</div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Dashboard action handlers
+        function refreshValueData() {
+            showNotification('Analyzing value distribution...', 'info');
+            setTimeout(() => {
+                updateValueDistribution();
+                showNotification('Value analysis complete!', 'success');
+            }, 1500);
+        }
+
+        function refreshActivity() {
+            showNotification('Updating activity feed...', 'info');
+            setTimeout(() => {
+                updateActivityFeed();
+                showNotification('Activity feed refreshed!', 'success');
+            }, 800);
+        }
+
+        // Update quick stats
+        function updateQuickStats() {
+            const amounts = properties.map(p => parseAmount(p.amountDue)).filter(a => a > 0);
+            const avgAmount = amounts.length > 0 ? amounts.reduce((sum, a) => sum + a, 0) / amounts.length : 0;
+            const photosCount = properties.filter(p => p.photoUrl && p.photoUrl !== 'No photo available').length;
+            
+            document.getElementById('avg-amount').textContent = `$${avgAmount.toLocaleString()}`;
+            document.getElementById('photos-count').textContent = photosCount.toString();
+            document.getElementById('counties-count').textContent = allCounties.length.toString();
+        }
+
+        // Enhanced apply filters with multiple criteria
+        function applyFilters() {
+            console.log('🔍 applyFilters called');
+            
+            const county = document.getElementById('county-select').value;
+            const sort = document.getElementById('sort-select').value;
+            const search = document.getElementById('search-input').value.toLowerCase();
+            const zipCode = document.getElementById('zip-filter').value;
+            const amountRange = document.getElementById('amount-filter').value;
+            const status = document.getElementById('status-filter').value;
+            
+            console.log('Applied filters:', { county, sort, search, zipCode, amountRange, status });
+            
+            currentFilter = county;
+            currentSort = sort;
+            currentSearchTerm = search;
+            
+            console.log('Total properties before filtering:', properties.length);
+            
+            // Filter properties with enhanced criteria
+            filteredProperties = properties.filter(property => {
+                const matchesCounty = !county || property.county === county;
+                const matchesSearch = !search || 
+                    (property.address && property.address.toLowerCase().includes(search)) ||
+                    (property.parcelId && property.parcelId.toLowerCase().includes(search));
+                
+                // Zip code filtering
+                let matchesZip = true;
+                if (zipCode) {
+                    const propertyZip = extractZipFromProperty(property);
+                    matchesZip = propertyZip === zipCode;
+                }
+                
+                // Amount filtering
+                let matchesAmount = true;
+                if (amountRange) {
+                    const amount = parseAmount(property.amountDue);
+                    if (amountRange === '0-5000') {
+                        matchesAmount = amount < 5000;
+                    } else if (amountRange === '5000-15000') {
+                        matchesAmount = amount >= 5000 && amount <= 15000;
+                    } else if (amountRange === '15000-50000') {
+                        matchesAmount = amount >= 15000 && amount <= 50000;
+                    } else if (amountRange === '50000+') {
+                        matchesAmount = amount > 50000;
+                    }
+                }
+                
+                // Status filtering
+                let matchesStatus = true;
+                if (status) {
+                    if (status === 'mapped') {
+                        matchesStatus = property.hasCoordinates;
+                    } else if (status === 'photo') {
+                        matchesStatus = property.photoUrl && property.photoUrl !== 'No photo available';
+                    } else if (status === 'unmapped') {
+                        matchesStatus = !property.hasCoordinates;
+                    }
+                }
+                
+                return matchesCounty && matchesSearch && matchesZip && matchesAmount && matchesStatus;
+            });
+            
+            console.log('Properties after filtering:', filteredProperties.length);
+            
+            // Enhanced sorting
+            filteredProperties.sort((a, b) => {
+                switch (sort) {
+                    case 'amount':
+                        return parseAmount(b.amountDue) - parseAmount(a.amountDue);
+                    case 'parcelId':
+                        return (a.parcelId || '').localeCompare(b.parcelId || '');
+                    default:
+                        return (a.address || '').localeCompare(b.address || '');
+                }
+            });
+            
+            console.log('🏠 Calling displayProperties...');
+            displayProperties();
+            console.log('🗺️ Calling updateMapMarkers...');
+            updateMapMarkers();
+            console.log('📊 Calling updateFilteredStats...');
+            updateFilteredStats();
+            console.log('✅ Filter application complete');
+        }
+
+        // Update stats for filtered results
+        function updateFilteredStats() {
+            const filteredTotal = filteredProperties.length;
+            const filteredGeocoded = filteredProperties.filter(p => p.hasCoordinates).length;
+            const filteredValue = filteredProperties.reduce((sum, p) => sum + parseAmount(p.amountDue), 0);
+            
+            // No KPI cards to update - analytics sections handle their own data
+        }
+
+        // Export results functionality
+        function exportResults() {
+            if (filteredProperties.length === 0) {
+                alert('No properties to export. Please adjust your filters.');
+                return;
+            }
+            
+            const csvContent = [
+                ['Address', 'Parcel ID', 'Amount Due', 'County', 'Has Coordinates', 'Photo Available'].join(','),
+                ...filteredProperties.map(p => [
+                    `"${p.address || ''}"`,
+                    `"${p.parcelId || ''}"`,
+                    parseAmount(p.amountDue),
+                    `"${p.county || ''}"`,
+                    p.hasCoordinates ? 'Yes' : 'No',
+                    (p.photoUrl && p.photoUrl !== 'No photo available') ? 'Yes' : 'No'
+                ].join(','))
+            ].join('\n');
+            
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `georgia-tax-sales-${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+
+        // Clear filters
+        function clearFilters() {
+            document.getElementById('county-select').value = '';
+            document.getElementById('sort-select').value = 'address';
+            document.getElementById('search-input').value = '';
+            document.getElementById('zip-filter').value = '';
+            document.getElementById('amount-filter').value = '';
+            document.getElementById('status-filter').value = '';
+            
+            currentFilter = '';
+            currentSort = 'address';
+            currentSearchTerm = '';
+            
+            filteredProperties = [...properties];
+            displayProperties();
+            updateMapMarkers();
+        }
+
+        // View property on map
+        function viewOnMap(lat, lng) {
+            if (lat && lng && map) {
+                map.setView([lat, lng], 16);
+                scrollToSection('map');
+            }
+        }
+
+        // Open Street View
+        function openStreetView(lat, lng) {
+            if (lat && lng) {
+                const url = `https://www.google.com/maps/@${lat},${lng},3a,75y,90t/data=!3m6!1e1!3m4!1s0x0:0x0!2e0!7i13312!8i6656`;
+                window.open(url, '_blank');
+            }
+        }
+
+        // Scroll to section
+        function scrollToSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                section.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // Show resources
+        function showResource(type) {
+            const resources = {
+                guide: 'Tax Sale Guide: Learn the basics of tax sale investing, including how auctions work, what to research before bidding, and common pitfalls to avoid.',
+                tips: 'Bidding Tips: Strategies for successful bidding, setting budgets, understanding property values, and timing your bids effectively.',
+                legal: 'Legal Requirements: Understanding your obligations as a tax sale purchaser, redemption periods, title issues, and necessary documentation.',
+                financing: 'Financing Options: Explore funding sources for tax sale purchases, including cash requirements, hard money lenders, and partnership opportunities.'
+            };
+            
+            alert(resources[type] || 'Resource information coming soon!');
+        }
+
+        // Download PDF function - Links to actual Chatham County Tax Sale PDF
+        function downloadPDF() {
+            showNotification('Opening Chatham County Tax Sale PDF...', 'info');
+            
+            // Official Chatham County Tax Sale List PDF URL
+            const chathamTaxSalePdfUrl = 'https://cms.chathamcountyga.gov/api/assets/taxcommissioner/bbcf4bac-48f3-47fe-894c-18397e65ebff?download=0';
+            
+            // Open in new tab
+            window.open(chathamTaxSalePdfUrl, '_blank');
+            
+            showNotification('Official Chatham County Tax Sale PDF opened!', 'success');
+        }
+
+        // Download Photo List PDF function
+        function downloadPhotoListPDF() {
+            showNotification('Opening Chatham County Tax Sale Photo List...', 'info');
+            
+            // Official Chatham County Tax Sale Photo List PDF URL
+            const chathamPhotoListPdfUrl = 'https://cms.chathamcountyga.gov/api/assets/taxcommissioner/59c03060-15c8-4653-9c6c-0568b45814c9?download=0';
+            
+            // Open in new tab
+            window.open(chathamPhotoListPdfUrl, '_blank');
+            
+            showNotification('Official Chatham County Tax Sale Photo List opened!', 'success');
+        }
+
+        // Go to official Chatham County Tax Sale website
+        function goToChathamTaxSaleWebsite() {
+            showNotification('Opening official Chatham County Tax Sale website...', 'info');
+            window.open('https://tax.chathamcountyga.gov/TaxSaleList', '_blank');
+        }
+
+        // Show about
+        function showAbout() {
+            alert('Georgia Tax Sales - Your premier source for tax sale property listings across Georgia. We provide comprehensive data, mapping, and resources to help investors find opportunities.');
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('property-modal').style.display = 'none';
+        }
+
+        // Toggle raw data
+        function toggleRawData() {
+            const rawData = document.getElementById('raw-data');
+            const btn = document.getElementById('raw-data-btn');
+            
+            if (rawData.style.display === 'none') {
+                rawData.style.display = 'block';
+                btn.textContent = '📄 Hide Raw Data';
+            } else {
+                rawData.style.display = 'none';
+                btn.textContent = '📄 Show Raw Data';
+            }
+        }
+
+        // Show error message
+        function showError(message) {
+            const propertyGrid = document.getElementById('property-grid');
+            propertyGrid.innerHTML = `
+                <div style="grid-column: 1 / -1; text-align: center; padding: 3rem; color: #dc2626;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
+                    <h3 style="margin-bottom: 0.5rem; color: #dc2626;">Error Loading Data</h3>
+                    <p>${message}</p>
+                    <button class="btn" onclick="loadListings()" style="margin-top: 1rem;">Try Again</button>
+                </div>
+            `;
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('property-modal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+
+        // Handle escape key for modal
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // Missing functions implementation
+        
+        // Show notification function
+        function showNotification(message, type = 'info') {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
+                color: white;
+                padding: 1rem 1.5rem;
+                border-radius: 0.5rem;
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+                z-index: 9999;
+                font-weight: 600;
+                transition: all 0.3s ease;
+                transform: translateX(100%);
+                opacity: 0;
+            `;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            // Animate in
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+                notification.style.opacity = '1';
+            }, 100);
+            
+            // Auto remove after 3 seconds
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                notification.style.opacity = '0';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        // Clear filters function
+        function clearFilters() {
+            document.getElementById('county-select').value = '';
+            document.getElementById('sort-select').value = 'address';
+            document.getElementById('search-input').value = '';
+            document.getElementById('amount-filter').value = '';
+            document.getElementById('status-filter').value = '';
+            
+            filteredProperties = [...properties];
+            displayProperties();
+            updateMapMarkers();
+        }
+
+        // Export results function
+        function exportResults() {
+            if (filteredProperties.length === 0) {
+                showNotification('No properties to export', 'error');
+                return;
+            }
+            
+            const csvContent = [
+                ['Address', 'County', 'Parcel ID', 'Amount Due', 'Has Photo', 'Has Coordinates'].join(','),
+                ...filteredProperties.map(property => [
+                    `"${property.address || ''}"`,
+                    `"${property.county || ''}"`,
+                    `"${property.parcelId || ''}"`,
+                    property.amountDue || '0',
+                    property.photoUrl && property.photoUrl !== 'No photo available' ? 'Yes' : 'No',
+                    property.hasCoordinates ? 'Yes' : 'No'
+                ].join(','))
+            ].join('\n');
+            
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `tax-sale-listings-${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showNotification('Properties exported to CSV successfully!', 'success');
+        }
+
+        // View on map function
+        function viewOnMap(lat, lng) {
+            if (lat && lng && heroMap) {
+                heroMap.setView([lat, lng], 15);
+                scrollToSection('hero');
+                showNotification('Property location shown on hero map', 'success');
+            } else {
+                showNotification('Location coordinates not available', 'error');
+            }
+        }
+
+        // Open street view function
+        function openStreetView(lat, lng) {
+            if (lat && lng) {
+                const url = `https://www.google.com/maps/@${lat},${lng},3a,75y,90t/data=!3m6!1e1!3m4!1s0x0:0x0!2e0!7i13312!8i6656`;
+                window.open(url, '_blank');
+            } else {
+                showNotification('Coordinates not available for street view', 'error');
+            }
+        }
+    </script>
+</body>
+</html>

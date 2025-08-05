@@ -194,13 +194,14 @@ class PropertyDatabase {
         });
     }
 
-    // Get all properties from database
+    // Get all properties from database (only from the most recent PDF file)
     async getAllProperties() {
         return new Promise((resolve, reject) => {
             this.db.all(
                 `SELECT p.*, pf.filename, pf.upload_date 
                  FROM properties p 
                  JOIN pdf_files pf ON p.pdf_file_id = pf.id 
+                 WHERE pf.id = (SELECT id FROM pdf_files ORDER BY last_processed DESC LIMIT 1)
                  ORDER BY p.property_index`,
                 (err, rows) => {
                     if (err) {
@@ -299,6 +300,29 @@ class PropertyDatabase {
                     resolve();
                 });
             });
+        });
+    }
+
+    // Clean up old PDF file records (keep only the most recent 5)
+    async cleanupOldPdfFiles() {
+        return new Promise((resolve, reject) => {
+            this.db.run(
+                `DELETE FROM pdf_files 
+                 WHERE id NOT IN (
+                     SELECT id FROM pdf_files 
+                     ORDER BY last_processed DESC 
+                     LIMIT 5
+                 )`,
+                (err) => {
+                    if (err) {
+                        console.error('Error cleaning up old PDF files:', err);
+                        reject(err);
+                    } else {
+                        console.log('✅ Cleaned up old PDF file records');
+                        resolve();
+                    }
+                }
+            );
         });
     }
 

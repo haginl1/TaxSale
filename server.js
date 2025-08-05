@@ -1,4 +1,5 @@
 // Tax Sale System with Dynamic URL Fetching - Deploy: Aug 4, 2025 (Sync Update)
+require('dotenv').config();
 const express = require('express');
 const fetch = require('node-fetch');
 const pdfParse = require('pdf-parse');
@@ -378,7 +379,7 @@ async function geocodeAllListings(listings, county = 'Chatham County', state = '
 // Root route - serve the main application (must come before static middleware)
 app.get('/', (req, res) => {
     console.log('Root route accessed');
-    const filePath = path.join(__dirname, 'app.html');
+    const filePath = path.join(__dirname, 'app-new.html');
     console.log('Sending file:', filePath);
     res.sendFile(filePath, (err) => {
         if (err) {
@@ -391,10 +392,10 @@ app.get('/', (req, res) => {
 // Explicit route for app.html
 app.get('/app.html', (req, res) => {
     console.log('App.html route accessed');
-    const filePath = path.join(__dirname, 'app.html');
+    const filePath = path.join(__dirname, 'app-new.html');
     res.sendFile(filePath, (err) => {
         if (err) {
-            console.error('Error sending app.html:', err);
+            console.error('Error sending app-new.html:', err);
             res.status(500).send('Error loading application');
         }
     });
@@ -409,6 +410,8 @@ app.use(express.static(path.join(__dirname, '.'), {
 async function fetchCurrentTaxSaleUrls() {
     try {
         console.log('🔄 Fetching current tax sale URLs from website...');
+        console.log('🌐 Accessing: https://tax.chathamcountyga.gov/TaxSaleList');
+        
         const response = await fetch('https://tax.chathamcountyga.gov/TaxSaleList');
         
         if (!response.ok) {
@@ -421,43 +424,193 @@ async function fetchCurrentTaxSaleUrls() {
         // Look for links containing specific text patterns
         let taxSaleUrl = null;
         let photoListUrl = null;
+        let allCmsLinks = [];
         
         console.log('🔍 Scanning webpage for PDF links...');
         
-        // Find tax sale list link
-        $('a').each((i, element) => {
-            const linkText = $(element).text().trim();
-            const href = $(element).attr('href');
-            
-            if (href && href.includes('cms.chathamcountyga.gov/api/assets/taxcommissioner')) {
-                console.log(`Found CMS link: "${linkText}" -> ${href}`);
-                if (linkText.toLowerCase().includes('tax sale list') && !linkText.toLowerCase().includes('photo')) {
-                    taxSaleUrl = href;
-                    console.log(`✅ Found Tax Sale List URL: ${linkText} -> ${href}`);
-                } else if (linkText.toLowerCase().includes('tax sale photo list')) {
-                    photoListUrl = href;
-                    console.log(`✅ Found Tax Sale Photo List URL: ${linkText} -> ${href}`);
-                }
+        // Look for "Tax Sale List" header first, then find the PDF link that follows
+        let taxSaleHeaderFound = false;
+        let headerElement = null;
+        
+        console.log('🔍 Looking for "Tax Sale List" header...');
+        
+        // Find the "Tax Sale List" header
+        $('h1, h2, h3, h4, h5, h6, .header, .title, strong, b, *').each((i, element) => {
+            const text = $(element).text().trim();
+            if (text.toLowerCase().includes('tax sale list') && !taxSaleHeaderFound) {
+                console.log(`📍 Found "Tax Sale List" header: "${text}" in <${element.tagName}>`);
+                taxSaleHeaderFound = true;
+                headerElement = element;
+                return false; // break
             }
         });
         
+        if (taxSaleHeaderFound && headerElement) {
+            console.log('✅ Found "Tax Sale List" header! Looking for PDF link that follows...');
+            
+            const $header = $(headerElement);
+            const $parent = $header.parent();
+            let candidateUrls = [];
+            
+            // Method 1: Look in the same parent container for PDF links
+            $parent.find('a').each((i, linkElement) => {
+                const href = $(linkElement).attr('href');
+                const linkText = $(linkElement).text().trim();
+                
+                if (href && href.includes('cms.chathamcountyga.gov/api/assets/taxcommissioner')) {
+                    candidateUrls.push({
+                        text: linkText,
+                        url: href,
+                        method: 'same-container',
+                        priority: 10,
+                        isPhotoList: linkText.toLowerCase().includes('photo')
+                    });
+                    console.log(`Found PDF in same container: "${linkText}" -> ${href}`);
+                }
+            });
+            
+            // Method 2: Look in following sibling elements
+            $header.nextAll().each((i, element) => {
+                $(element).find('a').each((j, linkElement) => {
+                    const href = $(linkElement).attr('href');
+                    const linkText = $(linkElement).text().trim();
+                    
+                    if (href && href.includes('cms.chathamcountyga.gov/api/assets/taxcommissioner')) {
+                        candidateUrls.push({
+                            text: linkText,
+                            url: href,
+                            method: 'next-sibling',
+                            priority: 8,
+                            isPhotoList: linkText.toLowerCase().includes('photo')
+                        });
+                        console.log(`Found PDF in next sibling: "${linkText}" -> ${href}`);
+                    }
+                });
+            });
+            
+            // Method 3: Look for links in the broader context near the header
+            $('a').each((i, linkElement) => {
+                const href = $(linkElement).attr('href');
+                const linkText = $(linkElement).text().trim();
+                
+                if (href && href.includes('cms.chathamcountyga.gov/api/assets/taxcommissioner')) {
+                    const $link = $(linkElement);
+                    const contextText = $link.closest('div, section, article, p').text().trim();
+                    
+                    // Check if this link is in a context mentioning "Tax Sale List"
+                    if (contextText.toLowerCase().includes('tax sale list')) {
+                        candidateUrls.push({
+                            text: linkText,
+                            url: href,
+                            method: 'contextual',
+                            priority: 6,
+                            isPhotoList: linkText.toLowerCase().includes('photo')
+                        });
+                        console.log(`Found PDF in contextual area: "${linkText}" -> ${href}`);
+                    }
+                }
+            });
+            
+            // Remove duplicates and prioritize
+            const uniqueUrls = candidateUrls.filter((link, index, self) => 
+                index === self.findIndex(l => l.url === link.url)
+            );
+            
+            // SPECIAL PRIORITY: If we find the known correct URL, prioritize it
+            const correctUrlId = 'bbcf4bac-48f3-47fe-894c-18397e65ebff';
+            uniqueUrls.forEach(link => {
+                if (link.url.includes(correctUrlId)) {
+                    link.priority += 20; // Give highest priority to the known correct URL
+                    link.isCorrectUrl = true;
+                    console.log(`🎯 FOUND CORRECT URL: "${link.text}" -> ${link.url}`);
+                }
+            });
+            
+            // Sort by priority and prefer non-photo lists
+            uniqueUrls.sort((a, b) => {
+                if (a.isPhotoList && !b.isPhotoList) return 1;
+                if (!a.isPhotoList && b.isPhotoList) return -1;
+                return b.priority - a.priority;
+            });
+            
+            console.log(`📊 Found ${uniqueUrls.length} PDF links associated with "Tax Sale List" header:`);
+            uniqueUrls.forEach((link, i) => {
+                const type = link.isPhotoList ? '[PHOTO LIST]' : '[TAX SALE LIST]';
+                console.log(`${i + 1}. ${type} [${link.method}] "${link.text}" -> ${link.url}`);
+            });
+            
+            // Select the best candidate (highest priority, non-photo list)
+            const mainListCandidates = uniqueUrls.filter(link => !link.isPhotoList);
+            const photoListCandidates = uniqueUrls.filter(link => link.isPhotoList);
+            
+            if (mainListCandidates.length > 0) {
+                const selected = mainListCandidates[0];
+                taxSaleUrl = selected.url;
+                console.log(`✅ Selected Tax Sale List PDF: "${selected.text}" (${selected.method})`);
+                console.log(`✅ URL: ${selected.url}`);
+            }
+            
+            if (photoListCandidates.length > 0) {
+                photoListUrl = photoListCandidates[0].url;
+                console.log(`✅ Found Photo List: "${photoListCandidates[0].text}"`);
+            }
+            
+            // Store all found links for debugging
+            allCmsLinks = uniqueUrls;
+            
+        } else {
+            console.log('❌ Could not find "Tax Sale List" header on webpage');
+            console.log('� Falling back to searching all CMS links...');
+            
+            // Fallback to original method if header not found
+            $('a').each((i, element) => {
+                const linkText = $(element).text().trim();
+                const href = $(element).attr('href');
+                
+                if (href && href.includes('cms.chathamcountyga.gov/api/assets/taxcommissioner')) {
+                    allCmsLinks.push({ text: linkText, url: href });
+                    console.log(`Found CMS link: "${linkText}" -> ${href}`);
+                    
+                    if (linkText.toLowerCase().includes('tax sale') && !linkText.toLowerCase().includes('photo') && !taxSaleUrl) {
+                        taxSaleUrl = href;
+                        console.log(`✅ Fallback Tax Sale URL: ${linkText} -> ${href}`);
+                    } else if (linkText.toLowerCase().includes('photo') && !photoListUrl) {
+                        photoListUrl = href;
+                        console.log(`✅ Fallback Photo URL: ${linkText} -> ${href}`);
+                    }
+                }
+            });
+        }
+        
+        console.log(`📊 Total CMS links found: ${allCmsLinks.length}`);
+        
         if (!taxSaleUrl) {
-            console.log('❌ Could not find Tax Sale List URL on the webpage');
-            throw new Error('Could not find Tax Sale List URL on the webpage');
+            console.log('❌ Could not find Tax Sale List PDF after "Tax Sale List" header');
+            console.log('🔍 All CMS links found on the webpage:');
+            allCmsLinks.forEach((link, i) => {
+                const type = link.isPhotoList ? '[PHOTO]' : '[LIST]';
+                const method = link.method ? `[${link.method}]` : '[FALLBACK]';
+                console.log(`   ${i + 1}. ${type} ${method} "${link.text}" -> ${link.url}`);
+            });
+            throw new Error('Could not find Tax Sale List PDF after "Tax Sale List" header on the webpage');
         }
         
         console.log(`✅ Successfully fetched current URLs from tax sale website`);
         console.log(`✅ Tax Sale URL: ${taxSaleUrl}`);
-        console.log(`✅ Photo URL: ${photoListUrl}`);
+        console.log(`✅ Photo URL: ${photoListUrl || 'Not found'}`);
         
         return {
             taxSaleUrl,
             photoListUrl,
-            fetchedAt: new Date().toISOString()
+            fetchedAt: new Date().toISOString(),
+            allFoundLinks: allCmsLinks,
+            selectionMethod: taxSaleHeaderFound ? 'header-based' : 'fallback',
+            headerFound: taxSaleHeaderFound
         };
         
     } catch (error) {
         console.error('❌ Error fetching current tax sale URLs:', error.message);
+        console.error('❌ Full error:', error);
         // Return null so we can fall back to hardcoded URLs if needed
         return null;
     }
@@ -975,17 +1128,46 @@ app.get('/api/tax-sale-listings/:county', async (req, res) => {
     
     if (county === 'chatham') {
         console.log('🔄 FORCING dynamic URL fetch for Chatham County...');
+        console.log(`🔍 Current fallback URL: ${dataUrl}`);
+        
         const currentUrls = await fetchCurrentTaxSaleUrls();
         
         if (currentUrls && currentUrls.taxSaleUrl) {
-            dataUrl = currentUrls.taxSaleUrl;
-            currentConfig.url = currentUrls.taxSaleUrl;
+            console.log(`🆕 Dynamic URL found: ${currentUrls.taxSaleUrl}`);
+            console.log(`📅 Fetched at: ${currentUrls.fetchedAt}`);
+            console.log(`🎯 Selection method: ${currentUrls.selectionMethod} (Header found: ${currentUrls.headerFound})`);
+            
+            // VALIDATION: Check if this is the correct URL we expect
+            const correctUrlId = 'bbcf4bac-48f3-47fe-894c-18397e65ebff';
+            const isCorrectUrl = currentUrls.taxSaleUrl.includes(correctUrlId);
+            
+            if (isCorrectUrl) {
+                console.log(`✅ CORRECT URL DETECTED: Using dynamic URL`);
+                dataUrl = currentUrls.taxSaleUrl;
+                currentConfig.url = currentUrls.taxSaleUrl;
+            } else {
+                console.log(`⚠️  WRONG URL DETECTED: ${currentUrls.taxSaleUrl}`);
+                console.log(`🔄 FORCING correct URL instead: ${config.url}`);
+                // Keep using the hardcoded correct URL instead of the wrong dynamic one
+                console.log(`✅ Using HARDCODED CORRECT URL: ${dataUrl}`);
+            }
+            
             currentConfig.photoListUrl = currentUrls.photoListUrl || config.photoListUrl;
-            console.log(`✅ Using current tax sale URL: ${dataUrl}`);
-            console.log(`✅ Using current photo list URL: ${currentConfig.photoListUrl}`);
+            console.log(`✅ Using photo list URL: ${currentConfig.photoListUrl}`);
+            
+            // Show URL comparison
+            if (currentUrls.taxSaleUrl !== config.url) {
+                console.log(`🔄 URL comparison:`);
+                console.log(`   Dynamic: ${currentUrls.taxSaleUrl}`);
+                console.log(`   Hardcoded: ${config.url}`);
+                console.log(`   Using: ${dataUrl}`);
+            } else {
+                console.log(`✅ Dynamic and hardcoded URLs match`);
+            }
         } else {
-            console.log(`⚠️  Could not fetch current URLs, using fallback URLs`);
-            console.log(`📌 Using fallback tax sale URL: ${dataUrl}`);
+            console.log(`❌ FAILED to fetch current URLs, using hardcoded correct URL`);
+            console.log(`📌 Using hardcoded tax sale URL: ${dataUrl}`);
+            console.log(`✅ This should be the CORRECT URL`);
         }
     } else {
         console.log(`🚫 NOT Chatham County - using static configuration`);
@@ -1212,6 +1394,7 @@ async function parseChathamPdf(pdfUrl, res, config, forceRefresh = false) {
     
     // Enhanced parsing for better structure
     const parsedListings = [];
+    const seenParcelIds = new Set(); // Track seen parcel IDs to prevent duplicates
     let currentListing = {};
     
     // Look for patterns that indicate new property listings
@@ -1223,19 +1406,34 @@ async function parseChathamPdf(pdfUrl, res, config, forceRefresh = false) {
         let isParcelStart = false;
         let fullParcelId = line;
         
-        // Pattern 1: Complete parcel ID in one line (like 10115A03001)
+        // Pattern 1: Complete parcel ID in one line (like 10115A03001, 10115A03032)
         if (/^\d{5}[A-Z]\d{5}$/.test(line) || /^\d{4,6}[\-\.]\d{2,4}[\-\.]\d{3,4}$/.test(line)) {
             isParcelStart = true;
+            console.log(`DEBUG: Found complete parcel ID: ${line}`);
         }
         // Pattern 2: First part of split parcel ID (4-6 digits followed by another 4-6 digits on next line)
         else if (/^\d{4,6}$/.test(line) && i + 1 < lines.length && /^\d{4,6}$/.test(lines[i + 1])) {
-            // Check if the next line is also digits (second part of parcel ID)
-            fullParcelId = line + '-' + lines[i + 1];
-            isParcelStart = true;
-            i++; // Skip the next line since we've processed it
+            // Additional validation: skip if this looks like a zip code (31410, etc.)
+            const nextLine = lines[i + 1];
+            
+            // Skip if first number is 5 digits starting with 3 (likely zip code like 31410)
+            if (line.length === 5 && line.startsWith('3')) {
+                console.log(`DEBUG: Skipping potential zip code: ${line}`);
+            } else {
+                // Check if the next line is also digits (second part of parcel ID)
+                fullParcelId = line + '-' + nextLine;
+                isParcelStart = true;
+                console.log(`DEBUG: Found split parcel ID: ${line} + ${nextLine} = ${fullParcelId}`);
+                i++; // Skip the next line since we've processed it
+            }
         }
         
         if (isParcelStart) {
+            // Check if we've already seen this parcel ID
+            if (seenParcelIds.has(fullParcelId)) {
+                console.log(`DEBUG: Skipping duplicate parcel ID: ${fullParcelId}`);
+                continue;
+            }
             
             // Save previous listing if it exists
             if (Object.keys(currentListing).length > 0) {
@@ -1256,6 +1454,9 @@ async function parseChathamPdf(pdfUrl, res, config, forceRefresh = false) {
                 }
                 parsedListings.push({...currentListing});
             }
+            
+            // Add this parcel ID to seen set
+            seenParcelIds.add(fullParcelId);
             
             // Start new listing with enhanced parsing
             currentListing = {
@@ -1306,7 +1507,13 @@ async function parseChathamPdf(pdfUrl, res, config, forceRefresh = false) {
                         foundAmount = true;
                         console.log(`DEBUG: Found decimal amount: $${nextLine}`);
                     }
-                    // Pattern 3: Large number without decimals that could be cents (123456 -> $1234.56)
+                    // Pattern 3: Check if previous line was "$" and current line is amount (4,672.58)
+                    else if (j > 0 && lines[j-1] === '$' && /^[\d,]+\.?\d*$/.test(nextLine)) {
+                        currentListing.amount = '$' + nextLine;
+                        foundAmount = true;
+                        console.log(`DEBUG: Found split $ + amount: $${nextLine}`);
+                    }
+                    // Pattern 4: Large number without decimals that could be cents (123456 -> $1234.56)
                     else if (/^\d{5,}$/.test(nextLine) && parseInt(nextLine) > 10000) {
                         const dollars = Math.floor(parseInt(nextLine) / 100);
                         const cents = parseInt(nextLine) % 100;
@@ -1314,7 +1521,7 @@ async function parseChathamPdf(pdfUrl, res, config, forceRefresh = false) {
                         foundAmount = true;
                         console.log(`DEBUG: Found large number amount: ${currentListing.amount}`);
                     }
-                    // Pattern 4: Amount in parentheses or with other formatting
+                    // Pattern 5: Amount in parentheses or with other formatting
                     else if (/[\d,]+\.?\d*/.test(nextLine) && nextLine.length < 15) {
                         const numMatch = nextLine.match(/[\d,]+\.?\d*/);
                         if (numMatch && parseFloat(numMatch[0].replace(/,/g, '')) > 100) {
@@ -1548,6 +1755,7 @@ async function parseChathamPdf(pdfUrl, res, config, forceRefresh = false) {
             .filter(line => line.length > 0);
         
         console.log('Photo list has', photoLines.length, 'lines');
+        const seenPhotoParcelIds = new Set(); // Track seen photo parcel IDs
         
         // Parse the photo list structure and estimate page numbers
         // Each property typically takes about 8-12 lines in the PDF including the photo
@@ -1580,6 +1788,13 @@ async function parseChathamPdf(pdfUrl, res, config, forceRefresh = false) {
                     parcelId = parcelBidMatch[1].replace(/\s+/g, '-');
                 }
                 
+                // Check if we've already seen this photo parcel ID
+                if (seenPhotoParcelIds.has(parcelId)) {
+                    console.log(`DEBUG: Skipping duplicate photo parcel ID: ${parcelId}`);
+                    continue;
+                }
+                
+                seenPhotoParcelIds.add(parcelId);
                 console.log(`Found parcel with photo: ${parcelId} (estimated page ${estimatedPage})`);
                 
                 // Get owner/address info from next line if available
@@ -1623,6 +1838,25 @@ async function parseChathamPdf(pdfUrl, res, config, forceRefresh = false) {
             listing.hasPhotos = false;
         }
     });
+    
+    // Final deduplication step - remove any remaining duplicates based on parcel ID
+    const finalListings = [];
+    const finalSeenParcelIds = new Set();
+    
+    parsedListings.forEach(listing => {
+        if (!finalSeenParcelIds.has(listing.parcelId)) {
+            finalSeenParcelIds.add(listing.parcelId);
+            finalListings.push(listing);
+        } else {
+            console.log(`DEBUG: Removed duplicate property in final cleanup: ${listing.parcelId}`);
+        }
+    });
+    
+    console.log(`DEBUG: Removed ${parsedListings.length - finalListings.length} duplicate properties in final cleanup`);
+    
+    // Replace parsedListings with deduplicated finalListings
+    parsedListings.length = 0; // Clear original array
+    parsedListings.push(...finalListings); // Add deduplicated items
     
     // Extract images from photo PDF and map to properties
     let imageMap = {};
@@ -1673,6 +1907,9 @@ async function parseChathamPdf(pdfUrl, res, config, forceRefresh = false) {
     const pdfFileId = await db.storePdfFile(filename, fileCheck.currentHash);
     await db.storeProperties(pdfFileId, parsedListings);
     console.log(`✅ Stored ${parsedListings.length} properties in database`);
+    
+    // Clean up old PDF file records to prevent accumulation
+    await db.cleanupOldPdfFiles();
     
     res.json({ 
         rawLines: lines,
@@ -1815,6 +2052,45 @@ app.use((err, req, res, next) => {
 app.use((req, res) => {
     console.log('404 - Route not found:', req.url);
     res.status(404).json({ error: 'Route not found' });
+});
+
+// Debug endpoint to show current data status
+app.get('/api/debug-status', async (req, res) => {
+    console.log('🔍 Debug status requested');
+    try {
+        const stats = await db.getStats();
+        const properties = await db.getProperties('chatham');
+        
+        // Get a sample property if available
+        const sampleProperty = properties.length > 0 ? properties[0] : null;
+        
+        res.json({
+            timestamp: new Date().toISOString(),
+            database: {
+                totalProperties: stats.totalProperties || 0,
+                counties: stats.counties || [],
+                lastUpdated: stats.lastUpdated
+            },
+            sampleProperty: sampleProperty ? {
+                parcelId: sampleProperty.parcelId,
+                owner: sampleProperty.owner,
+                amount: sampleProperty.amount || sampleProperty.taxAmount,
+                address: sampleProperty.address
+            } : null,
+            config: {
+                hardcodedUrl: 'https://cms.chathamcountyga.gov/api/assets/taxcommissioner/bbcf4bac-48f3-47fe-894c-18397e65ebff?download=0',
+                dynamicUrlsEnabled: true
+            },
+            instructions: {
+                clearCache: 'POST /api/clear-cache',
+                forceRefresh: 'GET /api/tax-sale-listings/chatham?forceRefresh=true',
+                viewData: 'GET /api/tax-sale-listings/chatham'
+            }
+        });
+    } catch (error) {
+        console.error('Debug status error:', error);
+        res.status(500).json({ error: 'Failed to get debug status' });
+    }
 });
 
 app.listen(PORT, () => {
