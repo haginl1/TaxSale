@@ -78,7 +78,7 @@ function getCacheKey(address, zipCode) {
 // Initialize geocode cache
 loadGeocodeCache();
 
-// Enhanced address cleaning with SITUS field extraction
+// Clean address for geocoding by removing legal descriptions
 function cleanAddressForGeocoding(address) {
     if (!address || typeof address !== 'string') {
         return { cleaned: '', zipCode: null };
@@ -86,76 +86,6 @@ function cleanAddressForGeocoding(address) {
     
     let cleaned = address;
     console.log(`🧹 Cleaning address: "${address}"`);
-    
-    // SITUS extraction enhancement: Look for clean address patterns first
-    // If we get a clean SITUS address like "7205 W SUGAR TREE CT 31410", use it as is
-    const cleanSitusPattern = /^(\d{1,4}\s+[A-Z\s]+(ST|AVE|DR|CT|CIR|LN|RD|WAY|PL|BLVD|PKWY|HWY|HIGHWAY))\s+(\d{5})$/i;
-    const cleanSitusMatch = cleaned.match(cleanSitusPattern);
-    if (cleanSitusMatch) {
-        // This is already a clean SITUS address
-        const streetAddress = cleanSitusMatch[1].trim();
-        const zipCode = cleanSitusMatch[3];
-        console.log(`🎯 Found clean SITUS address: "${streetAddress}" with zip: ${zipCode}`);
-        return { 
-            cleaned: streetAddress,
-            zipCode: zipCode
-        };
-    }
-    
-    // Also handle SITUS addresses with "TH" suffix like "1907 E 56 TH ST 31404"
-    const situsThPattern = /^(\d{1,4}\s+[A-Z\s]+\d+\s+(TH|ND|RD|ST)\s+(ST|AVE|DR|CT|CIR|LN|RD|WAY|PL|BLVD))\s+(\d{5})$/i;
-    const situsThMatch = cleaned.match(situsThPattern);
-    if (situsThMatch) {
-        let streetAddress = situsThMatch[1].trim();
-        const zipCode = situsThMatch[4];
-        // Normalize ordinal format: "1907 E 56 TH ST" -> "1907 E 56TH ST" for better geocoding
-        streetAddress = streetAddress.replace(' TH ST', 'TH ST').replace(' ND ST', 'ND ST').replace(' RD ST', 'RD ST').replace(' ST ST', 'ST ST');
-        console.log(`🎯 Found clean SITUS address with ordinal: "${streetAddress}" with zip: ${zipCode}`);
-        return { 
-            cleaned: streetAddress,
-            zipCode: zipCode
-        };
-    }
-    
-    // Handle clean addresses WITHOUT zip codes (like "706 E 33 RD ST" or "1907 E 56 TH ST")
-    const cleanAddressNoZipPattern = /^(\d{1,4}\s+[A-Z\s]+(ST|AVE|DR|CT|CIR|LN|RD|WAY|PL|BLVD|PKWY|HWY|HIGHWAY))$/i;
-    const cleanNoZipMatch = cleaned.match(cleanAddressNoZipPattern);
-    if (cleanNoZipMatch) {
-        const streetAddress = cleanNoZipMatch[1].trim();
-        console.log(`🎯 Found clean address without zip: "${streetAddress}"`);
-        return { 
-            cleaned: streetAddress,
-            zipCode: null
-        };
-    }
-    
-    // Handle ordinal addresses WITHOUT zip codes (like "706 E 33 RD ST" or "1907 E 56 TH ST")  
-    const ordinalNoZipPattern = /^(\d{1,4}\s+[A-Z\s]+\d+\s+(TH|ND|RD|ST)\s+(ST|AVE|DR|CT|CIR|LN|RD|WAY|PL|BLVD))$/i;
-    const ordinalNoZipMatch = cleaned.match(ordinalNoZipPattern);
-    if (ordinalNoZipMatch) {
-        let streetAddress = ordinalNoZipMatch[1].trim();
-        // Normalize ordinal format: "706 E 33 RD ST" -> "706 E 33RD ST" for better geocoding
-        streetAddress = streetAddress.replace(' TH ST', 'TH ST').replace(' ND ST', 'ND ST').replace(' RD ST', 'RD ST').replace(' ST ST', 'ST ST');
-        console.log(`🎯 Found clean ordinal address without zip: "${streetAddress}"`);
-        return { 
-            cleaned: streetAddress,
-            zipCode: null
-        };
-    }
-    
-    // Look for a clean address pattern within legal descriptions
-    // Pattern: house number + street + zip within legal text
-    const embeddedAddressPattern = /(\d{1,4}\s+[A-Z\s]+(ST|AVE|DR|CT|CIR|LN|RD|WAY|PL|BLVD|PKWY|HWY))\s+(\d{5})/i;
-    const embeddedMatch = cleaned.match(embeddedAddressPattern);
-    if (embeddedMatch) {
-        const streetAddress = embeddedMatch[1].trim();
-        const zipCode = embeddedMatch[3];
-        console.log(`🎯 Extracted address: "${streetAddress}" with zip: ${zipCode} from legal text`);
-        return { 
-            cleaned: streetAddress,
-            zipCode: zipCode
-        };
-    }
     
     // Extract zip code if it's embedded in the address before cleaning
     let extractedZipCode = null;
@@ -469,11 +399,6 @@ app.get('/app.html', (req, res) => {
             res.status(500).send('Error loading application');
         }
     });
-});
-
-// Handle favicon.ico requests to prevent 404 errors
-app.get('/favicon.ico', (req, res) => {
-    res.status(204).end(); // No Content
 });
 
 // Serve static files (but not index.html at root)
@@ -1880,37 +1805,13 @@ async function parseChathamPdf(pdfUrl, res, config, forceRefresh = false) {
                 seenPhotoParcelIds.add(parcelId);
                 console.log(`Found parcel with photo: ${parcelId} (estimated page ${estimatedPage})`);
                 
-                // Get owner/address info from next lines - may span multiple lines
+                // Get owner/address info from next line if available
                 let ownerAddress = '';
-                let lookAheadIndex = i + 1;
-                const addressParts = [];
-                
-                // Look ahead up to 3 lines to capture complete address
-                while (lookAheadIndex < photoLines.length && lookAheadIndex <= i + 3) {
-                    const nextLine = photoLines[lookAheadIndex];
-                    
-                    // Stop if we hit another parcel ID pattern or document header
-                    if (nextLine.match(/^\d{4,6}/) || nextLine.includes('Chatham County') || 
-                        nextLine.includes('Property Photos')) {
-                        break;
-                    }
-                    
-                    // Add non-empty lines to address parts
-                    if (nextLine.trim().length > 0) {
-                        addressParts.push(nextLine.trim());
-                    }
-                    
-                    lookAheadIndex++;
-                }
-                
-                // Combine address parts with space separator
-                ownerAddress = addressParts.join(' ').trim();
-                
-                // If no address found in next lines, use current line content after parcel
-                if (!ownerAddress && parcelBidMatch[0] !== line) {
-                    const afterParcel = line.replace(parcelBidMatch[0], '').trim();
-                    if (afterParcel.length > 0) {
-                        ownerAddress = afterParcel;
+                if (i + 1 < photoLines.length) {
+                    const nextLine = photoLines[i + 1];
+                    // Check if next line doesn't start with parcel ID pattern
+                    if (!nextLine.match(/^\d{4,6}/) && !nextLine.includes('Chatham County')) {
+                        ownerAddress = nextLine;
                     }
                 }
                 
@@ -1939,30 +1840,6 @@ async function parseChathamPdf(pdfUrl, res, config, forceRefresh = false) {
                 listing.amount = listing.photoData.bidAmount;
                 listing.taxAmount = listing.photoData.bidAmount;
                 console.log(`DEBUG: Using photo bidAmount as taxAmount for ${listing.parcelId}: ${listing.taxAmount}`);
-            }
-            
-            // CRITICAL: Extract clean SITUS address from photo data
-            if (listing.photoData.ownerAddress && listing.photoData.ownerAddress.includes('/')) {
-                const parts = listing.photoData.ownerAddress.split('/');
-                if (parts.length >= 2) {
-                    // Take the LAST part after splitting by '/' - this should be the SITUS address
-                    const situsAddress = parts[parts.length - 1].trim();
-                    console.log(`🏠 Extracting clean SITUS address from photo data: "${situsAddress}"`);
-                    
-                    // Clean and process the SITUS address
-                    const cleaningResult = cleanAddressForGeocoding(situsAddress);
-                    
-                    // Override the messy parsed address with clean SITUS data
-                    listing.address = situsAddress; // Store original SITUS
-                    listing.cleanedAddress = cleaningResult.cleaned; // Store cleaned SITUS
-                    
-                    if (cleaningResult.zipCode) {
-                        listing.zipCode = cleaningResult.zipCode;
-                        console.log(`🎯 Using SITUS zip code: ${cleaningResult.zipCode} for ${listing.parcelId}`);
-                    }
-                    
-                    console.log(`✅ Replaced messy address with clean SITUS: "${listing.cleanedAddress}" (ZIP: ${listing.zipCode})`);
-                }
             }
         } else {
             listing.photoData = null;
@@ -2183,90 +2060,6 @@ app.use((err, req, res, next) => {
 app.use((req, res) => {
     console.log('404 - Route not found:', req.url);
     res.status(404).json({ error: 'Route not found' });
-});
-
-// Health check endpoint with database initialization
-app.get('/api/health', async (req, res) => {
-    console.log('🏥 Health check requested');
-    try {
-        const dbStats = await db.getStats();
-        const hasData = dbStats.totalProperties > 0;
-        
-        const status = {
-            status: 'healthy',
-            timestamp: new Date().toISOString(),
-            database: {
-                connected: true,
-                totalProperties: dbStats.totalProperties,
-                hasData: hasData
-            },
-            server: {
-                uptime: process.uptime(),
-                memory: process.memoryUsage(),
-                environment: process.env.NODE_ENV || 'development'
-            }
-        };
-        
-        // If no data exists, suggest initialization
-        if (!hasData) {
-            status.suggestions = [
-                'Database appears empty. Consider calling /api/force-refresh/chatham to initialize data.',
-                'This is normal on first deployment or after database reset.'
-            ];
-        }
-        
-        res.json(status);
-    } catch (error) {
-        console.error('❌ Health check failed:', error);
-        res.status(500).json({
-            status: 'unhealthy',
-            timestamp: new Date().toISOString(),
-            error: error.message,
-            suggestions: [
-                'Database connection failed. Check server logs.',
-                'Try restarting the application.'
-            ]
-        });
-    }
-});
-
-// Auto-initialize endpoint for production deployments
-app.post('/api/auto-init', async (req, res) => {
-    console.log('🚀 Auto-initialization requested');
-    try {
-        const dbStats = await db.getStats();
-        
-        if (dbStats.totalProperties > 0) {
-            console.log(`📊 Database already has ${dbStats.totalProperties} properties, skipping initialization`);
-            return res.json({
-                message: 'Database already initialized',
-                totalProperties: dbStats.totalProperties,
-                skipped: true
-            });
-        }
-        
-        console.log('🔄 Database empty, starting auto-initialization...');
-        
-        // Force refresh Chatham County data
-        const config = COUNTY_CONFIGS['chatham'];
-        if (config) {
-            console.log('📄 Processing Chatham County PDF...');
-            await parseChathamPdf(config.url, res, config, true);
-        } else {
-            throw new Error('Chatham County configuration not found');
-        }
-        
-    } catch (error) {
-        console.error('❌ Auto-initialization failed:', error);
-        res.status(500).json({
-            error: 'Auto-initialization failed',
-            message: error.message,
-            suggestions: [
-                'Check server logs for detailed error information',
-                'Try manual force refresh: POST /api/force-refresh/chatham'
-            ]
-        });
-    }
 });
 
 // Debug endpoint to show current data status

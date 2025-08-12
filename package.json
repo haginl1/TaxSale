@@ -6,7 +6,9 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
-    "build": "echo 'No build step required'"
+    "build": "echo 'No build step required'",
+    "postinstall": "node -e \"console.log('✅ Installation complete. Database will initialize on first request.')\"",
+    "init-db": "node -e \"const fetch = require('node-fetch'); const url = process.env.RENDER_EXTERNAL_URL || 'http://localhost:3001'; fetch(url + '/api/auto-init', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: '{}'}).then(r => r.json()).then(console.log).catch(console.error);\""
   },
   "engines": {
     "node": ">=16.0.0"
