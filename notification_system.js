@@ -117,7 +117,7 @@ class NotificationSystem {
         try {
             const nodemailer = require('nodemailer');
             
-            const transporter = nodemailer.createTransporter({
+            const transporter = nodemailer.createTransport({
                 host: this.config.email.smtp.host,
                 port: this.config.email.smtp.port,
                 secure: this.config.email.smtp.port === 465,
