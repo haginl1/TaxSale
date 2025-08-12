@@ -8,13 +8,15 @@ const fs = require('fs').promises;
 const fsSync = require('fs');
 const pdf2pic = require('pdf2pic');
 const PropertyDatabase = require('./database');
+const NotificationSystem = require('./notification_system');
 const cheerio = require('cheerio');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Initialize database
+// Initialize database and notification system
 const db = new PropertyDatabase();
+const notifier = new NotificationSystem();
 
 // Disable ETag caching for development
 app.set('etag', false);
@@ -2024,6 +2026,10 @@ async function parseChathamPdf(pdfUrl, res, config, forceRefresh = false) {
     // Store the PDF file and properties in database
     console.log('💾 Storing properties in database...');
     
+    // Get old properties for comparison (before storing new ones)
+    const oldProperties = fileCheck.changed && !fileCheck.isNew ? await db.getAllProperties() : [];
+    const oldPropertyIds = new Set(oldProperties.map(p => p.parcelId));
+    
     // Debug: Check what amounts are in parsedListings before storage
     console.log(`DEBUG: About to store ${parsedListings.length} properties`);
     parsedListings.forEach((listing, index) => {
@@ -2038,6 +2044,37 @@ async function parseChathamPdf(pdfUrl, res, config, forceRefresh = false) {
     const pdfFileId = await db.storePdfFile(filename, fileCheck.currentHash);
     await db.storeProperties(pdfFileId, parsedListings);
     console.log(`✅ Stored ${parsedListings.length} properties in database`);
+    
+    // Calculate changes for notifications
+    if (fileCheck.changed) {
+        const newPropertyIds = new Set(parsedListings.map(p => p.parcelId));
+        const addedProperties = parsedListings.filter(p => !oldPropertyIds.has(p.parcelId));
+        const removedProperties = oldProperties.filter(p => !newPropertyIds.has(p.parcelId));
+        
+        // Send notification about PDF changes
+        if (addedProperties.length > 0 || removedProperties.length > 0 || fileCheck.isNew) {
+            console.log('📢 Sending PDF change notifications...');
+            
+            try {
+                await notifier.notifyPDFChange(config.name, {
+                    oldHash: fileCheck.storedHash,
+                    newHash: fileCheck.currentHash,
+                    url: pdfUrl,
+                    totalProperties: parsedListings.length,
+                    newProperties: addedProperties.length,
+                    removedProperties: removedProperties.length,
+                    isNewFile: fileCheck.isNew,
+                    addedPropertyIds: addedProperties.map(p => p.parcelId).slice(0, 10), // First 10
+                    removedPropertyIds: removedProperties.map(p => p.parcelId).slice(0, 10), // First 10
+                    geocodeStats: geocodeStats
+                });
+            } catch (notificationError) {
+                console.error('❌ Notification failed (continuing anyway):', notificationError.message);
+            }
+        } else {
+            console.log('📊 PDF changed but no property changes detected');
+        }
+    }
     
     // Clean up old PDF file records to prevent accumulation
     await db.cleanupOldPdfFiles();
@@ -2170,6 +2207,102 @@ app.post('/api/force-refresh/:county', async (req, res) => {
     } catch (error) {
         console.error('Error in force refresh:', error);
         res.status(500).json({ error: 'Failed to force refresh' });
+    }
+});
+
+// Test notifications endpoint
+app.post('/api/test-notifications', async (req, res) => {
+    console.log('🧪 Testing notification system...');
+    try {
+        await notifier.testNotifications();
+        res.json({ 
+            message: 'Test notifications sent successfully',
+            enabled_methods: Object.keys(notifier.config).filter(method => notifier.config[method].enabled),
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        console.error('❌ Test notifications failed:', error);
+        res.status(500).json({ error: 'Test notifications failed', message: error.message });
+    }
+});
+
+// Get notification configuration
+app.get('/api/notification-config', (req, res) => {
+    const config = {};
+    
+    // Only return non-sensitive configuration info
+    Object.keys(notifier.config).forEach(method => {
+        config[method] = {
+            enabled: notifier.config[method].enabled,
+            configured: method === 'console' ? true : 
+                       method === 'email' ? !!notifier.config[method].to :
+                       method === 'webhook' ? !!notifier.config[method].url :
+                       method === 'slack' ? !!notifier.config[method].webhook :
+                       method === 'file' ? !!notifier.config[method].logPath : false
+        };
+    });
+    
+    res.json(config);
+});
+
+// Manual notification trigger (for testing with actual data)
+app.post('/api/trigger-notification', async (req, res) => {
+    console.log('🔔 Manual notification trigger requested');
+    try {
+        const { county = 'chatham', message = 'Manual test notification' } = req.body;
+        
+        // Get current database stats for realistic test data
+        const dbStats = await db.getStats();
+        
+        await notifier.notifyPDFChange(county, {
+            oldHash: 'manual_test_old_hash',
+            newHash: 'manual_test_new_hash',
+            url: 'https://test.example.com/test.pdf',
+            totalProperties: dbStats.totalProperties || 100,
+            newProperties: 5,
+            removedProperties: 2,
+            isNewFile: false,
+            addedPropertyIds: ['TEST-001', 'TEST-002', 'TEST-003'],
+            removedPropertyIds: ['OLD-001', 'OLD-002'],
+            geocodeStats: { successful: 95, total: 100, fromCache: 90, newlyGeocoded: 5 }
+        });
+        
+        res.json({ 
+            message: 'Manual notification triggered successfully',
+            county: county,
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        console.error('❌ Manual notification failed:', error);
+        res.status(500).json({ error: 'Manual notification failed', message: error.message });
+    }
+});
+
+// Get notification log (if file logging is enabled)
+app.get('/api/notification-log', async (req, res) => {
+    try {
+        if (!notifier.config.file.enabled) {
+            return res.json({ message: 'File logging not enabled', entries: [] });
+        }
+        
+        const logPath = notifier.config.file.logPath;
+        try {
+            const logContent = await fs.readFile(logPath, 'utf8');
+            const entries = logContent.split('\n')
+                .filter(line => line.trim().length > 0)
+                .slice(-50) // Last 50 entries
+                .map(line => {
+                    const match = line.match(/\[(.*?)\] (.*)/);
+                    return match ? { timestamp: match[1], message: match[2] } : { message: line };
+                });
+            
+            res.json({ entries: entries.reverse(), total: entries.length });
+        } catch (fileError) {
+            res.json({ message: 'No log file found or unable to read', entries: [] });
+        }
+    } catch (error) {
+        console.error('❌ Error reading notification log:', error);
+        res.status(500).json({ error: 'Failed to read notification log' });
     }
 });
 
