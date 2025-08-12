@@ -108,16 +108,37 @@ class NotificationSystem {
     }
 
     async emailNotification(notification) {
+        console.log('📧 Starting email notification process...');
+        
+        // Check configuration
+        console.log('Email config check:', {
+            enabled: this.config.email.enabled,
+            to: this.config.email.to ? 'SET' : 'NOT SET',
+            from: this.config.email.from ? 'SET' : 'NOT SET',
+            host: this.config.email.smtp.host ? 'SET' : 'NOT SET',
+            port: this.config.email.smtp.port,
+            user: this.config.email.smtp.user ? 'SET' : 'NOT SET',
+            pass: this.config.email.smtp.pass ? 'SET' : 'NOT SET'
+        });
+        
         if (!this.config.email.to) {
-            console.log('⚠️ No email address configured for notifications');
-            return;
+            const error = 'No email address configured for notifications (NOTIFICATION_EMAIL env var)';
+            console.log('⚠️', error);
+            throw new Error(error);
+        }
+
+        if (!this.config.email.smtp.host || !this.config.email.smtp.user || !this.config.email.smtp.pass) {
+            const error = 'SMTP configuration incomplete. Check SMTP_HOST, SMTP_USER, SMTP_PASS env vars';
+            console.log('⚠️', error);
+            throw new Error(error);
         }
 
         // Note: You'll need to install nodemailer: npm install nodemailer
         try {
             const nodemailer = require('nodemailer');
+            console.log('📧 Nodemailer loaded successfully');
             
-            const transporter = nodemailer.createTransport({
+            const transportConfig = {
                 host: this.config.email.smtp.host,
                 port: this.config.email.smtp.port,
                 secure: this.config.email.smtp.port === 465,
@@ -125,7 +146,16 @@ class NotificationSystem {
                     user: this.config.email.smtp.user,
                     pass: this.config.email.smtp.pass
                 }
+            };
+            
+            console.log('📧 Creating transporter with config:', {
+                host: transportConfig.host,
+                port: transportConfig.port,
+                secure: transportConfig.secure,
+                user: transportConfig.auth.user ? 'SET' : 'NOT SET'
             });
+            
+            const transporter = nodemailer.createTransport(transportConfig);
 
             const htmlContent = `
                 <h2>🚨 Tax Sale PDF Update Alert</h2>
@@ -139,6 +169,7 @@ class NotificationSystem {
                 <p><em>This is an automated notification from your Tax Sale Monitoring System</em></p>
             `;
 
+            console.log('📧 Sending email...');
             await transporter.sendMail({
                 from: this.config.email.from,
                 to: this.config.email.to,
@@ -146,12 +177,21 @@ class NotificationSystem {
                 html: htmlContent
             });
 
-            console.log(`📧 Email notification sent to ${this.config.email.to}`);
+            console.log(`📧 Email notification sent successfully to ${this.config.email.to}`);
         } catch (error) {
+            console.error('❌ Email notification detailed error:', {
+                message: error.message,
+                code: error.code,
+                command: error.command,
+                response: error.response,
+                responseCode: error.responseCode
+            });
+            
             if (error.code === 'MODULE_NOT_FOUND') {
                 console.log('⚠️ nodemailer not installed. Run: npm install nodemailer');
+                throw new Error('nodemailer not installed. Run: npm install nodemailer');
             } else {
-                console.error('❌ Email notification failed:', error.message);
+                throw new Error(`Email notification failed: ${error.message}`);
             }
         }
     }
