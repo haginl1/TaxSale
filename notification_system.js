@@ -283,6 +283,66 @@ class NotificationSystem {
             removedProperties: 2
         });
     }
+
+    // Test individual notification method
+    async sendTestNotification(method, testData = null) {
+        console.log(`🧪 Testing ${method} notification method...`);
+        
+        const defaultTestData = {
+            county: 'chatham',
+            changeDetails: {
+                propertiesAdded: [{ parcelId: 'TEST-001', address: '123 Test St', amount: '$1,000' }],
+                propertiesRemoved: [{ parcelId: 'TEST-002', address: '456 Test Ave', amount: '$2,000' }],
+                totalCount: 25
+            }
+        };
+        
+        const data = testData || defaultTestData;
+        
+        // Check if method exists and is enabled (except for console which is always enabled)
+        if (!this.notificationMethods[method]) {
+            throw new Error(`Unknown notification method: ${method}`);
+        }
+        
+        if (method !== 'console' && !this.config[method]?.enabled) {
+            return {
+                success: false,
+                message: `${method} notifications are not enabled. Check your environment variables.`,
+                config: this.config[method]
+            };
+        }
+        
+        try {
+            // Call the appropriate notification method
+            await this.notificationMethods[method].call(this, {
+                timestamp: new Date().toISOString(),
+                county: data.county,
+                type: 'TEST',
+                message: `🧪 Test notification via ${method}`,
+                data: {
+                    totalProperties: data.changeDetails.totalCount,
+                    newProperties: data.changeDetails.propertiesAdded.length,
+                    removedProperties: data.changeDetails.propertiesRemoved.length,
+                    url: 'https://example.com/test-chatham-tax-sale.pdf'
+                }
+            });
+            
+            return {
+                success: true,
+                message: `${method} notification sent successfully`,
+                method: method,
+                timestamp: new Date().toISOString()
+            };
+            
+        } catch (error) {
+            console.error(`❌ ${method} notification test failed:`, error.message);
+            return {
+                success: false,
+                message: `${method} notification failed: ${error.message}`,
+                error: error.message
+            };
+        }
+    }
 }
 
 module.exports = NotificationSystem;
